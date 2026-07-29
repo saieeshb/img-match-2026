@@ -1,0 +1,7283 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Non-U.S. IMG Match Outcomes 2026 — Interactive Explorer</title>
+<meta name="description" content="An interactive, exportable explorer of NRMP Charting Outcomes data for non-U.S. citizen international medical graduates in the 2026 Main Residency Match.">
+
+<!-- ===================================================================
+     BEFORE YOU DEPLOY: replace https://REPLACE-WITH-YOUR-DOMAIN below
+     with the real origin (e.g. https://match.yoursite.com). Facebook,
+     X/Twitter, LinkedIn and Slack all require og:image to be an
+     absolute URL; a relative path silently yields no preview card.
+     =================================================================== -->
+<meta property="og:title" content="What separated the IMGs who matched">
+<meta property="og:description" content="Every non-U.S. IMG in the 2026 Match, by preferred specialty. Two measures separated those who matched from those who did not.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://REPLACE-WITH-YOUR-DOMAIN/">
+<meta property="og:image" content="https://REPLACE-WITH-YOUR-DOMAIN/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Bar chart of non-U.S. IMG match rates across 24 specialties, from Pediatrics at 68.5 percent down to Vascular Surgery at 14.3 percent.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="What separated the IMGs who matched">
+<meta name="twitter:description" content="Every non-U.S. IMG in the 2026 Match, by preferred specialty. Two measures separated those who matched from those who did not.">
+<meta name="twitter:image" content="https://REPLACE-WITH-YOUR-DOMAIN/og-image.png">
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23111214'/><rect x='6.5' y='18' width='4.4' height='8' rx='1.2' fill='%233fbfae'/><rect x='13.8' y='12' width='4.4' height='14' rx='1.2' fill='%235c9dff'/><rect x='21.1' y='6.5' width='4.4' height='19.5' rx='1.2' fill='%23f0a92e'/></svg>">
+<style>:root{
+  --bg:#fbfbf9; --bg-elev:#ffffff; --bg-sunk:#f2f2ee;
+  --ink:#15161a; --ink-2:#4a4d57; --ink-3:#767b87;
+  --rule:#e2e2dc; --rule-2:#cfcfc7;
+  --matched:#1f6feb; --matched-soft:#dbeafe;
+  --unmatched:#d97706; --unmatched-soft:#fef3c7;
+  --accent:#0f766e;
+  --warn-bg:#fff8e6; --warn-rule:#e8c46a;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --maxw:1180px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#111214; --bg-elev:#191b1f; --bg-sunk:#0c0d0f;
+    --ink:#eceef2; --ink-2:#b0b5c0; --ink-3:#7e8593;
+    --rule:#2a2d33; --rule-2:#3a3e46;
+    --matched:#5c9dff; --matched-soft:#16304f;
+    --unmatched:#f0a92e; --unmatched-soft:#3d2c0c;
+    --accent:#3fbfae;
+    --warn-bg:#2a2413; --warn-rule:#7a6420;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111214; --bg-elev:#191b1f; --bg-sunk:#0c0d0f;
+  --ink:#eceef2; --ink-2:#b0b5c0; --ink-3:#7e8593;
+  --rule:#2a2d33; --rule-2:#3a3e46;
+  --matched:#5c9dff; --matched-soft:#16304f;
+  --unmatched:#f0a92e; --unmatched-soft:#3d2c0c;
+  --accent:#3fbfae;
+  --warn-bg:#2a2413; --warn-rule:#7a6420;
+}
+:root[data-theme="light"]{
+  --bg:#fbfbf9; --bg-elev:#ffffff; --bg-sunk:#f2f2ee;
+  --ink:#15161a; --ink-2:#4a4d57; --ink-3:#767b87;
+  --rule:#e2e2dc; --rule-2:#cfcfc7;
+  --matched:#1f6feb; --matched-soft:#dbeafe;
+  --unmatched:#d97706; --unmatched-soft:#fef3c7;
+  --accent:#0f766e;
+  --warn-bg:#fff8e6; --warn-rule:#e8c46a;
+}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);
+  font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;margin:0;
+  overflow-x:hidden}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+@media(max-width:640px){.wrap{padding:0 16px}}
+
+a{color:var(--matched)}
+h1,h2,h3,h4{line-height:1.2;margin:0}
+.num{font-variant-numeric:tabular-nums;font-family:var(--mono)}
+
+/* ---------- top bar ---------- */
+.topbar{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 88%,transparent);
+  backdrop-filter:blur(12px);border-bottom:1px solid var(--rule)}
+.topbar-in{max-width:var(--maxw);margin:0 auto;padding:10px 24px;display:flex;gap:18px;align-items:center}
+.brand{font-weight:700;font-size:14px;letter-spacing:-.01em;white-space:nowrap}
+.brand span{color:var(--ink-3);font-weight:500}
+.navlinks{display:flex;gap:16px;margin-left:auto;overflow-x:auto;scrollbar-width:none}
+.navlinks::-webkit-scrollbar{display:none}
+.navlinks a{color:var(--ink-2);text-decoration:none;font-size:13px;white-space:nowrap;padding:4px 0;border-bottom:2px solid transparent}
+.navlinks a:hover{color:var(--ink);border-bottom-color:var(--rule-2)}
+.themebtn{background:none;border:1px solid var(--rule);color:var(--ink-2);border-radius:6px;
+  padding:5px 9px;cursor:pointer;font-size:13px;line-height:1;flex-shrink:0}
+.themebtn:hover{border-color:var(--rule-2);color:var(--ink)}
+@media(max-width:820px){.navlinks{display:none}}
+
+/* ---------- hero ---------- */
+header.hero{padding:64px 0 40px;border-bottom:1px solid var(--rule)}
+.eyebrow{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:16px}
+h1{font-family:var(--serif);font-size:clamp(34px,5.6vw,60px);letter-spacing:-.02em;font-weight:600;max-width:17ch}
+.standfirst{font-size:clamp(17px,2vw,20px);color:var(--ink-2);max-width:62ch;margin-top:20px;line-height:1.55}
+.sourceline{margin-top:26px;font-size:13px;color:var(--ink-3);display:flex;flex-wrap:wrap;gap:8px 18px}
+
+/* ---------- stat band ---------- */
+.statband{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));
+  gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:10px;overflow:hidden;margin:40px 0}
+.stat{background:var(--bg-elev);padding:18px 20px}
+.stat .k{font-size:clamp(24px,3.2vw,32px);font-weight:650;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.stat .l{font-size:12.5px;color:var(--ink-3);margin-top:4px;line-height:1.35}
+
+/* ---------- sections ---------- */
+section{padding:56px 0;border-bottom:1px solid var(--rule)}
+section:last-of-type{border-bottom:0}
+.shead{max-width:66ch;margin-bottom:28px}
+.shead::before{content:"";display:block;width:34px;height:2px;background:var(--accent);margin-bottom:18px}
+h2{font-family:var(--serif);font-size:clamp(25px,3.4vw,34px);letter-spacing:-.015em;font-weight:600}
+.shead p{color:var(--ink-2);margin:14px 0 0;font-size:16.5px}
+h3{font-size:17px;font-weight:650;letter-spacing:-.01em}
+
+/* findings: hanging headings, no boxes — breaks the uniform-card rhythm */
+.findings{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:34px 44px;margin-top:32px;
+  padding-top:26px;border-top:1px solid var(--rule)}
+.findings h3{margin-bottom:9px}
+.findings p{margin:0;color:var(--ink-2);font-size:14.5px}
+.findings p+p{margin-top:10px}
+
+/* caveats: a reference list, not a card deck */
+.caveatlist{margin-top:8px;border-top:1px solid var(--rule-2)}
+.caveatlist>div{display:grid;grid-template-columns:minmax(190px,.9fr) 2.4fr;gap:10px 44px;
+  padding:24px 0;border-bottom:1px solid var(--rule);align-items:start}
+.caveatlist h3{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:-.01em;padding-top:1px}
+.caveatlist p{margin:0;color:var(--ink-2);font-size:15px}
+.caveatlist p+p{margin-top:11px}
+@media(max-width:720px){.caveatlist>div{grid-template-columns:1fr;gap:8px}}
+
+.callout{background:var(--warn-bg);border:1px solid var(--warn-rule);border-left-width:4px;
+  border-radius:8px;padding:20px 22px;margin:26px 0}
+.callout h3{margin-bottom:8px;font-size:16px}
+.callout p{margin:0;color:var(--ink-2);font-size:15px}
+.callout p+p{margin-top:10px}
+
+/* ---------- controls ---------- */
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:18px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3);font-weight:600}
+select,input[type=search]{background:var(--bg-elev);border:1px solid var(--rule-2);color:var(--ink);
+  border-radius:7px;padding:8px 11px;font-size:14px;font-family:inherit;min-width:170px}
+select:focus,input:focus{outline:2px solid var(--matched);outline-offset:1px}
+.btn{background:var(--bg-elev);border:1px solid var(--rule-2);color:var(--ink);border-radius:7px;
+  padding:8px 13px;font-size:13.5px;cursor:pointer;font-family:inherit;white-space:nowrap}
+.btn:hover{border-color:var(--ink-3)}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.primary:hover{opacity:.86}
+.seg{display:inline-flex;border:1px solid var(--rule-2);border-radius:7px;overflow:hidden}
+.seg button{background:var(--bg-elev);border:0;border-right:1px solid var(--rule-2);color:var(--ink-2);
+  padding:8px 13px;font-size:13.5px;cursor:pointer;font-family:inherit}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+.spacer{margin-left:auto}
+@media(max-width:640px){.spacer{margin-left:0;width:100%}}
+
+/* ---------- tables ---------- */
+.tablescroll{overflow-x:auto;border:1px solid var(--rule);border-radius:10px;background:var(--bg-elev)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:right;padding:10px 13px;border-bottom:1px solid var(--rule);white-space:nowrap}
+th:first-child,td:first-child{text-align:left;position:sticky;left:0;background:var(--bg-elev)}
+thead th{background:var(--bg-sunk);font-size:11.5px;text-transform:uppercase;letter-spacing:.055em;
+  color:var(--ink-3);font-weight:650;position:sticky;top:0;z-index:2;border-bottom:1px solid var(--rule-2)}
+thead th:first-child{z-index:3;background:var(--bg-sunk)}
+th.sortable{cursor:pointer;user-select:none}
+th.sortable:hover{color:var(--ink)}
+th .arrow{opacity:.35;margin-left:3px}
+th[aria-sort] .arrow{opacity:1;color:var(--accent)}
+tbody tr:last-child td{border-bottom:0}
+tbody tr.clickable{cursor:pointer}
+tbody tr.clickable:hover td{background:var(--bg-sunk)}
+tbody tr.clickable:hover td:first-child{background:var(--bg-sunk)}
+tbody tr.open td{background:var(--matched-soft)}
+tbody tr.open td:first-child{background:var(--matched-soft)}
+td.name{font-weight:550}
+.sub{color:var(--ink-3);font-size:12px;font-weight:400}
+
+.ratebar{display:flex;align-items:center;gap:9px;justify-content:flex-end}
+.ratebar .track{width:74px;height:7px;border-radius:4px;background:var(--bg-sunk);overflow:hidden;flex-shrink:0}
+.ratebar .fill{height:100%;border-radius:4px;background:var(--matched)}
+
+.pill{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11.5px;font-weight:600;letter-spacing:.01em}
+.pill.viable{background:var(--matched-soft);color:var(--matched)}
+.pill.contested{background:var(--unmatched-soft);color:var(--unmatched)}
+.pill.closed{background:color-mix(in srgb,var(--ink-3) 18%,transparent);color:var(--ink-2)}
+.pill.tiny{font-size:10.5px;padding:1px 6px}
+
+/* ---------- detail drawer ---------- */
+tr.detailrow>td{padding:0;border-bottom:1px solid var(--rule-2);background:var(--bg-sunk) !important;white-space:normal}
+.detail{padding:24px 22px}
+.detail-hd{display:flex;flex-wrap:wrap;gap:14px 26px;align-items:baseline;margin-bottom:6px}
+.detail-hd h3{font-family:var(--serif);font-size:22px;font-weight:600}
+.detail-note{color:var(--ink-2);font-size:14.5px;max-width:78ch;margin:6px 0 20px}
+.metricgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
+.mcard{background:var(--bg-elev);border:1px solid var(--rule);border-radius:9px;padding:14px 16px}
+.mcard-hd{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:2px}
+.mcard-hd .t{font-size:13.5px;font-weight:650}
+.mcard-hd .d{font-size:12px;font-variant-numeric:tabular-nums;font-weight:600}
+.d.up{color:var(--matched)} .d.flat{color:var(--ink-3)} .d.down{color:var(--unmatched)}
+.mcard .why{font-size:12px;color:var(--ink-3);margin:0 0 10px}
+.legend{display:flex;gap:16px;font-size:12px;color:var(--ink-2);margin:16px 0 4px;flex-wrap:wrap}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.sw-m{background:var(--matched)} .sw-n{background:var(--unmatched)}
+.suppressed{font-size:12.5px;color:var(--ink-3);font-style:italic;padding:8px 0}
+
+/* ---------- charts ---------- */
+.chartbox{border:1px solid var(--rule);border-radius:10px;background:var(--bg-elev);padding:18px;overflow-x:auto}
+svg{display:block;max-width:100%}
+svg text{font-family:var(--sans);fill:var(--ink-2)}
+.axisline{stroke:var(--rule-2);stroke-width:1}
+.gridline{stroke:var(--rule);stroke-width:1}
+.dot{cursor:pointer}
+.tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--bg);padding:8px 11px;
+  border-radius:7px;font-size:12.5px;line-height:1.45;z-index:100;opacity:0;transition:opacity .1s;max-width:250px}
+.tip.on{opacity:1}
+.tip b{color:var(--bg)}
+
+/* ---------- notes ---------- */
+.notegrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:22px}
+.note{background:var(--bg-elev);border:1px solid var(--rule);border-radius:9px;padding:18px 20px}
+.note h3{margin-bottom:8px;font-size:15px}
+.note p{margin:0;color:var(--ink-2);font-size:14px}
+.note p+p{margin-top:9px}
+
+footer{padding:44px 0 60px;color:var(--ink-3);font-size:13.5px}
+footer p{margin:0 0 12px;max-width:76ch}
+footer a{color:var(--ink-2)}
+.cite{font-family:var(--mono);font-size:12px;background:var(--bg-sunk);border:1px solid var(--rule);
+  border-radius:7px;padding:12px 14px;margin-top:8px;white-space:pre-wrap;color:var(--ink-2);line-height:1.55}
+.vis-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <div class="brand">IMG Match Outcomes <span>· 2026</span></div>
+    <nav class="navlinks">
+      <a href="#levers">The two levers</a>
+      <a href="#explorer">Specialties</a>
+      <a href="#compare">Compare</a>
+      <a href="#competition">Competition</a>
+      <a href="#data">Full data</a>
+      <a href="#caveats">Caveats</a>
+    </nav>
+    <button class="themebtn" id="themeBtn" title="Toggle light / dark" aria-label="Toggle light or dark theme">☾</button>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">NRMP Charting Outcomes · Main Residency Match 2026</div>
+    <h1>What separated the IMGs who matched</h1>
+    <p class="standfirst">
+      Every non-U.S. citizen international medical graduate in the 2026 Match, sorted by the specialty they
+      ranked first. Two measures separated those who matched from those who did not, and most of what
+      applicants are coached to build was not among them.
+    </p>
+    <div class="sourceline">
+      <span>Source: National Resident Matching Program, <em>Charting Outcomes: Non-U.S. IMGs</em>, July 2026</span>
+      <span>· 8,943 applicants analysed</span>
+      <span>· 24 specialties</span>
+    </div>
+
+    <div class="statband">
+      <div class="stat"><div class="k">24.9%</div><div class="l">of all Match applicants were non-U.S. IMGs, the second-largest group</div></div>
+      <div class="stat"><div class="k">49.0%</div><div class="l">matched into the specialty they ranked first</div></div>
+      <div class="stat"><div class="k">5 vs 2</div><div class="l">median programs ranked in-specialty, matched vs unmatched</div></div>
+      <div class="stat"><div class="k">248 vs 242</div><div class="l">median Step 2 CK, matched vs unmatched</div></div>
+      <div class="stat"><div class="k">59.8%</div><div class="l">of non-U.S. IMGs ranked Internal Medicine first</div></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ============ 1. THE TWO LEVERS ============ -->
+<section id="levers">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Only two measures separate matched from unmatched</h2>
+      <p>
+        Pooling every specialty, applicants who matched and applicants who did not are statistically
+        indistinguishable on research output, work history and volunteering. The medians are identical
+        rather than merely close. Only rank-list length and Step 2 CK move.
+      </p>
+    </div>
+
+    <div class="tablescroll" style="max-width:820px">
+      <table>
+        <caption class="vis-hidden">Median values for matched and unmatched non-U.S. IMGs across all specialties</caption>
+        <thead><tr>
+          <th>Measure</th><th>Matched (n=4,429)</th><th>Not matched (n=4,541)</th><th style="text-align:left">Verdict</th>
+        </tr></thead>
+        <tbody id="aggBody"></tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <h3>A note on the 41.5% you'll see quoted elsewhere</h3>
+      <p>
+        The NRMP report leads with "41.5 percent of non-U.S. IMGs matched to their preferred specialty."
+        That figure is the <strong>unweighted average of the 24 individual specialty rates</strong>, so it
+        counts Vascular Surgery, with 28 IMG applicants, the same as Internal Medicine, with 6,992.
+      </p>
+      <p>
+        The applicant-weighted rate, which is the number that describes an actual person's odds, is
+        <strong>49.0%</strong> (5,721 matched of 11,685). This site uses the weighted figure throughout and
+        shows the underlying counts so you can check it.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2. SPECIALTY EXPLORER ============ -->
+<section id="explorer">
+  <div class="wrap">
+    <div class="shead">
+      <h2>All 24 specialties, ranked</h2>
+      <p>
+        Click any row to open the full distribution for that specialty: all nine measures, matched against
+        unmatched, with quartiles and ranges. Sort by any column.
+      </p>
+    </div>
+
+    <div class="controls">
+      <div class="field">
+        <label for="specSearch">Find a specialty</label>
+        <input type="search" id="specSearch" placeholder="e.g. pathology" autocomplete="off">
+      </div>
+      <div class="spacer"></div>
+      <button class="btn" id="dlSummary">↓ Summary CSV</button>
+    </div>
+
+    <div class="tablescroll">
+      <table>
+        <caption class="vis-hidden">Non-U.S. IMG match outcomes by preferred specialty. Click a row for detail.</caption>
+        <thead><tr id="specHead"></tr></thead>
+        <tbody id="specBody"></tbody>
+      </table>
+    </div>
+    <p class="sub" style="margin-top:12px">
+      "Realistic" = 50% or more of IMGs who tried, matched. "Contested" = 33–50%. "Long shot" = under 33%.
+      A dash means NRMP suppressed the figure because fewer than five applicants in that cohort consented to
+      research use of their data.
+    </p>
+  </div>
+</section>
+
+<!-- ============ 3. COMPARE ACROSS SPECIALTIES ============ -->
+<section id="compare">
+  <div class="wrap">
+    <div class="shead">
+      <h2>One measure at a time, across every specialty</h2>
+      <p>
+        Solid bars are applicants who matched; pale bars are those who did not. Where the two bars run to the
+        same length, that measure did nothing to tell them apart. Click a row to jump to that specialty's detail.
+      </p>
+    </div>
+
+    <div class="controls">
+      <div class="field">
+        <label for="cmpMetric">Measure</label>
+        <select id="cmpMetric"></select>
+      </div>
+      <div class="field">
+        <label>Order by</label>
+        <div class="seg" id="cmpSort">
+          <button data-sort="gap" aria-pressed="true">Biggest gap</button>
+          <button data-sort="matched" aria-pressed="false">Highest value</button>
+          <button data-sort="rate" aria-pressed="false">Match rate</button>
+        </div>
+      </div>
+    </div>
+    <p class="sub" id="cmpDesc" style="margin:0 0 14px;max-width:74ch"></p>
+
+    <div class="legend">
+      <span><i class="sw-m"></i>Matched</span>
+      <span><i class="sw-n"></i>Did not match</span>
+      <span style="color:var(--ink-3)">Values at right: matched / not matched</span>
+    </div>
+    <div class="chartbox" id="cmpChart"></div>
+  </div>
+</section>
+
+<!-- ============ 4. COMPETITION ============ -->
+<section id="competition">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Where the pressure comes from</h2>
+      <p>
+        Each circle is a specialty, sized by how many non-U.S. IMGs ranked it first. The horizontal axis is
+        total applicants per available position, a measure of how contested the specialty is overall.
+      </p>
+    </div>
+
+    <div class="chartbox" id="scatter"></div>
+
+    <div class="findings">
+      <div>
+        <h3>Overall pressure predicts IMG outcomes</h3>
+        <p>The correlation between all-applicants-per-position and IMG match rate is <strong>−0.84</strong>. The correlation between IMG density and IMG match rate is <strong>+0.19</strong>, which is essentially nothing.</p>
+        <p>Pathology has the second-highest IMG density of any specialty and a workable 45.1% rate. Dermatology has almost no IMG applicants and a 16.7% rate.</p>
+      </div>
+      <div>
+        <h3>Family Medicine breaks the pattern</h3>
+        <p>FM was the least subscribed specialty in the Match, with 5,491 positions against 4,685 applicants preferring it. Yet 513 of 1,112 non-U.S. IMGs who ranked it first did not match into it.</p>
+        <p>Their Step 2 medians were identical to those who matched (230 vs 231). The only separator was rank-list length: 3 versus 1.</p>
+      </div>
+      <div>
+        <h3>Concentration risk</h3>
+        <p>Internal Medicine absorbs <strong>59.8%</strong> of all non-U.S. IMG first choices, and the top three take 76.1%.</p>
+        <p>Pediatrics, the highest match rate in the entire report at 68.5%, draws only 6.8%.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5. FULL DATA ============ -->
+<section id="data">
+  <div class="wrap">
+    <div class="shead">
+      <h2>All 432 rows</h2>
+      <p>
+        24 specialties by 9 measures by 2 cohorts, with sample size, minimum, quartiles, median, maximum,
+        interquartile range, mean and standard deviation. Filter it, then export it.
+      </p>
+    </div>
+
+    <div class="controls">
+      <div class="field">
+        <label for="dbSpec">Specialty</label>
+        <select id="dbSpec"><option value="all">All specialties</option></select>
+      </div>
+      <div class="field">
+        <label for="dbMetric">Measure</label>
+        <select id="dbMetric"><option value="all">All measures</option></select>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn primary" id="dlTidy">↓ Filtered CSV</button>
+      <button class="btn" id="dlJson">↓ Full JSON</button>
+    </div>
+    <p class="sub" style="margin:0 0 12px"><span id="dbCount"></span> · one row per specialty, measure and cohort</p>
+
+    <div class="tablescroll" style="max-height:620px;overflow-y:auto">
+      <table>
+        <caption class="vis-hidden">Complete summary statistics for all specialties and measures</caption>
+        <thead><tr>
+          <th>Specialty</th><th style="text-align:left">Measure</th><th style="text-align:left">Cohort</th>
+          <th>n</th><th>Min</th><th>Q1</th><th>Median</th><th>Q3</th><th>Max</th><th>IQR</th><th>Mean</th><th>SD</th>
+        </tr></thead>
+        <tbody id="dbBody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6. CAVEATS ============ -->
+<section id="caveats">
+  <div class="wrap">
+    <div class="shead">
+      <h2>What this data cannot tell you</h2>
+      <p>Six limits that decide how far these numbers can be pushed.</p>
+    </div>
+
+    <div class="caveatlist">
+      <div>
+        <h3>Only Step 2 CK is verified</h3>
+        <div>
+          <p>NRMP obtains Step 2 CK scores directly from the USMLE program. Everything else, from research and abstracts through publications, work, volunteering and degrees, is self-reported at registration and is neither verified nor quality-assessed.</p>
+          <p>The Neurosurgery matched cohort (n=8) reports a median of 44 research experiences and 70 publications, with one applicant claiming 199. Orthopaedics shows a maximum of 493. Those figures are reporting artefacts, and nothing in the report checks them.</p>
+        </div>
+      </div>
+      <div>
+        <h3>2026 breaks comparability</h3>
+        <div>
+          <p>Abstracts, presentations and publications were a single combined item before 2026 and were split into three separate items this cycle. Do not compare these three against earlier editions of Charting Outcomes.</p>
+          <p>This is also the first year non-U.S. IMGs were reported separately from U.S.-citizen IMGs, so prior "IMG" figures are not comparable either.</p>
+        </div>
+      </div>
+      <div>
+        <h3>Rank length mostly measures interview volume</h3>
+        <div>
+          <p>You cannot rank a program that did not interview you. A long contiguous rank list largely reflects how many interviews an applicant received, so it works as a symptom of a strong application rather than a lever you pull directly.</p>
+          <p>The useful signal is the unmatched median of 1 to 2. A large share of unmatched IMGs got only one or two interviews, which puts the failure earlier in the cycle than the rank list.</p>
+        </div>
+      </div>
+      <div>
+        <h3>Distributions overlap heavily</h3>
+        <div>
+          <p>Matched Internal Medicine applicants ranged from 209 to 284 on Step 2 CK, and unmatched ones reached 279. A high score does not secure a match and a modest one does not disqualify you.</p>
+          <p>A median describes a group and forecasts nothing about an individual applicant.</p>
+        </div>
+      </div>
+      <div>
+        <h3>The biggest variables are missing</h3>
+        <div>
+          <p>Visa status, year of graduation, U.S. clinical experience, letters, and the MSPE are plausibly the strongest determinants for non-U.S. IMGs. None of them appear anywhere in this report.</p>
+          <p>NRMP itself notes that course evaluations, reference letters and the MSPE also contribute to outcomes.</p>
+        </div>
+      </div>
+      <div>
+        <h3>Who is counted</h3>
+        <div>
+          <p>Only applicants who certified a rank order list and consented to research use of their data. Applicants who never reached the ranking stage are invisible here, which is where a great many IMG applications actually end.</p>
+          <p>Applicants who ranked a preliminary or transitional-year program first are excluded, as are specialties offering fewer than 50 positions.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p><strong>Source and attribution.</strong> All figures are drawn from the National Resident Matching Program's
+    <em>Charting Outcomes™: Characteristics of Applicants Who Matched to Their Preferred Specialty, Non-U.S. IMGs
+    (Main Residency Match, 2026 Appointment Year)</em>, published July 2026. Match rates, the applicant-weighted
+    total, and the competitiveness correlations shown here are derived from the published counts. The underlying
+    statistics are the NRMP's.</p>
+    <p>NRMP data is copyright © 2026 National Resident Matching Program. Reuse and redistribution of NRMP
+    publications requires their permission; the contact is <a href="mailto:datarequest@nrmp.org">datarequest@nrmp.org</a>.
+    This page is an independent presentation and is not affiliated with, endorsed by, or reviewed by the NRMP.</p>
+    <p>Suggested citation for the underlying report:</p>
+    <div class="cite">National Resident Matching Program. 2026. Charting Outcomes™: Characteristics of Applicants Who Matched to Their Preferred Specialty, Non-U.S. IMGs (Main Residency Match, 2026 Appointment Year).</div>
+  </div>
+</footer>
+
+<script>const DATA = {
+ "overall": {
+  "activeApplicants": 48050,
+  "imgShareOfPool": 24.9,
+  "analysisSample": 8943,
+  "consentedMatched": 4429,
+  "consentedNotMatched": 4541,
+  "totalImgMatched": 5721,
+  "totalImgNotMatched": 5964,
+  "totalImg": 11685,
+  "weightedMatchRate": 49.0,
+  "reportHeadlineRate": 41.5,
+  "totalPositions": 39589,
+  "totalAllApplicants": 47343,
+  "aggregate": [
+   {
+    "measure": "Contiguous ranks",
+    "matched": "5.0",
+    "notMatched": "2.0",
+    "separates": true
+   },
+   {
+    "measure": "USMLE Step 2 CK",
+    "matched": "248",
+    "notMatched": "242",
+    "separates": true
+   },
+   {
+    "measure": "Research experiences",
+    "matched": "3.0",
+    "notMatched": "3.0",
+    "separates": false
+   },
+   {
+    "measure": "Abstracts",
+    "matched": "2.0",
+    "notMatched": "2.0",
+    "separates": false
+   },
+   {
+    "measure": "Presentations",
+    "matched": "2.0",
+    "notMatched": "2.0",
+    "separates": false
+   },
+   {
+    "measure": "Publications",
+    "matched": "3.0",
+    "notMatched": "3.0",
+    "separates": false
+   },
+   {
+    "measure": "Work experiences",
+    "matched": "3.0",
+    "notMatched": "3.0",
+    "separates": false
+   },
+   {
+    "measure": "Volunteer experiences",
+    "matched": "3.0",
+    "notMatched": "3.0",
+    "separates": false
+   },
+   {
+    "measure": "Distinct specialties ranked",
+    "matched": "1.0",
+    "notMatched": "1.0",
+    "separates": false
+   },
+   {
+    "measure": "Has a Ph.D.",
+    "matched": "2.2%",
+    "notMatched": "2.0%",
+    "separates": false
+   },
+   {
+    "measure": "Has another graduate degree",
+    "matched": "21.1%",
+    "notMatched": "24.3%",
+    "separates": false
+   }
+  ]
+ },
+ "metrics": [
+  {
+   "key": "contiguous_ranks",
+   "label": "Contiguous ranks",
+   "unit": "programs",
+   "verified": false,
+   "desc": "Programs ranked in the preferred specialty before a program from another specialty appears on the rank list.",
+   "higherBetter": true
+  },
+  {
+   "key": "step2ck",
+   "label": "USMLE Step 2 CK",
+   "unit": "score",
+   "verified": true,
+   "desc": "Primary-source score obtained by NRMP directly from the USMLE program. The only verified measure in this report.",
+   "higherBetter": true
+  },
+  {
+   "key": "publications",
+   "label": "Publications",
+   "unit": "count",
+   "verified": false,
+   "desc": "Peer-reviewed journal articles, book chapters, online publications, monographs and case reports. Split from a combined item for the first time in 2026.",
+   "higherBetter": true
+  },
+  {
+   "key": "abstracts",
+   "label": "Abstracts",
+   "unit": "count",
+   "verified": false,
+   "desc": "Abstracts accepted for conference presentation and subsequently published in a peer-reviewed journal. Split from a combined item for the first time in 2026.",
+   "higherBetter": true
+  },
+  {
+   "key": "presentations",
+   "label": "Presentations",
+   "unit": "count",
+   "verified": false,
+   "desc": "Poster or oral presentations at conferences or school research days. Split from a combined item for the first time in 2026.",
+   "higherBetter": true
+  },
+  {
+   "key": "research",
+   "label": "Research experiences",
+   "unit": "count",
+   "verified": false,
+   "desc": "Experiences serving as a member of a research team during medical, graduate or undergraduate school.",
+   "higherBetter": true
+  },
+  {
+   "key": "work",
+   "label": "Work experiences",
+   "unit": "count",
+   "verified": false,
+   "desc": "Paid experiences applying knowledge or skills to a field or job.",
+   "higherBetter": true
+  },
+  {
+   "key": "volunteer",
+   "label": "Volunteer experiences",
+   "unit": "count",
+   "verified": false,
+   "desc": "Experiences freely giving time and labour to a project, task or service.",
+   "higherBetter": true
+  },
+  {
+   "key": "specialties_ranked",
+   "label": "Distinct specialties ranked",
+   "unit": "specialties",
+   "verified": false,
+   "desc": "How many different specialties appear anywhere on the applicant's rank order list.",
+   "higherBetter": null
+  }
+ ],
+ "specialties": [
+  {
+   "name": "Pediatrics",
+   "short": "Pediatrics",
+   "positions": 3185,
+   "allApplicants": 3023,
+   "imgMatched": 542,
+   "imgNotMatched": 249,
+   "imgTotal": 791,
+   "matchRate": 68.5,
+   "allPerPos": 0.95,
+   "imgPerPos": 0.25,
+   "metrics": {
+    "contiguous_ranks": {
+     "matched": {
+      "n": 422,
+      "min": 1,
+      "q1": 3.0,
+      "median": 6.0,
+      "q3": 11.0,
+      "max": 31,
+      "iqr": 8.0,
+      "mean": 7.6,
+      "sd": 5.8
+     },
+     "not_matched": {
+      "n": 182,
+      "min": 1,
+      "q1": 1.0,
+      "median": 1.0,
+      "q3": 2.0,
+      "max": 8,
+      "iqr": 1.0,
+      "mean": 1.7,
+      "sd": 1.3
+     }
+    },
+    "specialties_ranked": {
+     "matched": {
+      "n": 422,
+      "min": 1,
+      "q1": 1.0,
+      "median": 1.0,
+      "q3": 1.0,
+      "max": 5,
+      "iqr": 0.0,
+      "mean": 1.2,
+      "sd": 0.6
+     },
+     "not_matched": {
+      "n": 182,
+      "min": 1,
+      "q1": 1.0,
+      "median": 1.0,
+      "q3": 1.0,
+      "max": 4,
+      "iqr": 0.0,
+      "mean": 1.3,
+      "sd": 0.6
+     }
+    },
+    "step2ck": {
+     "matched": {
+      "n": 422,
+      "min": 214,
+      "q1": 232.0,
+      "median": 240.0,
+      "q3": 252.0,
+      "max": 283,
+      "iqr": 20.0,
+      "mean": 241.0,
+      "sd": 13.0
+     },
+     "not_matched": {
+      "n": 182,
+      "min": 209,
+      "q1": 224.0,
+      "median": 233.0,
+      "q3": 245.0,
+      "max": 274,
+      "iqr": 21.0,
+      "mean": 234.0,
+      "sd": 13.0
+     }
+    },
+    "research": {
+     "matched": {
+      "n": 422,
+      "min": 0,
+      "q1": 1.0,
+      "median": 3.0,
+      "q3": 4.0,
+      "max": 45,
+      "iqr": 3.0,
+      "mean": 3.8,
+      "sd": 5.1
+     },
+     "not_matched": {
+      "n": 182,
+      "min": 0,
+      "q1": 1.0,
+      "median": 3.0,
+      "q3": 4.0,
+      "max": 20,
+      "iqr": 3.0,
+      "mean": 3.7,
+      "sd": 3.8
+     }
+    },
+    "abstracts": {
+     "matched": {
+      "n": 422,
+      "min": 0,
+      "q1": 0.0,
+      "median": 1.0,
+      "q3": 3.0,
+      "max": 31,
+      "iqr": 3.0,
+      "mean": 2.7,
+      "sd": 4.3
+     },
+     "not_matched": {
+      "n": 182,
+      "min": 0,
+      "q1": 0.0,
+      "median": 1.0,
+      "q3": 3.0,
+      "max": 20,
+      "iqr": 3.0,
+      "mean": 2.5,
+      "sd": 3.8
+     }
+    },
+    "presentations": {
+     "matched": {
+      "n": 422,
+      "min": 0,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 4.0,
+      "max": 49,
+      "iqr": 3.0,
+      "mean": 3.3,
+      "sd": 5.4
+     },
+     "not_matched": {
+      "n": 182,
+      "min": 0,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 3.0,
+      "max": 20,
+      "iqr": 2.0,
+      "mean": 3.0,
+      "sd": 3.9
+     }
+    },
+    "publications": {
+     "matched": {
+      "n": 422,
+      "min": 0,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 4.0,
+      "max": 80,
+      "iqr": 3.0,
+      "mean": 4.4,
+      "sd": 7.6
+     },
+     "not_matched": {
+      "n": 182,
+      "min": 0,
+      "q1": 1.0,
+      "median": 3.0,
+      "q3": 5.0,
+      "max": 40,
+      "iqr": 4.0,
+      "mean": 4.2,
+      "sd": 5.5
+     }
+    },
+    "work": {
+     "matched": {
+      "n": 422,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 5.0,
+      "max": 20,
+      "iqr": 3.0,
+      "mean": 3.4,
+      "sd": 2.8
+     },
+     "not_matched": {
+      "n": 182,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 5.0,
+      "max": 15,
+      "iqr": 3.0,
+      "mean": 3.8,
+      "sd": 2.4
+     }
+    },
+    "volunteer": {
+     "matched": {
+      "n": 422,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 4.0,
+      "max": 40,
+      "iqr": 2.0,
+      "mean": 3.5,
+      "sd": 3.0
+     },
+     "not_matched": {
+      "n": 182,
+      "min": 1,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 4.0,
+      "max": 10,
+      "iqr": 2.0,
+      "mean": 3.4,
+      "sd": 2.0
+     }
+    }
+   },
+   "phd": {
+    "matched": 1.9,
+    "not_matched": 2.8
+   },
+   "gradDegree": {
+    "matched": 21.3,
+    "not_matched": 22.3
+   }
+  },
+  {
+   "name": "Public Health and Preventive Medicine",
+   "short": "Public Health / Prev Med",
+   "positions": 63,
+   "allApplicants": 61,
+   "imgMatched": 3,
+   "imgNotMatched": 2,
+   "imgTotal": 5,
+   "matchRate": 60.0,
+   "allPerPos": 0.97,
+   "imgPerPos": 0.08,
+   "metrics": {
+    "contiguous_ranks": {
+     "matched": {
+      "n": 3,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 2,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     }
+    },
+    "specialties_ranked": {
+     "matched": {
+      "n": 3,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 2,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     }
+    },
+    "step2ck": {
+     "matched": {
+      "n": 3,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 2,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     }
+    },
+    "research": {
+     "matched": {
+      "n": 3,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 2,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     }
+    },
+    "abstracts": {
+     "matched": {
+      "n": 3,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 2,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     }
+    },
+    "presentations": {
+     "matched": {
+      "n": 3,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 2,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     }
+    },
+    "publications": {
+     "matched": {
+      "n": 3,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 2,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     }
+    },
+    "work": {
+     "matched": {
+      "n": 3,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 2,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     }
+    },
+    "volunteer": {
+     "matched": {
+      "n": 3,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 2,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     }
+    }
+   },
+   "phd": {
+    "matched": null,
+    "not_matched": null
+   },
+   "gradDegree": {
+    "matched": null,
+    "not_matched": null
+   }
+  },
+  {
+   "name": "Psychiatry",
+   "short": "Psychiatry",
+   "positions": 2516,
+   "allApplicants": 2873,
+   "imgMatched": 219,
+   "imgNotMatched": 156,
+   "imgTotal": 375,
+   "matchRate": 58.4,
+   "allPerPos": 1.14,
+   "imgPerPos": 0.15,
+   "metrics": {
+    "contiguous_ranks": {
+     "matched": {
+      "n": 171,
+      "min": 1,
+      "q1": 2.0,
+      "median": 5.0,
+      "q3": 8.0,
+      "max": 21,
+      "iqr": 6.0,
+      "mean": 5.8,
+      "sd": 4.2
+     },
+     "not_matched": {
+      "n": 126,
+      "min": 1,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 3.0,
+      "max": 13,
+      "iqr": 2.0,
+      "mean": 2.6,
+      "sd": 2.2
+     }
+    },
+    "specialties_ranked": {
+     "matched": {
+      "n": 171,
+      "min": 1,
+      "q1": 1.0,
+      "median": 1.0,
+      "q3": 1.0,
+      "max": 4,
+      "iqr": 0.0,
+      "mean": 1.3,
+      "sd": 0.6
+     },
+     "not_matched": {
+      "n": 126,
+      "min": 1,
+      "q1": 1.0,
+      "median": 1.0,
+      "q3": 2.0,
+      "max": 4,
+      "iqr": 1.0,
+      "mean": 1.3,
+      "sd": 0.6
+     }
+    },
+    "step2ck": {
+     "matched": {
+      "n": 171,
+      "min": 213,
+      "q1": 229.0,
+      "median": 241.0,
+      "q3": 255.0,
+      "max": 274,
+      "iqr": 26.0,
+      "mean": 242.0,
+      "sd": 16.0
+     },
+     "not_matched": {
+      "n": 126,
+      "min": 214,
+      "q1": 226.0,
+      "median": 237.0,
+      "q3": 247.0,
+      "max": 276,
+      "iqr": 21.0,
+      "mean": 237.0,
+      "sd": 13.0
+     }
+    },
+    "research": {
+     "matched": {
+      "n": 171,
+      "min": 0,
+      "q1": 1.0,
+      "median": 3.0,
+      "q3": 5.0,
+      "max": 21,
+      "iqr": 4.0,
+      "mean": 3.9,
+      "sd": 3.8
+     },
+     "not_matched": {
+      "n": 126,
+      "min": 0,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 4.0,
+      "max": 50,
+      "iqr": 3.0,
+      "mean": 4.0,
+      "sd": 6.8
+     }
+    },
+    "abstracts": {
+     "matched": {
+      "n": 171,
+      "min": 0,
+      "q1": 0.0,
+      "median": 1.0,
+      "q3": 4.0,
+      "max": 15,
+      "iqr": 4.0,
+      "mean": 2.9,
+      "sd": 3.5
+     },
+     "not_matched": {
+      "n": 126,
+      "min": 0,
+      "q1": 0.0,
+      "median": 1.0,
+      "q3": 3.0,
+      "max": 12,
+      "iqr": 3.0,
+      "mean": 2.1,
+      "sd": 2.8
+     }
+    },
+    "presentations": {
+     "matched": {
+      "n": 171,
+      "min": 0,
+      "q1": 1.0,
+      "median": 3.0,
+      "q3": 5.0,
+      "max": 55,
+      "iqr": 4.0,
+      "mean": 4.5,
+      "sd": 6.5
+     },
+     "not_matched": {
+      "n": 126,
+      "min": 0,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 4.0,
+      "max": 27,
+      "iqr": 3.0,
+      "mean": 3.0,
+      "sd": 4.4
+     }
+    },
+    "publications": {
+     "matched": {
+      "n": 171,
+      "min": 0,
+      "q1": 1.0,
+      "median": 3.0,
+      "q3": 5.0,
+      "max": 75,
+      "iqr": 4.0,
+      "mean": 4.9,
+      "sd": 8.8
+     },
+     "not_matched": {
+      "n": 126,
+      "min": 0,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 5.0,
+      "max": 45,
+      "iqr": 4.0,
+      "mean": 4.5,
+      "sd": 7.2
+     }
+    },
+    "work": {
+     "matched": {
+      "n": 171,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 5.0,
+      "max": 13,
+      "iqr": 3.0,
+      "mean": 3.8,
+      "sd": 2.8
+     },
+     "not_matched": {
+      "n": 126,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 6.0,
+      "max": 14,
+      "iqr": 4.0,
+      "mean": 4.2,
+      "sd": 3.2
+     }
+    },
+    "volunteer": {
+     "matched": {
+      "n": 171,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 4.0,
+      "max": 18,
+      "iqr": 2.0,
+      "mean": 3.6,
+      "sd": 2.6
+     },
+     "not_matched": {
+      "n": 126,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 4.0,
+      "max": 18,
+      "iqr": 2.0,
+      "mean": 3.4,
+      "sd": 2.7
+     }
+    }
+   },
+   "phd": {
+    "matched": 3.3,
+    "not_matched": 1.9
+   },
+   "gradDegree": {
+    "matched": 25.5,
+    "not_matched": 31.5
+   }
+  },
+  {
+   "name": "Radiology-Diagnostic",
+   "short": "Radiology (Diagnostic)",
+   "positions": 1268,
+   "allApplicants": 1419,
+   "imgMatched": 102,
+   "imgNotMatched": 73,
+   "imgTotal": 175,
+   "matchRate": 58.3,
+   "allPerPos": 1.12,
+   "imgPerPos": 0.14,
+   "metrics": {
+    "contiguous_ranks": {
+     "matched": {
+      "n": 75,
+      "min": 1,
+      "q1": 2.0,
+      "median": 5.0,
+      "q3": 8.0,
+      "max": 14,
+      "iqr": 6.0,
+      "mean": 5.3,
+      "sd": 3.4
+     },
+     "not_matched": {
+      "n": 52,
+      "min": 1,
+      "q1": 1.0,
+      "median": 1.5,
+      "q3": 2.0,
+      "max": 7,
+      "iqr": 1.0,
+      "mean": 2.2,
+      "sd": 1.7
+     }
+    },
+    "specialties_ranked": {
+     "matched": {
+      "n": 75,
+      "min": 1,
+      "q1": 2.0,
+      "median": 2.0,
+      "q3": 3.0,
+      "max": 6,
+      "iqr": 1.0,
+      "mean": 2.5,
+      "sd": 1.2
+     },
+     "not_matched": {
+      "n": 52,
+      "min": 1,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 3.0,
+      "max": 6,
+      "iqr": 2.0,
+      "mean": 2.3,
+      "sd": 1.2
+     }
+    },
+    "step2ck": {
+     "matched": {
+      "n": 75,
+      "min": 215,
+      "q1": 243.0,
+      "median": 250.0,
+      "q3": 262.0,
+      "max": 276,
+      "iqr": 19.0,
+      "mean": 251.0,
+      "sd": 14.0
+     },
+     "not_matched": {
+      "n": 52,
+      "min": 216,
+      "q1": 240.0,
+      "median": 251.0,
+      "q3": 262.0,
+      "max": 280,
+      "iqr": 22.0,
+      "mean": 250.0,
+      "sd": 15.0
+     }
+    },
+    "research": {
+     "matched": {
+      "n": 75,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 6.0,
+      "max": 53,
+      "iqr": 4.0,
+      "mean": 7.0,
+      "sd": 11.0
+     },
+     "not_matched": {
+      "n": 52,
+      "min": 0,
+      "q1": 2.0,
+      "median": 4.0,
+      "q3": 5.0,
+      "max": 60,
+      "iqr": 3.0,
+      "mean": 5.2,
+      "sd": 9.1
+     }
+    },
+    "abstracts": {
+     "matched": {
+      "n": 75,
+      "min": 0,
+      "q1": 1.0,
+      "median": 5.0,
+      "q3": 10.0,
+      "max": 75,
+      "iqr": 9.0,
+      "mean": 9.1,
+      "sd": 13.9
+     },
+     "not_matched": {
+      "n": 52,
+      "min": 0,
+      "q1": 0.0,
+      "median": 2.0,
+      "q3": 6.0,
+      "max": 30,
+      "iqr": 6.0,
+      "mean": 3.7,
+      "sd": 5.3
+     }
+    },
+    "presentations": {
+     "matched": {
+      "n": 75,
+      "min": 0,
+      "q1": 2.0,
+      "median": 4.5,
+      "q3": 11.0,
+      "max": 33,
+      "iqr": 9.0,
+      "mean": 7.9,
+      "sd": 8.7
+     },
+     "not_matched": {
+      "n": 52,
+      "min": 0,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 5.0,
+      "max": 30,
+      "iqr": 4.0,
+      "mean": 3.9,
+      "sd": 5.4
+     }
+    },
+    "publications": {
+     "matched": {
+      "n": 75,
+      "min": 0,
+      "q1": 2.0,
+      "median": 6.0,
+      "q3": 13.0,
+      "max": 47,
+      "iqr": 11.0,
+      "mean": 10.1,
+      "sd": 10.8
+     },
+     "not_matched": {
+      "n": 52,
+      "min": 0,
+      "q1": 2.0,
+      "median": 4.0,
+      "q3": 9.0,
+      "max": 30,
+      "iqr": 7.0,
+      "mean": 6.6,
+      "sd": 7.1
+     }
+    },
+    "work": {
+     "matched": {
+      "n": 75,
+      "min": 0,
+      "q1": 1.0,
+      "median": 3.0,
+      "q3": 4.0,
+      "max": 10,
+      "iqr": 3.0,
+      "mean": 3.2,
+      "sd": 2.5
+     },
+     "not_matched": {
+      "n": 52,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 4.0,
+      "max": 11,
+      "iqr": 2.0,
+      "mean": 3.4,
+      "sd": 2.4
+     }
+    },
+    "volunteer": {
+     "matched": {
+      "n": 75,
+      "min": 0,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 3.0,
+      "max": 15,
+      "iqr": 2.0,
+      "mean": 3.0,
+      "sd": 2.7
+     },
+     "not_matched": {
+      "n": 52,
+      "min": 0,
+      "q1": 2.0,
+      "median": 2.5,
+      "q3": 3.0,
+      "max": 12,
+      "iqr": 1.0,
+      "mean": 2.8,
+      "sd": 1.9
+     }
+    }
+   },
+   "phd": {
+    "matched": 3.1,
+    "not_matched": 2.6
+   },
+   "gradDegree": {
+    "matched": 21.9,
+    "not_matched": 31.7
+   }
+  },
+  {
+   "name": "Emergency Medicine",
+   "short": "Emergency Medicine",
+   "positions": 3198,
+   "allApplicants": 3224,
+   "imgMatched": 80,
+   "imgNotMatched": 68,
+   "imgTotal": 148,
+   "matchRate": 54.1,
+   "allPerPos": 1.01,
+   "imgPerPos": 0.05,
+   "metrics": {
+    "contiguous_ranks": {
+     "matched": {
+      "n": 60,
+      "min": 1,
+      "q1": 2.0,
+      "median": 4.0,
+      "q3": 7.0,
+      "max": 20,
+      "iqr": 5.0,
+      "mean": 5.1,
+      "sd": 4.3
+     },
+     "not_matched": {
+      "n": 53,
+      "min": 1,
+      "q1": 1.0,
+      "median": 1.0,
+      "q3": 2.0,
+      "max": 20,
+      "iqr": 1.0,
+      "mean": 2.1,
+      "sd": 2.7
+     }
+    },
+    "specialties_ranked": {
+     "matched": {
+      "n": 60,
+      "min": 1,
+      "q1": 1.0,
+      "median": 1.0,
+      "q3": 2.0,
+      "max": 3,
+      "iqr": 1.0,
+      "mean": 1.4,
+      "sd": 0.6
+     },
+     "not_matched": {
+      "n": 53,
+      "min": 1,
+      "q1": 1.0,
+      "median": 1.0,
+      "q3": 2.0,
+      "max": 5,
+      "iqr": 1.0,
+      "mean": 1.8,
+      "sd": 0.9
+     }
+    },
+    "step2ck": {
+     "matched": {
+      "n": 60,
+      "min": 219,
+      "q1": 234.0,
+      "median": 243.0,
+      "q3": 256.0,
+      "max": 275,
+      "iqr": 22.0,
+      "mean": 244.0,
+      "sd": 14.0
+     },
+     "not_matched": {
+      "n": 53,
+      "min": 211,
+      "q1": 230.0,
+      "median": 236.0,
+      "q3": 244.0,
+      "max": 266,
+      "iqr": 14.0,
+      "mean": 236.0,
+      "sd": 13.0
+     }
+    },
+    "research": {
+     "matched": {
+      "n": 60,
+      "min": 0,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 5.0,
+      "max": 100,
+      "iqr": 4.0,
+      "mean": 6.3,
+      "sd": 15.1
+     },
+     "not_matched": {
+      "n": 53,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 5.0,
+      "max": 23,
+      "iqr": 3.0,
+      "mean": 3.6,
+      "sd": 3.8
+     }
+    },
+    "abstracts": {
+     "matched": {
+      "n": 60,
+      "min": 0,
+      "q1": 0.0,
+      "median": 1.0,
+      "q3": 2.0,
+      "max": 50,
+      "iqr": 2.0,
+      "mean": 3.4,
+      "sd": 8.4
+     },
+     "not_matched": {
+      "n": 53,
+      "min": 0,
+      "q1": 0.0,
+      "median": 2.0,
+      "q3": 5.0,
+      "max": 13,
+      "iqr": 5.0,
+      "mean": 3.0,
+      "sd": 3.2
+     }
+    },
+    "presentations": {
+     "matched": {
+      "n": 60,
+      "min": 0,
+      "q1": 1.0,
+      "median": 3.0,
+      "q3": 6.0,
+      "max": 50,
+      "iqr": 5.0,
+      "mean": 5.0,
+      "sd": 7.7
+     },
+     "not_matched": {
+      "n": 53,
+      "min": 0,
+      "q1": 1.0,
+      "median": 2.5,
+      "q3": 5.0,
+      "max": 30,
+      "iqr": 4.0,
+      "mean": 4.5,
+      "sd": 6.0
+     }
+    },
+    "publications": {
+     "matched": {
+      "n": 60,
+      "min": 0,
+      "q1": 0.0,
+      "median": 2.0,
+      "q3": 6.0,
+      "max": 65,
+      "iqr": 6.0,
+      "mean": 4.4,
+      "sd": 9.7
+     },
+     "not_matched": {
+      "n": 53,
+      "min": 0,
+      "q1": 0.0,
+      "median": 2.0,
+      "q3": 5.0,
+      "max": 28,
+      "iqr": 5.0,
+      "mean": 4.2,
+      "sd": 6.3
+     }
+    },
+    "work": {
+     "matched": {
+      "n": 60,
+      "min": 0,
+      "q1": 1.0,
+      "median": 4.0,
+      "q3": 5.0,
+      "max": 12,
+      "iqr": 4.0,
+      "mean": 3.9,
+      "sd": 2.9
+     },
+     "not_matched": {
+      "n": 53,
+      "min": 0,
+      "q1": 3.0,
+      "median": 4.0,
+      "q3": 6.0,
+      "max": 20,
+      "iqr": 3.0,
+      "mean": 5.6,
+      "sd": 4.3
+     }
+    },
+    "volunteer": {
+     "matched": {
+      "n": 60,
+      "min": 0,
+      "q1": 2.0,
+      "median": 4.0,
+      "q3": 6.0,
+      "max": 21,
+      "iqr": 4.0,
+      "mean": 4.8,
+      "sd": 3.7
+     },
+     "not_matched": {
+      "n": 53,
+      "min": 1,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 4.0,
+      "max": 150,
+      "iqr": 2.0,
+      "mean": 8.6,
+      "sd": 25.2
+     }
+    }
+   },
+   "phd": {
+    "matched": 1.9,
+    "not_matched": 0.0
+   },
+   "gradDegree": {
+    "matched": 17.0,
+    "not_matched": 36.2
+   }
+  },
+  {
+   "name": "Family Medicine",
+   "short": "Family Medicine",
+   "positions": 5491,
+   "allApplicants": 4685,
+   "imgMatched": 599,
+   "imgNotMatched": 513,
+   "imgTotal": 1112,
+   "matchRate": 53.9,
+   "allPerPos": 0.85,
+   "imgPerPos": 0.2,
+   "metrics": {
+    "contiguous_ranks": {
+     "matched": {
+      "n": 446,
+      "min": 1,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 7.0,
+      "max": 35,
+      "iqr": 5.0,
+      "mean": 5.4,
+      "sd": 5.5
+     },
+     "not_matched": {
+      "n": 387,
+      "min": 1,
+      "q1": 1.0,
+      "median": 1.0,
+      "q3": 2.0,
+      "max": 20,
+      "iqr": 1.0,
+      "mean": 1.9,
+      "sd": 2.1
+     }
+    },
+    "specialties_ranked": {
+     "matched": {
+      "n": 446,
+      "min": 1,
+      "q1": 1.0,
+      "median": 1.0,
+      "q3": 2.0,
+      "max": 5,
+      "iqr": 1.0,
+      "mean": 1.4,
+      "sd": 0.6
+     },
+     "not_matched": {
+      "n": 387,
+      "min": 1,
+      "q1": 1.0,
+      "median": 1.0,
+      "q3": 2.0,
+      "max": 6,
+      "iqr": 1.0,
+      "mean": 1.4,
+      "sd": 0.6
+     }
+    },
+    "step2ck": {
+     "matched": {
+      "n": 446,
+      "min": 209,
+      "q1": 222.0,
+      "median": 230.0,
+      "q3": 239.0,
+      "max": 267,
+      "iqr": 17.0,
+      "mean": 231.0,
+      "sd": 12.0
+     },
+     "not_matched": {
+      "n": 387,
+      "min": 210,
+      "q1": 223.0,
+      "median": 231.0,
+      "q3": 241.0,
+      "max": 276,
+      "iqr": 18.0,
+      "mean": 232.0,
+      "sd": 13.0
+     }
+    },
+    "research": {
+     "matched": {
+      "n": 446,
+      "min": 0,
+      "q1": 1.0,
+      "median": 3.0,
+      "q3": 5.0,
+      "max": 37,
+      "iqr": 4.0,
+      "mean": 3.7,
+      "sd": 4.4
+     },
+     "not_matched": {
+      "n": 387,
+      "min": 0,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 4.0,
+      "max": 22,
+      "iqr": 3.0,
+      "mean": 3.3,
+      "sd": 3.6
+     }
+    },
+    "abstracts": {
+     "matched": {
+      "n": 446,
+      "min": 0,
+      "q1": 0.0,
+      "median": 1.0,
+      "q3": 4.0,
+      "max": 30,
+      "iqr": 4.0,
+      "mean": 2.7,
+      "sd": 4.2
+     },
+     "not_matched": {
+      "n": 387,
+      "min": 0,
+      "q1": 0.0,
+      "median": 1.0,
+      "q3": 3.0,
+      "max": 23,
+      "iqr": 3.0,
+      "mean": 2.5,
+      "sd": 3.8
+     }
+    },
+    "presentations": {
+     "matched": {
+      "n": 446,
+      "min": 0,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 3.0,
+      "max": 21,
+      "iqr": 2.0,
+      "mean": 2.8,
+      "sd": 3.4
+     },
+     "not_matched": {
+      "n": 387,
+      "min": 0,
+      "q1": 1.0,
+      "median": 1.0,
+      "q3": 3.0,
+      "max": 33,
+      "iqr": 2.0,
+      "mean": 2.8,
+      "sd": 4.6
+     }
+    },
+    "publications": {
+     "matched": {
+      "n": 446,
+      "min": 0,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 4.0,
+      "max": 23,
+      "iqr": 3.0,
+      "mean": 3.1,
+      "sd": 3.7
+     },
+     "not_matched": {
+      "n": 387,
+      "min": 0,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 4.0,
+      "max": 80,
+      "iqr": 3.0,
+      "mean": 4.0,
+      "sd": 7.9
+     }
+    },
+    "work": {
+     "matched": {
+      "n": 446,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 6.0,
+      "max": 20,
+      "iqr": 4.0,
+      "mean": 4.3,
+      "sd": 3.2
+     },
+     "not_matched": {
+      "n": 387,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 5.0,
+      "max": 20,
+      "iqr": 3.0,
+      "mean": 4.2,
+      "sd": 3.2
+     }
+    },
+    "volunteer": {
+     "matched": {
+      "n": 446,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 4.0,
+      "max": 57,
+      "iqr": 2.0,
+      "mean": 3.8,
+      "sd": 4.1
+     },
+     "not_matched": {
+      "n": 387,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 4.0,
+      "max": 60,
+      "iqr": 2.0,
+      "mean": 3.7,
+      "sd": 5.6
+     }
+    }
+   },
+   "phd": {
+    "matched": 1.0,
+    "not_matched": 1.6
+   },
+   "gradDegree": {
+    "matched": 23.1,
+    "not_matched": 27.3
+   }
+  },
+  {
+   "name": "Physical Medicine and Rehabilitation",
+   "short": "PM&R",
+   "positions": 601,
+   "allApplicants": 828,
+   "imgMatched": 21,
+   "imgNotMatched": 18,
+   "imgTotal": 39,
+   "matchRate": 53.8,
+   "allPerPos": 1.38,
+   "imgPerPos": 0.06,
+   "metrics": {
+    "contiguous_ranks": {
+     "matched": {
+      "n": 15,
+      "min": 1,
+      "q1": 3.0,
+      "median": 5.0,
+      "q3": 10.0,
+      "max": 14,
+      "iqr": 7.0,
+      "mean": 6.3,
+      "sd": 4.2
+     },
+     "not_matched": {
+      "n": 14,
+      "min": 1,
+      "q1": 1.0,
+      "median": 1.5,
+      "q3": 4.0,
+      "max": 8,
+      "iqr": 3.0,
+      "mean": 2.7,
+      "sd": 2.3
+     }
+    },
+    "specialties_ranked": {
+     "matched": {
+      "n": 15,
+      "min": 1,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 2.0,
+      "max": 3,
+      "iqr": 1.0,
+      "mean": 1.8,
+      "sd": 0.8
+     },
+     "not_matched": {
+      "n": 14,
+      "min": 1,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 3.0,
+      "max": 4,
+      "iqr": 1.0,
+      "mean": 2.4,
+      "sd": 0.9
+     }
+    },
+    "step2ck": {
+     "matched": {
+      "n": 15,
+      "min": 219,
+      "q1": 230.0,
+      "median": 240.0,
+      "q3": 249.0,
+      "max": 259,
+      "iqr": 19.0,
+      "mean": 239.0,
+      "sd": 13.0
+     },
+     "not_matched": {
+      "n": 14,
+      "min": 214,
+      "q1": 222.0,
+      "median": 240.0,
+      "q3": 250.0,
+      "max": 276,
+      "iqr": 28.0,
+      "mean": 237.0,
+      "sd": 18.0
+     }
+    },
+    "research": {
+     "matched": {
+      "n": 15,
+      "min": 1,
+      "q1": 3.0,
+      "median": 7.0,
+      "q3": 11.0,
+      "max": 15,
+      "iqr": 8.0,
+      "mean": 7.6,
+      "sd": 4.6
+     },
+     "not_matched": {
+      "n": 14,
+      "min": 1,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 5.0,
+      "max": 11,
+      "iqr": 3.0,
+      "mean": 3.8,
+      "sd": 2.9
+     }
+    },
+    "abstracts": {
+     "matched": {
+      "n": 15,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 4.0,
+      "max": 9,
+      "iqr": 2.0,
+      "mean": 3.3,
+      "sd": 2.4
+     },
+     "not_matched": {
+      "n": 14,
+      "min": 1,
+      "q1": 2.0,
+      "median": 2.5,
+      "q3": 3.0,
+      "max": 12,
+      "iqr": 1.0,
+      "mean": 3.9,
+      "sd": 3.6
+     }
+    },
+    "presentations": {
+     "matched": {
+      "n": 15,
+      "min": 1,
+      "q1": 3.0,
+      "median": 7.0,
+      "q3": 10.0,
+      "max": 15,
+      "iqr": 7.0,
+      "mean": 6.5,
+      "sd": 4.5
+     },
+     "not_matched": {
+      "n": 14,
+      "min": 0,
+      "q1": 1.0,
+      "median": 4.0,
+      "q3": 8.0,
+      "max": 11,
+      "iqr": 7.0,
+      "mean": 4.6,
+      "sd": 4.1
+     }
+    },
+    "publications": {
+     "matched": {
+      "n": 15,
+      "min": 0,
+      "q1": 1.0,
+      "median": 3.0,
+      "q3": 5.0,
+      "max": 18,
+      "iqr": 4.0,
+      "mean": 4.2,
+      "sd": 4.8
+     },
+     "not_matched": {
+      "n": 14,
+      "min": 1,
+      "q1": 1.0,
+      "median": 4.0,
+      "q3": 8.0,
+      "max": 16,
+      "iqr": 7.0,
+      "mean": 5.4,
+      "sd": 5.1
+     }
+    },
+    "work": {
+     "matched": {
+      "n": 15,
+      "min": 1,
+      "q1": 2.0,
+      "median": 3.5,
+      "q3": 4.0,
+      "max": 11,
+      "iqr": 2.0,
+      "mean": 3.8,
+      "sd": 2.7
+     },
+     "not_matched": {
+      "n": 14,
+      "min": 1,
+      "q1": 2.0,
+      "median": 2.0,
+      "q3": 6.0,
+      "max": 9,
+      "iqr": 4.0,
+      "mean": 3.5,
+      "sd": 2.7
+     }
+    },
+    "volunteer": {
+     "matched": {
+      "n": 15,
+      "min": 1,
+      "q1": 1.0,
+      "median": 3.0,
+      "q3": 7.0,
+      "max": 20,
+      "iqr": 6.0,
+      "mean": 5.5,
+      "sd": 5.7
+     },
+     "not_matched": {
+      "n": 14,
+      "min": 1,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 5.0,
+      "max": 8,
+      "iqr": 3.0,
+      "mean": 3.7,
+      "sd": 2.5
+     }
+    }
+   },
+   "phd": {
+    "matched": 7.1,
+    "not_matched": 15.4
+   },
+   "gradDegree": {
+    "matched": 14.3,
+    "not_matched": 18.2
+   }
+  },
+  {
+   "name": "Child Neurology",
+   "short": "Child Neurology",
+   "positions": 243,
+   "allApplicants": 249,
+   "imgMatched": 26,
+   "imgNotMatched": 24,
+   "imgTotal": 50,
+   "matchRate": 52.0,
+   "allPerPos": 1.02,
+   "imgPerPos": 0.21,
+   "metrics": {
+    "contiguous_ranks": {
+     "matched": {
+      "n": 18,
+      "min": 1,
+      "q1": 2.0,
+      "median": 4.0,
+      "q3": 7.0,
+      "max": 14,
+      "iqr": 5.0,
+      "mean": 5.4,
+      "sd": 4.6
+     },
+     "not_matched": {
+      "n": 20,
+      "min": 1,
+      "q1": 1.0,
+      "median": 1.0,
+      "q3": 2.0,
+      "max": 7,
+      "iqr": 1.0,
+      "mean": 2.0,
+      "sd": 1.7
+     }
+    },
+    "specialties_ranked": {
+     "matched": {
+      "n": 18,
+      "min": 1,
+      "q1": 2.0,
+      "median": 2.0,
+      "q3": 3.0,
+      "max": 4,
+      "iqr": 1.0,
+      "mean": 2.4,
+      "sd": 1.0
+     },
+     "not_matched": {
+      "n": 20,
+      "min": 1,
+      "q1": 2.0,
+      "median": 2.0,
+      "q3": 3.0,
+      "max": 5,
+      "iqr": 1.0,
+      "mean": 2.4,
+      "sd": 0.9
+     }
+    },
+    "step2ck": {
+     "matched": {
+      "n": 18,
+      "min": 215,
+      "q1": 234.0,
+      "median": 238.0,
+      "q3": 250.0,
+      "max": 272,
+      "iqr": 16.0,
+      "mean": 241.0,
+      "sd": 15.0
+     },
+     "not_matched": {
+      "n": 20,
+      "min": 210,
+      "q1": 232.0,
+      "median": 235.0,
+      "q3": 245.0,
+      "max": 271,
+      "iqr": 13.0,
+      "mean": 237.0,
+      "sd": 14.0
+     }
+    },
+    "research": {
+     "matched": {
+      "n": 18,
+      "min": 1,
+      "q1": 3.0,
+      "median": 5.0,
+      "q3": 7.0,
+      "max": 10,
+      "iqr": 4.0,
+      "mean": 4.9,
+      "sd": 2.4
+     },
+     "not_matched": {
+      "n": 20,
+      "min": 1,
+      "q1": 3.0,
+      "median": 3.5,
+      "q3": 10.0,
+      "max": 30,
+      "iqr": 7.0,
+      "mean": 7.3,
+      "sd": 7.4
+     }
+    },
+    "abstracts": {
+     "matched": {
+      "n": 18,
+      "min": 0,
+      "q1": 0.0,
+      "median": 2.0,
+      "q3": 5.0,
+      "max": 9,
+      "iqr": 5.0,
+      "mean": 3.0,
+      "sd": 2.9
+     },
+     "not_matched": {
+      "n": 20,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 6.0,
+      "max": 21,
+      "iqr": 4.0,
+      "mean": 5.2,
+      "sd": 5.7
+     }
+    },
+    "presentations": {
+     "matched": {
+      "n": 18,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 4.0,
+      "max": 8,
+      "iqr": 2.0,
+      "mean": 3.2,
+      "sd": 2.2
+     },
+     "not_matched": {
+      "n": 20,
+      "min": 1,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 6.0,
+      "max": 15,
+      "iqr": 4.0,
+      "mean": 4.6,
+      "sd": 4.4
+     }
+    },
+    "publications": {
+     "matched": {
+      "n": 18,
+      "min": 1,
+      "q1": 2.0,
+      "median": 4.0,
+      "q3": 5.0,
+      "max": 13,
+      "iqr": 3.0,
+      "mean": 4.6,
+      "sd": 3.7
+     },
+     "not_matched": {
+      "n": 20,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 5.0,
+      "max": 15,
+      "iqr": 3.0,
+      "mean": 4.8,
+      "sd": 4.2
+     }
+    },
+    "work": {
+     "matched": {
+      "n": 18,
+      "min": 0,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 4.0,
+      "max": 10,
+      "iqr": 3.0,
+      "mean": 2.8,
+      "sd": 2.5
+     },
+     "not_matched": {
+      "n": 20,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.5,
+      "q3": 9.0,
+      "max": 15,
+      "iqr": 7.0,
+      "mean": 5.3,
+      "sd": 4.4
+     }
+    },
+    "volunteer": {
+     "matched": {
+      "n": 18,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 6.0,
+      "max": 10,
+      "iqr": 4.0,
+      "mean": 3.7,
+      "sd": 2.8
+     },
+     "not_matched": {
+      "n": 20,
+      "min": 1,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 5.0,
+      "max": 10,
+      "iqr": 3.0,
+      "mean": 3.6,
+      "sd": 2.4
+     }
+    }
+   },
+   "phd": {
+    "matched": 6.7,
+    "not_matched": 5.6
+   },
+   "gradDegree": {
+    "matched": 13.3,
+    "not_matched": 38.9
+   }
+  },
+  {
+   "name": "Radiation Oncology",
+   "short": "Radiation Oncology",
+   "positions": 187,
+   "allApplicants": 222,
+   "imgMatched": 18,
+   "imgNotMatched": 17,
+   "imgTotal": 35,
+   "matchRate": 51.4,
+   "allPerPos": 1.19,
+   "imgPerPos": 0.19,
+   "metrics": {
+    "contiguous_ranks": {
+     "matched": {
+      "n": 12,
+      "min": 1,
+      "q1": 5.0,
+      "median": 11.0,
+      "q3": 15.0,
+      "max": 18,
+      "iqr": 10.0,
+      "mean": 10.7,
+      "sd": 5.8
+     },
+     "not_matched": {
+      "n": 13,
+      "min": 1,
+      "q1": 2.0,
+      "median": 2.0,
+      "q3": 2.0,
+      "max": 8,
+      "iqr": 0.0,
+      "mean": 2.4,
+      "sd": 1.8
+     }
+    },
+    "specialties_ranked": {
+     "matched": {
+      "n": 12,
+      "min": 1,
+      "q1": 1.0,
+      "median": 3.0,
+      "q3": 3.0,
+      "max": 4,
+      "iqr": 2.0,
+      "mean": 2.5,
+      "sd": 1.1
+     },
+     "not_matched": {
+      "n": 13,
+      "min": 1,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 2.0,
+      "max": 5,
+      "iqr": 1.0,
+      "mean": 2.0,
+      "sd": 1.3
+     }
+    },
+    "step2ck": {
+     "matched": {
+      "n": 12,
+      "min": 228,
+      "q1": 240.0,
+      "median": 249.0,
+      "q3": 254.0,
+      "max": 270,
+      "iqr": 14.0,
+      "mean": 248.0,
+      "sd": 14.0
+     },
+     "not_matched": {
+      "n": 13,
+      "min": 222,
+      "q1": 233.0,
+      "median": 244.0,
+      "q3": 249.0,
+      "max": 271,
+      "iqr": 16.0,
+      "mean": 242.0,
+      "sd": 13.0
+     }
+    },
+    "research": {
+     "matched": {
+      "n": 12,
+      "min": 1,
+      "q1": 3.0,
+      "median": 5.0,
+      "q3": 20.0,
+      "max": 55,
+      "iqr": 17.0,
+      "mean": 12.2,
+      "sd": 16.0
+     },
+     "not_matched": {
+      "n": 13,
+      "min": 1,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 8.0,
+      "max": 73,
+      "iqr": 6.0,
+      "mean": 10.1,
+      "sd": 20.1
+     }
+    },
+    "abstracts": {
+     "matched": {
+      "n": 12,
+      "min": 2,
+      "q1": 2.0,
+      "median": 7.0,
+      "q3": 12.0,
+      "max": 16,
+      "iqr": 10.0,
+      "mean": 7.1,
+      "sd": 5.2
+     },
+     "not_matched": {
+      "n": 13,
+      "min": 0,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 5.0,
+      "max": 20,
+      "iqr": 4.0,
+      "mean": 4.3,
+      "sd": 5.7
+     }
+    },
+    "presentations": {
+     "matched": {
+      "n": 12,
+      "min": 1,
+      "q1": 2.0,
+      "median": 8.0,
+      "q3": 9.0,
+      "max": 16,
+      "iqr": 7.0,
+      "mean": 7.2,
+      "sd": 5.4
+     },
+     "not_matched": {
+      "n": 13,
+      "min": 1,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 7.0,
+      "max": 15,
+      "iqr": 6.0,
+      "mean": 4.2,
+      "sd": 4.5
+     }
+    },
+    "publications": {
+     "matched": {
+      "n": 12,
+      "min": 1,
+      "q1": 4.0,
+      "median": 19.0,
+      "q3": 40.0,
+      "max": 63,
+      "iqr": 36.0,
+      "mean": 22.1,
+      "sd": 21.0
+     },
+     "not_matched": {
+      "n": 13,
+      "min": 2,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 8.0,
+      "max": 46,
+      "iqr": 6.0,
+      "mean": 9.2,
+      "sd": 13.4
+     }
+    },
+    "work": {
+     "matched": {
+      "n": 12,
+      "min": 1,
+      "q1": 1.0,
+      "median": 3.5,
+      "q3": 8.0,
+      "max": 10,
+      "iqr": 7.0,
+      "mean": 4.2,
+      "sd": 3.5
+     },
+     "not_matched": {
+      "n": 13,
+      "min": 1,
+      "q1": 1.0,
+      "median": 2.5,
+      "q3": 7.0,
+      "max": 10,
+      "iqr": 6.0,
+      "mean": 4.3,
+      "sd": 3.5
+     }
+    },
+    "volunteer": {
+     "matched": {
+      "n": 12,
+      "min": 1,
+      "q1": 2.0,
+      "median": 4.0,
+      "q3": 6.0,
+      "max": 8,
+      "iqr": 4.0,
+      "mean": 4.1,
+      "sd": 2.5
+     },
+     "not_matched": {
+      "n": 13,
+      "min": 1,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 5.0,
+      "max": 9,
+      "iqr": 3.0,
+      "mean": 3.8,
+      "sd": 2.3
+     }
+    }
+   },
+   "phd": {
+    "matched": 10.0,
+    "not_matched": 0.0
+   },
+   "gradDegree": {
+    "matched": 20.0,
+    "not_matched": 41.7
+   }
+  },
+  {
+   "name": "Internal Medicine",
+   "short": "Internal Medicine",
+   "positions": 11632,
+   "allApplicants": 14734,
+   "imgMatched": 3392,
+   "imgNotMatched": 3600,
+   "imgTotal": 6992,
+   "matchRate": 48.5,
+   "allPerPos": 1.27,
+   "imgPerPos": 0.6,
+   "metrics": {
+    "contiguous_ranks": {
+     "matched": {
+      "n": 2649,
+      "min": 1,
+      "q1": 3.0,
+      "median": 5.0,
+      "q3": 8.0,
+      "max": 44,
+      "iqr": 5.0,
+      "mean": 6.1,
+      "sd": 4.5
+     },
+     "not_matched": {
+      "n": 2730,
+      "min": 1,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 3.0,
+      "max": 20,
+      "iqr": 2.0,
+      "mean": 2.5,
+      "sd": 2.2
+     }
+    },
+    "specialties_ranked": {
+     "matched": {
+      "n": 2649,
+      "min": 1,
+      "q1": 1.0,
+      "median": 1.0,
+      "q3": 1.0,
+      "max": 5,
+      "iqr": 0.0,
+      "mean": 1.3,
+      "sd": 0.6
+     },
+     "not_matched": {
+      "n": 2730,
+      "min": 1,
+      "q1": 1.0,
+      "median": 1.0,
+      "q3": 2.0,
+      "max": 6,
+      "iqr": 1.0,
+      "mean": 1.4,
+      "sd": 0.7
+     }
+    },
+    "step2ck": {
+     "matched": {
+      "n": 2649,
+      "min": 209,
+      "q1": 240.0,
+      "median": 251.0,
+      "q3": 259.0,
+      "max": 284,
+      "iqr": 19.0,
+      "mean": 249.0,
+      "sd": 14.0
+     },
+     "not_matched": {
+      "n": 2730,
+      "min": 209,
+      "q1": 233.0,
+      "median": 243.0,
+      "q3": 253.0,
+      "max": 279,
+      "iqr": 20.0,
+      "mean": 242.0,
+      "sd": 14.0
+     }
+    },
+    "research": {
+     "matched": {
+      "n": 2649,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 5.0,
+      "max": 150,
+      "iqr": 3.0,
+      "mean": 4.8,
+      "sd": 6.8
+     },
+     "not_matched": {
+      "n": 2730,
+      "min": 0,
+      "q1": 1.0,
+      "median": 3.0,
+      "q3": 5.0,
+      "max": 149,
+      "iqr": 4.0,
+      "mean": 4.2,
+      "sd": 6.4
+     }
+    },
+    "abstracts": {
+     "matched": {
+      "n": 2649,
+      "min": 0,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 5.0,
+      "max": 100,
+      "iqr": 4.0,
+      "mean": 3.8,
+      "sd": 6.1
+     },
+     "not_matched": {
+      "n": 2730,
+      "min": 0,
+      "q1": 0.0,
+      "median": 2.0,
+      "q3": 4.0,
+      "max": 70,
+      "iqr": 4.0,
+      "mean": 3.0,
+      "sd": 4.8
+     }
+    },
+    "presentations": {
+     "matched": {
+      "n": 2649,
+      "min": 0,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 4.0,
+      "max": 58,
+      "iqr": 3.0,
+      "mean": 3.2,
+      "sd": 4.4
+     },
+     "not_matched": {
+      "n": 2730,
+      "min": 0,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 3.0,
+      "max": 50,
+      "iqr": 2.0,
+      "mean": 2.6,
+      "sd": 3.6
+     }
+    },
+    "publications": {
+     "matched": {
+      "n": 2649,
+      "min": 0,
+      "q1": 1.0,
+      "median": 3.0,
+      "q3": 6.0,
+      "max": 351,
+      "iqr": 5.0,
+      "mean": 5.3,
+      "sd": 11.1
+     },
+     "not_matched": {
+      "n": 2730,
+      "min": 0,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 5.0,
+      "max": 92,
+      "iqr": 4.0,
+      "mean": 4.3,
+      "sd": 6.6
+     }
+    },
+    "work": {
+     "matched": {
+      "n": 2649,
+      "min": 0,
+      "q1": 1.0,
+      "median": 3.0,
+      "q3": 4.0,
+      "max": 23,
+      "iqr": 3.0,
+      "mean": 3.3,
+      "sd": 2.8
+     },
+     "not_matched": {
+      "n": 2730,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 5.0,
+      "max": 33,
+      "iqr": 3.0,
+      "mean": 3.9,
+      "sd": 3.0
+     }
+    },
+    "volunteer": {
+     "matched": {
+      "n": 2649,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 4.0,
+      "max": 50,
+      "iqr": 2.0,
+      "mean": 3.4,
+      "sd": 3.1
+     },
+     "not_matched": {
+      "n": 2730,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 4.0,
+      "max": 350,
+      "iqr": 2.0,
+      "mean": 3.6,
+      "sd": 8.7
+     }
+    }
+   },
+   "phd": {
+    "matched": 1.3,
+    "not_matched": 1.0
+   },
+   "gradDegree": {
+    "matched": 19.4,
+    "not_matched": 21.3
+   }
+  },
+  {
+   "name": "Interventional Radiology (Integrated)",
+   "short": "Interventional Radiology",
+   "positions": 245,
+   "allApplicants": 276,
+   "imgMatched": 14,
+   "imgNotMatched": 15,
+   "imgTotal": 29,
+   "matchRate": 48.3,
+   "allPerPos": 1.13,
+   "imgPerPos": 0.12,
+   "metrics": {
+    "contiguous_ranks": {
+     "matched": {
+      "n": 11,
+      "min": 1,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 4.0,
+      "max": 6,
+      "iqr": 3.0,
+      "mean": 2.5,
+      "sd": 1.8
+     },
+     "not_matched": {
+      "n": 10,
+      "min": 1,
+      "q1": 1.0,
+      "median": 1.0,
+      "q3": 2.0,
+      "max": 2,
+      "iqr": 1.0,
+      "mean": 1.3,
+      "sd": 0.5
+     }
+    },
+    "specialties_ranked": {
+     "matched": {
+      "n": 11,
+      "min": 2,
+      "q1": 2.0,
+      "median": 2.0,
+      "q3": 4.0,
+      "max": 4,
+      "iqr": 2.0,
+      "mean": 2.7,
+      "sd": 0.9
+     },
+     "not_matched": {
+      "n": 10,
+      "min": 1,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 4.0,
+      "max": 4,
+      "iqr": 2.0,
+      "mean": 2.8,
+      "sd": 1.0
+     }
+    },
+    "step2ck": {
+     "matched": {
+      "n": 11,
+      "min": 246,
+      "q1": 253.0,
+      "median": 260.0,
+      "q3": 266.0,
+      "max": 273,
+      "iqr": 13.0,
+      "mean": 260.0,
+      "sd": 9.0
+     },
+     "not_matched": {
+      "n": 10,
+      "min": 227,
+      "q1": 249.0,
+      "median": 250.0,
+      "q3": 257.0,
+      "max": 275,
+      "iqr": 8.0,
+      "mean": 252.0,
+      "sd": 13.0
+     }
+    },
+    "research": {
+     "matched": {
+      "n": 11,
+      "min": 1,
+      "q1": 2.0,
+      "median": 4.0,
+      "q3": 7.0,
+      "max": 10,
+      "iqr": 5.0,
+      "mean": 5.0,
+      "sd": 3.1
+     },
+     "not_matched": {
+      "n": 10,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.5,
+      "q3": 4.0,
+      "max": 50,
+      "iqr": 2.0,
+      "mean": 8.8,
+      "sd": 16.7
+     }
+    },
+    "abstracts": {
+     "matched": {
+      "n": 11,
+      "min": 1,
+      "q1": 1.0,
+      "median": 3.5,
+      "q3": 9.0,
+      "max": 16,
+      "iqr": 8.0,
+      "mean": 5.7,
+      "sd": 5.9
+     },
+     "not_matched": {
+      "n": 10,
+      "min": 0,
+      "q1": 1.0,
+      "median": 2.5,
+      "q3": 8.0,
+      "max": 34,
+      "iqr": 7.0,
+      "mean": 8.1,
+      "sd": 11.7
+     }
+    },
+    "presentations": {
+     "matched": {
+      "n": 11,
+      "min": 1,
+      "q1": 1.0,
+      "median": 6.0,
+      "q3": 6.0,
+      "max": 12,
+      "iqr": 5.0,
+      "mean": 5.3,
+      "sd": 4.1
+     },
+     "not_matched": {
+      "n": 10,
+      "min": 0,
+      "q1": 1.0,
+      "median": 1.0,
+      "q3": 5.0,
+      "max": 23,
+      "iqr": 4.0,
+      "mean": 5.1,
+      "sd": 7.8
+     }
+    },
+    "publications": {
+     "matched": {
+      "n": 11,
+      "min": 1,
+      "q1": 1.0,
+      "median": 3.0,
+      "q3": 5.0,
+      "max": 9,
+      "iqr": 4.0,
+      "mean": 3.8,
+      "sd": 2.8
+     },
+     "not_matched": {
+      "n": 10,
+      "min": 0,
+      "q1": 1.0,
+      "median": 6.0,
+      "q3": 20.0,
+      "max": 23,
+      "iqr": 19.0,
+      "mean": 9.7,
+      "sd": 9.7
+     }
+    },
+    "work": {
+     "matched": {
+      "n": 11,
+      "min": 1,
+      "q1": 2.0,
+      "median": 2.0,
+      "q3": 3.0,
+      "max": 3,
+      "iqr": 1.0,
+      "mean": 2.2,
+      "sd": 0.8
+     },
+     "not_matched": {
+      "n": 10,
+      "min": 1,
+      "q1": 2.0,
+      "median": 4.5,
+      "q3": 5.0,
+      "max": 8,
+      "iqr": 3.0,
+      "mean": 4.5,
+      "sd": 2.3
+     }
+    },
+    "volunteer": {
+     "matched": {
+      "n": 11,
+      "min": 1,
+      "q1": 1.0,
+      "median": 3.0,
+      "q3": 5.0,
+      "max": 7,
+      "iqr": 4.0,
+      "mean": 3.4,
+      "sd": 2.1
+     },
+     "not_matched": {
+      "n": 10,
+      "min": 0,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 2.0,
+      "max": 3,
+      "iqr": 1.0,
+      "mean": 1.8,
+      "sd": 1.0
+     }
+    }
+   },
+   "phd": {
+    "matched": 0.0,
+    "not_matched": 0.0
+   },
+   "gradDegree": {
+    "matched": 12.5,
+    "not_matched": 50.0
+   }
+  },
+  {
+   "name": "Pathology-Anatomic and Clinical",
+   "short": "Pathology",
+   "positions": 636,
+   "allApplicants": 957,
+   "imgMatched": 169,
+   "imgNotMatched": 206,
+   "imgTotal": 375,
+   "matchRate": 45.1,
+   "allPerPos": 1.5,
+   "imgPerPos": 0.59,
+   "metrics": {
+    "contiguous_ranks": {
+     "matched": {
+      "n": 128,
+      "min": 1,
+      "q1": 4.0,
+      "median": 7.0,
+      "q3": 11.0,
+      "max": 29,
+      "iqr": 7.0,
+      "mean": 8.2,
+      "sd": 5.7
+     },
+     "not_matched": {
+      "n": 156,
+      "min": 1,
+      "q1": 1.0,
+      "median": 3.0,
+      "q3": 5.0,
+      "max": 13,
+      "iqr": 4.0,
+      "mean": 3.6,
+      "sd": 2.7
+     }
+    },
+    "specialties_ranked": {
+     "matched": {
+      "n": 128,
+      "min": 1,
+      "q1": 1.0,
+      "median": 1.0,
+      "q3": 1.0,
+      "max": 5,
+      "iqr": 0.0,
+      "mean": 1.1,
+      "sd": 0.5
+     },
+     "not_matched": {
+      "n": 156,
+      "min": 1,
+      "q1": 1.0,
+      "median": 1.0,
+      "q3": 1.0,
+      "max": 3,
+      "iqr": 0.0,
+      "mean": 1.1,
+      "sd": 0.3
+     }
+    },
+    "step2ck": {
+     "matched": {
+      "n": 128,
+      "min": 217,
+      "q1": 232.0,
+      "median": 244.0,
+      "q3": 253.0,
+      "max": 274,
+      "iqr": 21.0,
+      "mean": 243.0,
+      "sd": 13.0
+     },
+     "not_matched": {
+      "n": 156,
+      "min": 214,
+      "q1": 228.0,
+      "median": 235.0,
+      "q3": 245.0,
+      "max": 267,
+      "iqr": 17.0,
+      "mean": 236.0,
+      "sd": 12.0
+     }
+    },
+    "research": {
+     "matched": {
+      "n": 128,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 5.0,
+      "max": 16,
+      "iqr": 3.0,
+      "mean": 4.0,
+      "sd": 3.3
+     },
+     "not_matched": {
+      "n": 156,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 5.0,
+      "max": 30,
+      "iqr": 3.0,
+      "mean": 4.3,
+      "sd": 4.6
+     }
+    },
+    "abstracts": {
+     "matched": {
+      "n": 128,
+      "min": 0,
+      "q1": 1.0,
+      "median": 3.0,
+      "q3": 8.0,
+      "max": 48,
+      "iqr": 7.0,
+      "mean": 5.5,
+      "sd": 7.0
+     },
+     "not_matched": {
+      "n": 156,
+      "min": 0,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 5.0,
+      "max": 60,
+      "iqr": 4.0,
+      "mean": 5.0,
+      "sd": 9.8
+     }
+    },
+    "presentations": {
+     "matched": {
+      "n": 128,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 7.0,
+      "max": 59,
+      "iqr": 5.0,
+      "mean": 5.5,
+      "sd": 7.3
+     },
+     "not_matched": {
+      "n": 156,
+      "min": 0,
+      "q1": 1.0,
+      "median": 3.0,
+      "q3": 5.0,
+      "max": 32,
+      "iqr": 4.0,
+      "mean": 5.4,
+      "sd": 7.3
+     }
+    },
+    "publications": {
+     "matched": {
+      "n": 128,
+      "min": 0,
+      "q1": 3.0,
+      "median": 7.0,
+      "q3": 13.0,
+      "max": 48,
+      "iqr": 10.0,
+      "mean": 10.3,
+      "sd": 10.8
+     },
+     "not_matched": {
+      "n": 156,
+      "min": 0,
+      "q1": 2.0,
+      "median": 4.0,
+      "q3": 10.0,
+      "max": 70,
+      "iqr": 8.0,
+      "mean": 7.7,
+      "sd": 10.7
+     }
+    },
+    "work": {
+     "matched": {
+      "n": 128,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 5.0,
+      "max": 21,
+      "iqr": 3.0,
+      "mean": 4.0,
+      "sd": 3.1
+     },
+     "not_matched": {
+      "n": 156,
+      "min": 0,
+      "q1": 2.0,
+      "median": 4.0,
+      "q3": 5.0,
+      "max": 19,
+      "iqr": 3.0,
+      "mean": 4.3,
+      "sd": 3.1
+     }
+    },
+    "volunteer": {
+     "matched": {
+      "n": 128,
+      "min": 0,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 3.0,
+      "max": 10,
+      "iqr": 2.0,
+      "mean": 2.7,
+      "sd": 2.1
+     },
+     "not_matched": {
+      "n": 156,
+      "min": 0,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 3.0,
+      "max": 50,
+      "iqr": 2.0,
+      "mean": 3.2,
+      "sd": 4.9
+     }
+    }
+   },
+   "phd": {
+    "matched": 16.8,
+    "not_matched": 14.8
+   },
+   "gradDegree": {
+    "matched": 46.7,
+    "not_matched": 41.2
+   }
+  },
+  {
+   "name": "Neurology",
+   "short": "Neurology",
+   "positions": 1260,
+   "allApplicants": 1689,
+   "imgMatched": 215,
+   "imgNotMatched": 298,
+   "imgTotal": 513,
+   "matchRate": 41.9,
+   "allPerPos": 1.34,
+   "imgPerPos": 0.41,
+   "metrics": {
+    "contiguous_ranks": {
+     "matched": {
+      "n": 166,
+      "min": 1,
+      "q1": 3.0,
+      "median": 6.0,
+      "q3": 10.0,
+      "max": 25,
+      "iqr": 7.0,
+      "mean": 6.8,
+      "sd": 4.8
+     },
+     "not_matched": {
+      "n": 231,
+      "min": 1,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 4.0,
+      "max": 18,
+      "iqr": 3.0,
+      "mean": 3.0,
+      "sd": 2.8
+     }
+    },
+    "specialties_ranked": {
+     "matched": {
+      "n": 166,
+      "min": 1,
+      "q1": 1.0,
+      "median": 1.0,
+      "q3": 2.0,
+      "max": 4,
+      "iqr": 1.0,
+      "mean": 1.5,
+      "sd": 0.7
+     },
+     "not_matched": {
+      "n": 231,
+      "min": 1,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 2.0,
+      "max": 6,
+      "iqr": 1.0,
+      "mean": 1.8,
+      "sd": 0.9
+     }
+    },
+    "step2ck": {
+     "matched": {
+      "n": 166,
+      "min": 212,
+      "q1": 240.0,
+      "median": 252.0,
+      "q3": 262.0,
+      "max": 276,
+      "iqr": 22.0,
+      "mean": 250.0,
+      "sd": 14.0
+     },
+     "not_matched": {
+      "n": 231,
+      "min": 215,
+      "q1": 233.0,
+      "median": 244.0,
+      "q3": 254.0,
+      "max": 274,
+      "iqr": 21.0,
+      "mean": 243.0,
+      "sd": 14.0
+     }
+    },
+    "research": {
+     "matched": {
+      "n": 166,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 6.0,
+      "max": 21,
+      "iqr": 4.0,
+      "mean": 5.1,
+      "sd": 4.7
+     },
+     "not_matched": {
+      "n": 231,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 6.0,
+      "max": 50,
+      "iqr": 4.0,
+      "mean": 5.1,
+      "sd": 6.0
+     }
+    },
+    "abstracts": {
+     "matched": {
+      "n": 166,
+      "min": 0,
+      "q1": 1.0,
+      "median": 3.0,
+      "q3": 6.0,
+      "max": 25,
+      "iqr": 5.0,
+      "mean": 4.4,
+      "sd": 4.8
+     },
+     "not_matched": {
+      "n": 231,
+      "min": 0,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 5.0,
+      "max": 150,
+      "iqr": 4.0,
+      "mean": 4.5,
+      "sd": 12.5
+     }
+    },
+    "presentations": {
+     "matched": {
+      "n": 166,
+      "min": 0,
+      "q1": 1.0,
+      "median": 4.0,
+      "q3": 7.0,
+      "max": 30,
+      "iqr": 6.0,
+      "mean": 5.1,
+      "sd": 5.3
+     },
+     "not_matched": {
+      "n": 231,
+      "min": 0,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 5.0,
+      "max": 26,
+      "iqr": 4.0,
+      "mean": 3.7,
+      "sd": 4.5
+     }
+    },
+    "publications": {
+     "matched": {
+      "n": 166,
+      "min": 0,
+      "q1": 2.0,
+      "median": 5.0,
+      "q3": 9.0,
+      "max": 44,
+      "iqr": 7.0,
+      "mean": 7.3,
+      "sd": 7.9
+     },
+     "not_matched": {
+      "n": 231,
+      "min": 0,
+      "q1": 1.0,
+      "median": 3.0,
+      "q3": 7.0,
+      "max": 120,
+      "iqr": 6.0,
+      "mean": 6.0,
+      "sd": 12.2
+     }
+    },
+    "work": {
+     "matched": {
+      "n": 166,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 5.0,
+      "max": 10,
+      "iqr": 3.0,
+      "mean": 3.2,
+      "sd": 2.3
+     },
+     "not_matched": {
+      "n": 231,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 5.0,
+      "max": 25,
+      "iqr": 3.0,
+      "mean": 3.8,
+      "sd": 3.2
+     }
+    },
+    "volunteer": {
+     "matched": {
+      "n": 166,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 4.0,
+      "max": 28,
+      "iqr": 2.0,
+      "mean": 3.2,
+      "sd": 3.2
+     },
+     "not_matched": {
+      "n": 231,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 4.0,
+      "max": 20,
+      "iqr": 2.0,
+      "mean": 3.0,
+      "sd": 2.5
+     }
+    }
+   },
+   "phd": {
+    "matched": 3.6,
+    "not_matched": 2.6
+   },
+   "gradDegree": {
+    "matched": 18.7,
+    "not_matched": 23.7
+   }
+  },
+  {
+   "name": "Otolaryngology",
+   "short": "Otolaryngology",
+   "positions": 403,
+   "allApplicants": 580,
+   "imgMatched": 7,
+   "imgNotMatched": 10,
+   "imgTotal": 17,
+   "matchRate": 41.2,
+   "allPerPos": 1.44,
+   "imgPerPos": 0.04,
+   "metrics": {
+    "contiguous_ranks": {
+     "matched": {
+      "n": 3,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 8,
+      "min": 1,
+      "q1": 1.0,
+      "median": 1.5,
+      "q3": 3.0,
+      "max": 3,
+      "iqr": 2.0,
+      "mean": 1.9,
+      "sd": 1.0
+     }
+    },
+    "specialties_ranked": {
+     "matched": {
+      "n": 3,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 8,
+      "min": 1,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 2.0,
+      "max": 2,
+      "iqr": 1.0,
+      "mean": 1.6,
+      "sd": 0.5
+     }
+    },
+    "step2ck": {
+     "matched": {
+      "n": 3,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 8,
+      "min": 230,
+      "q1": 233.0,
+      "median": 249.0,
+      "q3": 253.0,
+      "max": 260,
+      "iqr": 20.0,
+      "mean": 246.0,
+      "sd": 11.0
+     }
+    },
+    "research": {
+     "matched": {
+      "n": 3,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 8,
+      "min": 2,
+      "q1": 3.0,
+      "median": 7.0,
+      "q3": 14.0,
+      "max": 80,
+      "iqr": 11.0,
+      "mean": 18.8,
+      "sd": 30.4
+     }
+    },
+    "abstracts": {
+     "matched": {
+      "n": 3,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 8,
+      "min": 2,
+      "q1": 5.0,
+      "median": 10.0,
+      "q3": 17.0,
+      "max": 50,
+      "iqr": 12.0,
+      "mean": 15.7,
+      "sd": 17.6
+     }
+    },
+    "presentations": {
+     "matched": {
+      "n": 3,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 8,
+      "min": 5,
+      "q1": 6.0,
+      "median": 6.0,
+      "q3": 15.0,
+      "max": 59,
+      "iqr": 9.0,
+      "mean": 16.2,
+      "sd": 21.3
+     }
+    },
+    "publications": {
+     "matched": {
+      "n": 3,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 8,
+      "min": 2,
+      "q1": 2.0,
+      "median": 8.5,
+      "q3": 17.0,
+      "max": 41,
+      "iqr": 15.0,
+      "mean": 13.2,
+      "sd": 14.7
+     }
+    },
+    "work": {
+     "matched": {
+      "n": 3,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 8,
+      "min": 1,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 4.0,
+      "max": 6,
+      "iqr": 3.0,
+      "mean": 2.7,
+      "sd": 2.0
+     }
+    },
+    "volunteer": {
+     "matched": {
+      "n": 3,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 8,
+      "min": 2,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 3.0,
+      "max": 6,
+      "iqr": 1.0,
+      "mean": 3.2,
+      "sd": 1.5
+     }
+    }
+   },
+   "phd": {
+    "matched": null,
+    "not_matched": 0.0
+   },
+   "gradDegree": {
+    "matched": null,
+    "not_matched": 28.6
+   }
+  },
+  {
+   "name": "Anesthesiology",
+   "short": "Anesthesiology",
+   "positions": 2290,
+   "allApplicants": 2988,
+   "imgMatched": 89,
+   "imgNotMatched": 141,
+   "imgTotal": 230,
+   "matchRate": 38.7,
+   "allPerPos": 1.3,
+   "imgPerPos": 0.1,
+   "metrics": {
+    "contiguous_ranks": {
+     "matched": {
+      "n": 76,
+      "min": 1,
+      "q1": 3.0,
+      "median": 4.0,
+      "q3": 7.0,
+      "max": 21,
+      "iqr": 4.0,
+      "mean": 5.1,
+      "sd": 3.6
+     },
+     "not_matched": {
+      "n": 108,
+      "min": 1,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 3.0,
+      "max": 13,
+      "iqr": 2.0,
+      "mean": 2.3,
+      "sd": 2.1
+     }
+    },
+    "specialties_ranked": {
+     "matched": {
+      "n": 76,
+      "min": 1,
+      "q1": 1.0,
+      "median": 1.5,
+      "q3": 2.0,
+      "max": 5,
+      "iqr": 1.0,
+      "mean": 1.9,
+      "sd": 1.1
+     },
+     "not_matched": {
+      "n": 108,
+      "min": 1,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 2.0,
+      "max": 6,
+      "iqr": 1.0,
+      "mean": 1.9,
+      "sd": 1.1
+     }
+    },
+    "step2ck": {
+     "matched": {
+      "n": 76,
+      "min": 212,
+      "q1": 243.0,
+      "median": 255.0,
+      "q3": 262.0,
+      "max": 274,
+      "iqr": 19.0,
+      "mean": 252.0,
+      "sd": 14.0
+     },
+     "not_matched": {
+      "n": 108,
+      "min": 219,
+      "q1": 238.0,
+      "median": 247.0,
+      "q3": 254.0,
+      "max": 280,
+      "iqr": 16.0,
+      "mean": 246.0,
+      "sd": 12.0
+     }
+    },
+    "research": {
+     "matched": {
+      "n": 76,
+      "min": 0,
+      "q1": 2.0,
+      "median": 4.0,
+      "q3": 8.0,
+      "max": 35,
+      "iqr": 6.0,
+      "mean": 6.2,
+      "sd": 7.8
+     },
+     "not_matched": {
+      "n": 108,
+      "min": 0,
+      "q1": 1.0,
+      "median": 3.0,
+      "q3": 5.0,
+      "max": 32,
+      "iqr": 4.0,
+      "mean": 4.5,
+      "sd": 5.3
+     }
+    },
+    "abstracts": {
+     "matched": {
+      "n": 76,
+      "min": 0,
+      "q1": 1.0,
+      "median": 3.0,
+      "q3": 6.0,
+      "max": 33,
+      "iqr": 5.0,
+      "mean": 5.0,
+      "sd": 6.6
+     },
+     "not_matched": {
+      "n": 108,
+      "min": 0,
+      "q1": 0.0,
+      "median": 2.0,
+      "q3": 5.0,
+      "max": 14,
+      "iqr": 5.0,
+      "mean": 3.0,
+      "sd": 3.5
+     }
+    },
+    "presentations": {
+     "matched": {
+      "n": 76,
+      "min": 0,
+      "q1": 2.0,
+      "median": 4.0,
+      "q3": 7.0,
+      "max": 24,
+      "iqr": 5.0,
+      "mean": 5.6,
+      "sd": 5.9
+     },
+     "not_matched": {
+      "n": 108,
+      "min": 0,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 5.0,
+      "max": 15,
+      "iqr": 4.0,
+      "mean": 3.4,
+      "sd": 3.2
+     }
+    },
+    "publications": {
+     "matched": {
+      "n": 76,
+      "min": 0,
+      "q1": 2.0,
+      "median": 4.0,
+      "q3": 7.0,
+      "max": 69,
+      "iqr": 5.0,
+      "mean": 7.7,
+      "sd": 12.1
+     },
+     "not_matched": {
+      "n": 108,
+      "min": 0,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 5.0,
+      "max": 40,
+      "iqr": 4.0,
+      "mean": 4.4,
+      "sd": 7.1
+     }
+    },
+    "work": {
+     "matched": {
+      "n": 76,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 4.0,
+      "max": 12,
+      "iqr": 2.0,
+      "mean": 3.6,
+      "sd": 2.4
+     },
+     "not_matched": {
+      "n": 108,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 5.0,
+      "max": 10,
+      "iqr": 3.0,
+      "mean": 3.6,
+      "sd": 2.3
+     }
+    },
+    "volunteer": {
+     "matched": {
+      "n": 76,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 5.0,
+      "max": 10,
+      "iqr": 3.0,
+      "mean": 3.2,
+      "sd": 2.3
+     },
+     "not_matched": {
+      "n": 108,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 4.0,
+      "max": 44,
+      "iqr": 2.0,
+      "mean": 3.6,
+      "sd": 4.9
+     }
+    }
+   },
+   "phd": {
+    "matched": 7.9,
+    "not_matched": 3.3
+   },
+   "gradDegree": {
+    "matched": 33.9,
+    "not_matched": 22.9
+   }
+  },
+  {
+   "name": "Internal Medicine/Pediatrics",
+   "short": "Internal Medicine / Peds",
+   "positions": 404,
+   "allApplicants": 468,
+   "imgMatched": 8,
+   "imgNotMatched": 16,
+   "imgTotal": 24,
+   "matchRate": 33.3,
+   "allPerPos": 1.16,
+   "imgPerPos": 0.06,
+   "metrics": {
+    "contiguous_ranks": {
+     "matched": {
+      "n": 5,
+      "min": 1,
+      "q1": 1.0,
+      "median": 1.0,
+      "q3": 1.0,
+      "max": 1,
+      "iqr": 0.0,
+      "mean": 1.0,
+      "sd": 0.0
+     },
+     "not_matched": {
+      "n": 15,
+      "min": 1,
+      "q1": 1.0,
+      "median": 1.0,
+      "q3": 1.0,
+      "max": 4,
+      "iqr": 0.0,
+      "mean": 1.3,
+      "sd": 0.8
+     }
+    },
+    "specialties_ranked": {
+     "matched": {
+      "n": 5,
+      "min": 1,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 2.0,
+      "max": 4,
+      "iqr": 1.0,
+      "mean": 2.0,
+      "sd": 1.2
+     },
+     "not_matched": {
+      "n": 15,
+      "min": 2,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 3.0,
+      "max": 4,
+      "iqr": 1.0,
+      "mean": 2.7,
+      "sd": 0.7
+     }
+    },
+    "step2ck": {
+     "matched": {
+      "n": 5,
+      "min": 220,
+      "q1": 230.0,
+      "median": 252.0,
+      "q3": 252.0,
+      "max": 258,
+      "iqr": 22.0,
+      "mean": 242.0,
+      "sd": 16.0
+     },
+     "not_matched": {
+      "n": 15,
+      "min": 222,
+      "q1": 232.0,
+      "median": 245.0,
+      "q3": 251.0,
+      "max": 270,
+      "iqr": 19.0,
+      "mean": 244.0,
+      "sd": 15.0
+     }
+    },
+    "research": {
+     "matched": {
+      "n": 5,
+      "min": 2,
+      "q1": 2.0,
+      "median": 2.0,
+      "q3": 2.0,
+      "max": 10,
+      "iqr": 0.0,
+      "mean": 4.0,
+      "sd": 4.0
+     },
+     "not_matched": {
+      "n": 15,
+      "min": 0,
+      "q1": 1.0,
+      "median": 4.0,
+      "q3": 7.0,
+      "max": 8,
+      "iqr": 6.0,
+      "mean": 3.8,
+      "sd": 2.8
+     }
+    },
+    "abstracts": {
+     "matched": {
+      "n": 5,
+      "min": 2,
+      "q1": 2.0,
+      "median": 2.0,
+      "q3": 2.0,
+      "max": 2,
+      "iqr": 0.0,
+      "mean": 2.0,
+      "sd": 0.0
+     },
+     "not_matched": {
+      "n": 15,
+      "min": 0,
+      "q1": 0.0,
+      "median": 2.0,
+      "q3": 2.0,
+      "max": 4,
+      "iqr": 2.0,
+      "mean": 1.5,
+      "sd": 1.3
+     }
+    },
+    "presentations": {
+     "matched": {
+      "n": 5,
+      "min": 1,
+      "q1": 1.0,
+      "median": 1.0,
+      "q3": 2.0,
+      "max": 2,
+      "iqr": 1.0,
+      "mean": 1.3,
+      "sd": 0.6
+     },
+     "not_matched": {
+      "n": 15,
+      "min": 0,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 2.0,
+      "max": 7,
+      "iqr": 1.0,
+      "mean": 2.0,
+      "sd": 1.9
+     }
+    },
+    "publications": {
+     "matched": {
+      "n": 5,
+      "min": 1,
+      "q1": 1.0,
+      "median": 2.5,
+      "q3": 3.0,
+      "max": 6,
+      "iqr": 2.0,
+      "mean": 3.0,
+      "sd": 2.2
+     },
+     "not_matched": {
+      "n": 15,
+      "min": 0,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 4.0,
+      "max": 8,
+      "iqr": 3.0,
+      "mean": 2.8,
+      "sd": 2.5
+     }
+    },
+    "work": {
+     "matched": {
+      "n": 5,
+      "min": 2,
+      "q1": 2.0,
+      "median": 3.5,
+      "q3": 4.0,
+      "max": 10,
+      "iqr": 2.0,
+      "mean": 4.8,
+      "sd": 3.6
+     },
+     "not_matched": {
+      "n": 15,
+      "min": 1,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 7.0,
+      "max": 14,
+      "iqr": 5.0,
+      "mean": 4.3,
+      "sd": 3.5
+     }
+    },
+    "volunteer": {
+     "matched": {
+      "n": 5,
+      "min": 1,
+      "q1": 1.0,
+      "median": 1.5,
+      "q3": 2.0,
+      "max": 3,
+      "iqr": 1.0,
+      "mean": 1.8,
+      "sd": 1.0
+     },
+     "not_matched": {
+      "n": 15,
+      "min": 0,
+      "q1": 2.0,
+      "median": 2.5,
+      "q3": 4.0,
+      "max": 48,
+      "iqr": 2.0,
+      "mean": 8.5,
+      "sd": 15.2
+     }
+    }
+   },
+   "phd": {
+    "matched": 0.0,
+    "not_matched": 0.0
+   },
+   "gradDegree": {
+    "matched": 25.0,
+    "not_matched": 14.3
+   }
+  },
+  {
+   "name": "Obstetrics and Gynecology",
+   "short": "OB/GYN",
+   "positions": 1638,
+   "allApplicants": 2140,
+   "imgMatched": 44,
+   "imgNotMatched": 90,
+   "imgTotal": 134,
+   "matchRate": 32.8,
+   "allPerPos": 1.31,
+   "imgPerPos": 0.08,
+   "metrics": {
+    "contiguous_ranks": {
+     "matched": {
+      "n": 38,
+      "min": 1,
+      "q1": 2.0,
+      "median": 3.5,
+      "q3": 5.0,
+      "max": 11,
+      "iqr": 3.0,
+      "mean": 4.1,
+      "sd": 2.9
+     },
+     "not_matched": {
+      "n": 76,
+      "min": 1,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 2.0,
+      "max": 7,
+      "iqr": 1.0,
+      "mean": 1.9,
+      "sd": 1.1
+     }
+    },
+    "specialties_ranked": {
+     "matched": {
+      "n": 38,
+      "min": 1,
+      "q1": 1.0,
+      "median": 1.0,
+      "q3": 2.0,
+      "max": 4,
+      "iqr": 1.0,
+      "mean": 1.4,
+      "sd": 0.7
+     },
+     "not_matched": {
+      "n": 76,
+      "min": 1,
+      "q1": 1.0,
+      "median": 1.0,
+      "q3": 2.0,
+      "max": 4,
+      "iqr": 1.0,
+      "mean": 1.6,
+      "sd": 0.8
+     }
+    },
+    "step2ck": {
+     "matched": {
+      "n": 38,
+      "min": 227,
+      "q1": 238.0,
+      "median": 242.0,
+      "q3": 256.0,
+      "max": 274,
+      "iqr": 18.0,
+      "mean": 245.0,
+      "sd": 12.0
+     },
+     "not_matched": {
+      "n": 76,
+      "min": 218,
+      "q1": 230.0,
+      "median": 239.0,
+      "q3": 249.0,
+      "max": 269,
+      "iqr": 19.0,
+      "mean": 238.0,
+      "sd": 12.0
+     }
+    },
+    "research": {
+     "matched": {
+      "n": 38,
+      "min": 0,
+      "q1": 3.0,
+      "median": 4.0,
+      "q3": 7.0,
+      "max": 24,
+      "iqr": 4.0,
+      "mean": 5.4,
+      "sd": 4.6
+     },
+     "not_matched": {
+      "n": 76,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 4.0,
+      "max": 13,
+      "iqr": 2.0,
+      "mean": 3.5,
+      "sd": 2.6
+     }
+    },
+    "abstracts": {
+     "matched": {
+      "n": 38,
+      "min": 0,
+      "q1": 0.0,
+      "median": 2.0,
+      "q3": 4.0,
+      "max": 18,
+      "iqr": 4.0,
+      "mean": 3.0,
+      "sd": 3.8
+     },
+     "not_matched": {
+      "n": 76,
+      "min": 0,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 4.0,
+      "max": 13,
+      "iqr": 3.0,
+      "mean": 2.9,
+      "sd": 2.9
+     }
+    },
+    "presentations": {
+     "matched": {
+      "n": 38,
+      "min": 0,
+      "q1": 1.0,
+      "median": 3.0,
+      "q3": 8.0,
+      "max": 16,
+      "iqr": 7.0,
+      "mean": 4.4,
+      "sd": 4.0
+     },
+     "not_matched": {
+      "n": 76,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 7.0,
+      "max": 17,
+      "iqr": 5.0,
+      "mean": 4.8,
+      "sd": 4.6
+     }
+    },
+    "publications": {
+     "matched": {
+      "n": 38,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 5.0,
+      "max": 28,
+      "iqr": 3.0,
+      "mean": 5.2,
+      "sd": 6.8
+     },
+     "not_matched": {
+      "n": 76,
+      "min": 0,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 6.0,
+      "max": 23,
+      "iqr": 5.0,
+      "mean": 4.4,
+      "sd": 5.2
+     }
+    },
+    "work": {
+     "matched": {
+      "n": 38,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 4.0,
+      "max": 10,
+      "iqr": 2.0,
+      "mean": 3.4,
+      "sd": 2.4
+     },
+     "not_matched": {
+      "n": 76,
+      "min": 1,
+      "q1": 2.0,
+      "median": 4.0,
+      "q3": 6.0,
+      "max": 12,
+      "iqr": 4.0,
+      "mean": 4.4,
+      "sd": 2.6
+     }
+    },
+    "volunteer": {
+     "matched": {
+      "n": 38,
+      "min": 1,
+      "q1": 2.0,
+      "median": 3.5,
+      "q3": 6.0,
+      "max": 20,
+      "iqr": 4.0,
+      "mean": 4.5,
+      "sd": 3.5
+     },
+     "not_matched": {
+      "n": 76,
+      "min": 1,
+      "q1": 3.0,
+      "median": 4.0,
+      "q3": 6.0,
+      "max": 23,
+      "iqr": 3.0,
+      "mean": 4.8,
+      "sd": 3.9
+     }
+    }
+   },
+   "phd": {
+    "matched": 2.6,
+    "not_matched": 1.4
+   },
+   "gradDegree": {
+    "matched": 18.4,
+    "not_matched": 37.8
+   }
+  },
+  {
+   "name": "Surgery-General",
+   "short": "General Surgery",
+   "positions": 1807,
+   "allApplicants": 2760,
+   "imgMatched": 124,
+   "imgNotMatched": 309,
+   "imgTotal": 433,
+   "matchRate": 28.6,
+   "allPerPos": 1.53,
+   "imgPerPos": 0.24,
+   "metrics": {
+    "contiguous_ranks": {
+     "matched": {
+      "n": 102,
+      "min": 1,
+      "q1": 1.0,
+      "median": 3.0,
+      "q3": 4.0,
+      "max": 20,
+      "iqr": 3.0,
+      "mean": 3.7,
+      "sd": 3.4
+     },
+     "not_matched": {
+      "n": 230,
+      "min": 1,
+      "q1": 1.0,
+      "median": 1.0,
+      "q3": 3.0,
+      "max": 20,
+      "iqr": 2.0,
+      "mean": 2.2,
+      "sd": 2.4
+     }
+    },
+    "specialties_ranked": {
+     "matched": {
+      "n": 102,
+      "min": 1,
+      "q1": 1.0,
+      "median": 1.0,
+      "q3": 1.0,
+      "max": 3,
+      "iqr": 0.0,
+      "mean": 1.1,
+      "sd": 0.4
+     },
+     "not_matched": {
+      "n": 230,
+      "min": 1,
+      "q1": 1.0,
+      "median": 1.0,
+      "q3": 1.0,
+      "max": 5,
+      "iqr": 0.0,
+      "mean": 1.2,
+      "sd": 0.6
+     }
+    },
+    "step2ck": {
+     "matched": {
+      "n": 102,
+      "min": 216,
+      "q1": 244.0,
+      "median": 256.0,
+      "q3": 264.0,
+      "max": 275,
+      "iqr": 20.0,
+      "mean": 253.0,
+      "sd": 13.0
+     },
+     "not_matched": {
+      "n": 230,
+      "min": 209,
+      "q1": 238.0,
+      "median": 247.0,
+      "q3": 256.0,
+      "max": 280,
+      "iqr": 18.0,
+      "mean": 246.0,
+      "sd": 14.0
+     }
+    },
+    "research": {
+     "matched": {
+      "n": 102,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 10.0,
+      "max": 104,
+      "iqr": 8.0,
+      "mean": 10.1,
+      "sd": 17.5
+     },
+     "not_matched": {
+      "n": 230,
+      "min": 0,
+      "q1": 2.0,
+      "median": 4.0,
+      "q3": 8.0,
+      "max": 135,
+      "iqr": 6.0,
+      "mean": 8.4,
+      "sd": 15.4
+     }
+    },
+    "abstracts": {
+     "matched": {
+      "n": 102,
+      "min": 0,
+      "q1": 2.0,
+      "median": 4.0,
+      "q3": 13.0,
+      "max": 45,
+      "iqr": 11.0,
+      "mean": 8.9,
+      "sd": 10.3
+     },
+     "not_matched": {
+      "n": 230,
+      "min": 0,
+      "q1": 1.0,
+      "median": 3.0,
+      "q3": 7.0,
+      "max": 150,
+      "iqr": 6.0,
+      "mean": 6.6,
+      "sd": 13.8
+     }
+    },
+    "presentations": {
+     "matched": {
+      "n": 102,
+      "min": 0,
+      "q1": 3.0,
+      "median": 5.5,
+      "q3": 15.0,
+      "max": 47,
+      "iqr": 12.0,
+      "mean": 10.0,
+      "sd": 10.5
+     },
+     "not_matched": {
+      "n": 230,
+      "min": 0,
+      "q1": 1.0,
+      "median": 3.0,
+      "q3": 10.0,
+      "max": 150,
+      "iqr": 9.0,
+      "mean": 7.6,
+      "sd": 14.1
+     }
+    },
+    "publications": {
+     "matched": {
+      "n": 102,
+      "min": 0,
+      "q1": 4.0,
+      "median": 8.0,
+      "q3": 16.0,
+      "max": 60,
+      "iqr": 12.0,
+      "mean": 12.1,
+      "sd": 12.7
+     },
+     "not_matched": {
+      "n": 230,
+      "min": 0,
+      "q1": 2.0,
+      "median": 5.0,
+      "q3": 10.0,
+      "max": 140,
+      "iqr": 8.0,
+      "mean": 9.2,
+      "sd": 14.3
+     }
+    },
+    "work": {
+     "matched": {
+      "n": 102,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 4.0,
+      "max": 24,
+      "iqr": 2.0,
+      "mean": 3.8,
+      "sd": 3.3
+     },
+     "not_matched": {
+      "n": 230,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 5.0,
+      "max": 17,
+      "iqr": 3.0,
+      "mean": 4.0,
+      "sd": 3.1
+     }
+    },
+    "volunteer": {
+     "matched": {
+      "n": 102,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 4.0,
+      "max": 17,
+      "iqr": 2.0,
+      "mean": 3.7,
+      "sd": 2.8
+     },
+     "not_matched": {
+      "n": 230,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 5.0,
+      "max": 14,
+      "iqr": 3.0,
+      "mean": 3.5,
+      "sd": 2.6
+     }
+    }
+   },
+   "phd": {
+    "matched": 1.1,
+    "not_matched": 1.6
+   },
+   "gradDegree": {
+    "matched": 16.3,
+    "not_matched": 26.9
+   }
+  },
+  {
+   "name": "Thoracic Surgery (Integrated)",
+   "short": "Thoracic Surgery",
+   "positions": 56,
+   "allApplicants": 89,
+   "imgMatched": 2,
+   "imgNotMatched": 5,
+   "imgTotal": 7,
+   "matchRate": 28.6,
+   "allPerPos": 1.59,
+   "imgPerPos": 0.12,
+   "metrics": {
+    "contiguous_ranks": {
+     "matched": {
+      "n": 2,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 3,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     }
+    },
+    "specialties_ranked": {
+     "matched": {
+      "n": 2,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 3,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     }
+    },
+    "step2ck": {
+     "matched": {
+      "n": 2,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 3,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     }
+    },
+    "research": {
+     "matched": {
+      "n": 2,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 3,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     }
+    },
+    "abstracts": {
+     "matched": {
+      "n": 2,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 3,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     }
+    },
+    "presentations": {
+     "matched": {
+      "n": 2,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 3,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     }
+    },
+    "publications": {
+     "matched": {
+      "n": 2,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 3,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     }
+    },
+    "work": {
+     "matched": {
+      "n": 2,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 3,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     }
+    },
+    "volunteer": {
+     "matched": {
+      "n": 2,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 3,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     }
+    }
+   },
+   "phd": {
+    "matched": null,
+    "not_matched": null
+   },
+   "gradDegree": {
+    "matched": null,
+    "not_matched": null
+   }
+  },
+  {
+   "name": "Neurological Surgery",
+   "short": "Neurosurgery",
+   "positions": 280,
+   "allApplicants": 480,
+   "imgMatched": 15,
+   "imgNotMatched": 43,
+   "imgTotal": 58,
+   "matchRate": 25.9,
+   "allPerPos": 1.71,
+   "imgPerPos": 0.21,
+   "metrics": {
+    "contiguous_ranks": {
+     "matched": {
+      "n": 8,
+      "min": 1,
+      "q1": 2.0,
+      "median": 3.5,
+      "q3": 6.0,
+      "max": 16,
+      "iqr": 4.0,
+      "mean": 5.4,
+      "sd": 4.8
+     },
+     "not_matched": {
+      "n": 34,
+      "min": 1,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 4.0,
+      "max": 20,
+      "iqr": 3.0,
+      "mean": 3.5,
+      "sd": 3.8
+     }
+    },
+    "specialties_ranked": {
+     "matched": {
+      "n": 8,
+      "min": 1,
+      "q1": 1.0,
+      "median": 1.0,
+      "q3": 1.0,
+      "max": 2,
+      "iqr": 0.0,
+      "mean": 1.1,
+      "sd": 0.4
+     },
+     "not_matched": {
+      "n": 34,
+      "min": 1,
+      "q1": 1.0,
+      "median": 1.0,
+      "q3": 2.0,
+      "max": 3,
+      "iqr": 1.0,
+      "mean": 1.4,
+      "sd": 0.6
+     }
+    },
+    "step2ck": {
+     "matched": {
+      "n": 8,
+      "min": 239,
+      "q1": 245.0,
+      "median": 254.0,
+      "q3": 264.0,
+      "max": 269,
+      "iqr": 19.0,
+      "mean": 255.0,
+      "sd": 11.0
+     },
+     "not_matched": {
+      "n": 34,
+      "min": 216,
+      "q1": 241.0,
+      "median": 252.0,
+      "q3": 258.0,
+      "max": 276,
+      "iqr": 17.0,
+      "mean": 249.0,
+      "sd": 16.0
+     }
+    },
+    "research": {
+     "matched": {
+      "n": 8,
+      "min": 3,
+      "q1": 3.0,
+      "median": 44.0,
+      "q3": 90.0,
+      "max": 199,
+      "iqr": 87.0,
+      "mean": 59.0,
+      "sd": 70.8
+     },
+     "not_matched": {
+      "n": 34,
+      "min": 1,
+      "q1": 3.0,
+      "median": 5.0,
+      "q3": 10.0,
+      "max": 130,
+      "iqr": 7.0,
+      "mean": 17.0,
+      "sd": 29.3
+     }
+    },
+    "abstracts": {
+     "matched": {
+      "n": 8,
+      "min": 3,
+      "q1": 9.0,
+      "median": 20.0,
+      "q3": 38.0,
+      "max": 63,
+      "iqr": 29.0,
+      "mean": 24.7,
+      "sd": 20.5
+     },
+     "not_matched": {
+      "n": 34,
+      "min": 0,
+      "q1": 3.0,
+      "median": 14.0,
+      "q3": 25.0,
+      "max": 101,
+      "iqr": 22.0,
+      "mean": 20.3,
+      "sd": 24.5
+     }
+    },
+    "presentations": {
+     "matched": {
+      "n": 8,
+      "min": 4,
+      "q1": 9.0,
+      "median": 13.0,
+      "q3": 63.0,
+      "max": 93,
+      "iqr": 54.0,
+      "mean": 29.6,
+      "sd": 34.4
+     },
+     "not_matched": {
+      "n": 34,
+      "min": 1,
+      "q1": 5.0,
+      "median": 14.0,
+      "q3": 40.0,
+      "max": 170,
+      "iqr": 35.0,
+      "mean": 29.2,
+      "sd": 36.9
+     }
+    },
+    "publications": {
+     "matched": {
+      "n": 8,
+      "min": 20,
+      "q1": 21.0,
+      "median": 70.0,
+      "q3": 90.0,
+      "max": 136,
+      "iqr": 69.0,
+      "mean": 68.3,
+      "sd": 41.5
+     },
+     "not_matched": {
+      "n": 34,
+      "min": 1,
+      "q1": 10.0,
+      "median": 28.0,
+      "q3": 51.0,
+      "max": 81,
+      "iqr": 41.0,
+      "mean": 32.0,
+      "sd": 24.1
+     }
+    },
+    "work": {
+     "matched": {
+      "n": 8,
+      "min": 1,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 5.0,
+      "max": 9,
+      "iqr": 4.0,
+      "mean": 3.1,
+      "sd": 3.0
+     },
+     "not_matched": {
+      "n": 34,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 5.0,
+      "max": 10,
+      "iqr": 3.0,
+      "mean": 3.6,
+      "sd": 2.7
+     }
+    },
+    "volunteer": {
+     "matched": {
+      "n": 8,
+      "min": 1,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 5.0,
+      "max": 10,
+      "iqr": 3.0,
+      "mean": 3.9,
+      "sd": 3.0
+     },
+     "not_matched": {
+      "n": 34,
+      "min": 1,
+      "q1": 2.0,
+      "median": 3.5,
+      "q3": 5.0,
+      "max": 15,
+      "iqr": 3.0,
+      "mean": 3.8,
+      "sd": 2.9
+     }
+    }
+   },
+   "phd": {
+    "matched": 14.3,
+    "not_matched": 6.5
+   },
+   "gradDegree": {
+    "matched": 28.6,
+    "not_matched": 22.6
+   }
+  },
+  {
+   "name": "Orthopaedic Surgery",
+   "short": "Orthopaedic Surgery",
+   "positions": 963,
+   "allApplicants": 1598,
+   "imgMatched": 5,
+   "imgNotMatched": 17,
+   "imgTotal": 22,
+   "matchRate": 22.7,
+   "allPerPos": 1.66,
+   "imgPerPos": 0.02,
+   "metrics": {
+    "contiguous_ranks": {
+     "matched": {
+      "n": 2,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 14,
+      "min": 1,
+      "q1": 1.0,
+      "median": 3.0,
+      "q3": 4.0,
+      "max": 6,
+      "iqr": 3.0,
+      "mean": 3.0,
+      "sd": 1.8
+     }
+    },
+    "specialties_ranked": {
+     "matched": {
+      "n": 2,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 14,
+      "min": 1,
+      "q1": 1.0,
+      "median": 1.0,
+      "q3": 2.0,
+      "max": 4,
+      "iqr": 1.0,
+      "mean": 1.7,
+      "sd": 1.0
+     }
+    },
+    "step2ck": {
+     "matched": {
+      "n": 2,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 14,
+      "min": 226,
+      "q1": 238.0,
+      "median": 244.0,
+      "q3": 255.0,
+      "max": 257,
+      "iqr": 17.0,
+      "mean": 244.0,
+      "sd": 9.0
+     }
+    },
+    "research": {
+     "matched": {
+      "n": 2,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 14,
+      "min": 2,
+      "q1": 3.0,
+      "median": 8.0,
+      "q3": 67.0,
+      "max": 493,
+      "iqr": 64.0,
+      "mean": 72.3,
+      "sd": 144.7
+     }
+    },
+    "abstracts": {
+     "matched": {
+      "n": 2,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 14,
+      "min": 3,
+      "q1": 10.0,
+      "median": 14.0,
+      "q3": 35.0,
+      "max": 144,
+      "iqr": 25.0,
+      "mean": 36.1,
+      "sd": 46.9
+     }
+    },
+    "presentations": {
+     "matched": {
+      "n": 2,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 14,
+      "min": 1,
+      "q1": 5.0,
+      "median": 17.0,
+      "q3": 53.0,
+      "max": 151,
+      "iqr": 48.0,
+      "mean": 39.6,
+      "sd": 50.2
+     }
+    },
+    "publications": {
+     "matched": {
+      "n": 2,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 14,
+      "min": 1,
+      "q1": 11.0,
+      "median": 18.0,
+      "q3": 52.0,
+      "max": 232,
+      "iqr": 41.0,
+      "mean": 45.6,
+      "sd": 65.4
+     }
+    },
+    "work": {
+     "matched": {
+      "n": 2,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 14,
+      "min": 2,
+      "q1": 3.0,
+      "median": 3.5,
+      "q3": 5.0,
+      "max": 8,
+      "iqr": 2.0,
+      "mean": 4.1,
+      "sd": 1.9
+     }
+    },
+    "volunteer": {
+     "matched": {
+      "n": 2,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 14,
+      "min": 1,
+      "q1": 3.0,
+      "median": 5.5,
+      "q3": 8.0,
+      "max": 10,
+      "iqr": 5.0,
+      "mean": 5.4,
+      "sd": 3.2
+     }
+    }
+   },
+   "phd": {
+    "matched": null,
+    "not_matched": 0.0
+   },
+   "gradDegree": {
+    "matched": null,
+    "not_matched": 27.3
+   }
+  },
+  {
+   "name": "Plastic Surgery (Integrated)",
+   "short": "Plastic Surgery",
+   "positions": 230,
+   "allApplicants": 406,
+   "imgMatched": 5,
+   "imgNotMatched": 22,
+   "imgTotal": 27,
+   "matchRate": 18.5,
+   "allPerPos": 1.77,
+   "imgPerPos": 0.12,
+   "metrics": {
+    "contiguous_ranks": {
+     "matched": {
+      "n": 2,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 20,
+      "min": 1,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 2.0,
+      "max": 6,
+      "iqr": 1.0,
+      "mean": 2.3,
+      "sd": 1.5
+     }
+    },
+    "specialties_ranked": {
+     "matched": {
+      "n": 2,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 20,
+      "min": 1,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 2.0,
+      "max": 4,
+      "iqr": 1.0,
+      "mean": 1.8,
+      "sd": 0.9
+     }
+    },
+    "step2ck": {
+     "matched": {
+      "n": 2,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 20,
+      "min": 217,
+      "q1": 238.0,
+      "median": 251.0,
+      "q3": 259.0,
+      "max": 268,
+      "iqr": 21.0,
+      "mean": 248.0,
+      "sd": 13.0
+     }
+    },
+    "research": {
+     "matched": {
+      "n": 2,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 20,
+      "min": 2,
+      "q1": 3.0,
+      "median": 4.5,
+      "q3": 7.0,
+      "max": 62,
+      "iqr": 4.0,
+      "mean": 11.0,
+      "sd": 16.2
+     }
+    },
+    "abstracts": {
+     "matched": {
+      "n": 2,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 20,
+      "min": 1,
+      "q1": 4.0,
+      "median": 10.0,
+      "q3": 30.0,
+      "max": 60,
+      "iqr": 26.0,
+      "mean": 16.5,
+      "sd": 17.1
+     }
+    },
+    "presentations": {
+     "matched": {
+      "n": 2,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 20,
+      "min": 1,
+      "q1": 7.0,
+      "median": 20.0,
+      "q3": 38.0,
+      "max": 70,
+      "iqr": 31.0,
+      "mean": 25.2,
+      "sd": 21.4
+     }
+    },
+    "publications": {
+     "matched": {
+      "n": 2,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 20,
+      "min": 1,
+      "q1": 11.0,
+      "median": 25.0,
+      "q3": 55.0,
+      "max": 126,
+      "iqr": 44.0,
+      "mean": 32.5,
+      "sd": 33.6
+     }
+    },
+    "work": {
+     "matched": {
+      "n": 2,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 20,
+      "min": 1,
+      "q1": 3.0,
+      "median": 3.0,
+      "q3": 6.0,
+      "max": 10,
+      "iqr": 3.0,
+      "mean": 4.5,
+      "sd": 2.8
+     }
+    },
+    "volunteer": {
+     "matched": {
+      "n": 2,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 20,
+      "min": 1,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 4.0,
+      "max": 10,
+      "iqr": 3.0,
+      "mean": 3.0,
+      "sd": 2.7
+     }
+    }
+   },
+   "phd": {
+    "matched": null,
+    "not_matched": 5.9
+   },
+   "gradDegree": {
+    "matched": null,
+    "not_matched": 35.3
+   }
+  },
+  {
+   "name": "Dermatology",
+   "short": "Dermatology",
+   "positions": 602,
+   "allApplicants": 1099,
+   "imgMatched": 5,
+   "imgNotMatched": 25,
+   "imgTotal": 30,
+   "matchRate": 16.7,
+   "allPerPos": 1.83,
+   "imgPerPos": 0.05,
+   "metrics": {
+    "contiguous_ranks": {
+     "matched": {
+      "n": 4,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 19,
+      "min": 1,
+      "q1": 1.0,
+      "median": 1.0,
+      "q3": 3.0,
+      "max": 14,
+      "iqr": 2.0,
+      "mean": 2.7,
+      "sd": 3.4
+     }
+    },
+    "specialties_ranked": {
+     "matched": {
+      "n": 4,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 19,
+      "min": 1,
+      "q1": 1.0,
+      "median": 2.0,
+      "q3": 3.0,
+      "max": 5,
+      "iqr": 2.0,
+      "mean": 2.1,
+      "sd": 1.3
+     }
+    },
+    "step2ck": {
+     "matched": {
+      "n": 4,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 19,
+      "min": 232,
+      "q1": 237.0,
+      "median": 253.0,
+      "q3": 261.0,
+      "max": 275,
+      "iqr": 24.0,
+      "mean": 250.0,
+      "sd": 14.0
+     }
+    },
+    "research": {
+     "matched": {
+      "n": 4,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 19,
+      "min": 0,
+      "q1": 3.0,
+      "median": 4.0,
+      "q3": 8.0,
+      "max": 12,
+      "iqr": 5.0,
+      "mean": 5.1,
+      "sd": 3.2
+     }
+    },
+    "abstracts": {
+     "matched": {
+      "n": 4,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 19,
+      "min": 0,
+      "q1": 4.0,
+      "median": 6.5,
+      "q3": 15.0,
+      "max": 38,
+      "iqr": 11.0,
+      "mean": 10.5,
+      "sd": 10.0
+     }
+    },
+    "presentations": {
+     "matched": {
+      "n": 4,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 19,
+      "min": 2,
+      "q1": 5.0,
+      "median": 8.5,
+      "q3": 15.0,
+      "max": 800,
+      "iqr": 10.0,
+      "mean": 59.9,
+      "sd": 197.5
+     }
+    },
+    "publications": {
+     "matched": {
+      "n": 4,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 19,
+      "min": 0,
+      "q1": 4.0,
+      "median": 12.0,
+      "q3": 23.0,
+      "max": 70,
+      "iqr": 19.0,
+      "mean": 16.5,
+      "sd": 17.2
+     }
+    },
+    "work": {
+     "matched": {
+      "n": 4,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 19,
+      "min": 0,
+      "q1": 2.0,
+      "median": 4.0,
+      "q3": 5.0,
+      "max": 10,
+      "iqr": 3.0,
+      "mean": 3.8,
+      "sd": 2.3
+     }
+    },
+    "volunteer": {
+     "matched": {
+      "n": 4,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 19,
+      "min": 1,
+      "q1": 2.0,
+      "median": 2.0,
+      "q3": 3.0,
+      "max": 8,
+      "iqr": 1.0,
+      "mean": 2.8,
+      "sd": 1.7
+     }
+    }
+   },
+   "phd": {
+    "matched": null,
+    "not_matched": 12.5
+   },
+   "gradDegree": {
+    "matched": null,
+    "not_matched": 47.1
+   }
+  },
+  {
+   "name": "Vascular Surgery (Integrated)",
+   "short": "Vascular Surgery",
+   "positions": 110,
+   "allApplicants": 165,
+   "imgMatched": 4,
+   "imgNotMatched": 24,
+   "imgTotal": 28,
+   "matchRate": 14.3,
+   "allPerPos": 1.5,
+   "imgPerPos": 0.25,
+   "metrics": {
+    "contiguous_ranks": {
+     "matched": {
+      "n": 3,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 19,
+      "min": 1,
+      "q1": 1.0,
+      "median": 1.0,
+      "q3": 2.0,
+      "max": 3,
+      "iqr": 1.0,
+      "mean": 1.6,
+      "sd": 0.8
+     }
+    },
+    "specialties_ranked": {
+     "matched": {
+      "n": 3,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 19,
+      "min": 1,
+      "q1": 2.0,
+      "median": 2.0,
+      "q3": 2.0,
+      "max": 3,
+      "iqr": 0.0,
+      "mean": 2.0,
+      "sd": 0.5
+     }
+    },
+    "step2ck": {
+     "matched": {
+      "n": 3,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 19,
+      "min": 223,
+      "q1": 240.0,
+      "median": 247.0,
+      "q3": 257.0,
+      "max": 269,
+      "iqr": 17.0,
+      "mean": 247.0,
+      "sd": 12.0
+     }
+    },
+    "research": {
+     "matched": {
+      "n": 3,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 19,
+      "min": 0,
+      "q1": 2.0,
+      "median": 4.0,
+      "q3": 5.0,
+      "max": 19,
+      "iqr": 3.0,
+      "mean": 4.6,
+      "sd": 4.2
+     }
+    },
+    "abstracts": {
+     "matched": {
+      "n": 3,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 19,
+      "min": 0,
+      "q1": 3.0,
+      "median": 11.0,
+      "q3": 20.0,
+      "max": 76,
+      "iqr": 17.0,
+      "mean": 15.1,
+      "sd": 18.8
+     }
+    },
+    "presentations": {
+     "matched": {
+      "n": 3,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 19,
+      "min": 0,
+      "q1": 1.0,
+      "median": 10.0,
+      "q3": 14.0,
+      "max": 48,
+      "iqr": 13.0,
+      "mean": 10.6,
+      "sd": 11.5
+     }
+    },
+    "publications": {
+     "matched": {
+      "n": 3,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 19,
+      "min": 0,
+      "q1": 4.0,
+      "median": 15.0,
+      "q3": 18.0,
+      "max": 50,
+      "iqr": 14.0,
+      "mean": 14.8,
+      "sd": 13.1
+     }
+    },
+    "work": {
+     "matched": {
+      "n": 3,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 19,
+      "min": 0,
+      "q1": 2.0,
+      "median": 3.0,
+      "q3": 6.0,
+      "max": 9,
+      "iqr": 4.0,
+      "mean": 3.7,
+      "sd": 2.6
+     }
+    },
+    "volunteer": {
+     "matched": {
+      "n": 3,
+      "min": null,
+      "q1": null,
+      "median": null,
+      "q3": null,
+      "max": null,
+      "iqr": null,
+      "mean": null,
+      "sd": null
+     },
+     "not_matched": {
+      "n": 19,
+      "min": 1,
+      "q1": 2.0,
+      "median": 2.5,
+      "q3": 6.0,
+      "max": 15,
+      "iqr": 4.0,
+      "mean": 4.7,
+      "sd": 4.1
+     }
+    }
+   },
+   "phd": {
+    "matched": null,
+    "not_matched": 5.3
+   },
+   "gradDegree": {
+    "matched": null,
+    "not_matched": 31.6
+   }
+  }
+ ]
+};
+</script>
+<script>/* ============================================================
+   Non-U.S. IMG Match Outcomes 2026 — interactive explorer
+   Data: NRMP Charting Outcomes, 2026 Main Residency Match.
+   ============================================================ */
+(function () {
+  "use strict";
+
+  var S = DATA.specialties, M = DATA.metrics, O = DATA.overall;
+  var metricByKey = {};
+  M.forEach(function (m) { metricByKey[m.key] = m; });
+
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var el = function (tag, cls, txt) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (txt != null) n.textContent = txt;
+    return n;
+  };
+  var fmt = function (v, dp) {
+    if (v == null) return "—";
+    return dp === 0 ? String(Math.round(v)) : Number(v).toFixed(dp == null ? 1 : dp);
+  };
+  var esc = function (s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  };
+
+  /* Step 2 CK is a score, everything else is a count — controls decimals. */
+  function dpFor(key) { return key === "step2ck" ? 0 : 1; }
+
+  function tier(rate) {
+    if (rate >= 50) return { cls: "viable", label: "Realistic" };
+    if (rate >= 33) return { cls: "contested", label: "Contested" };
+    return { cls: "closed", label: "Long shot" };
+  }
+
+  /* ---------------- theme ---------------- */
+  var themeBtn = $("#themeBtn");
+  function currentTheme() {
+    return document.documentElement.getAttribute("data-theme") ||
+      (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  }
+  themeBtn.addEventListener("click", function () {
+    var next = currentTheme() === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    themeBtn.textContent = next === "dark" ? "☀︎" : "☾";
+    try { localStorage.setItem("img2026-theme", next); } catch (e) {}
+    redrawCharts();
+  });
+  try {
+    var saved = localStorage.getItem("img2026-theme");
+    if (saved) document.documentElement.setAttribute("data-theme", saved);
+  } catch (e) {}
+  themeBtn.textContent = currentTheme() === "dark" ? "☀︎" : "☾";
+
+  /* ---------------- tooltip ---------------- */
+  var tip = el("div", "tip");
+  document.body.appendChild(tip);
+  function showTip(evt, html) {
+    tip.innerHTML = html;
+    tip.classList.add("on");
+    var pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
+    var x = evt.clientX + pad, y = evt.clientY + pad;
+    if (x + w > window.innerWidth - 8) x = evt.clientX - w - pad;
+    if (y + h > window.innerHeight - 8) y = evt.clientY - h - pad;
+    tip.style.left = x + "px";
+    tip.style.top = y + "px";
+  }
+  function hideTip() { tip.classList.remove("on"); }
+
+  /* ============================================================
+     1. Headline aggregate — the two levers
+     ============================================================ */
+  function renderAggregate() {
+    var tb = $("#aggBody");
+    O.aggregate.forEach(function (r) {
+      var tr = el("tr");
+      var td0 = el("td", "name");
+      td0.appendChild(document.createTextNode(r.measure));
+      if (r.measure === "USMLE Step 2 CK") {
+        var p = el("span", "pill tiny viable", "verified");
+        p.style.marginLeft = "8px";
+        td0.appendChild(p);
+      }
+      tr.appendChild(td0);
+      tr.appendChild(el("td", "num", r.matched));
+      tr.appendChild(el("td", "num", r.notMatched));
+      var verdict = el("td");
+      var pill = el("span", "pill " + (r.separates ? "viable" : "closed"),
+        r.separates ? "Separates" : "No signal");
+      verdict.appendChild(pill);
+      tr.appendChild(verdict);
+      tb.appendChild(tr);
+    });
+  }
+
+  /* ============================================================
+     2. Specialty explorer — sortable table with expandable detail
+     ============================================================ */
+  var sortKey = "matchRate", sortDir = -1, openSpec = null, filterText = "";
+
+  var COLS = [
+    { k: "short",          label: "Specialty",            t: "text" },
+    { k: "matchRate",      label: "IMG match rate",       t: "rate", help: "Share of non-U.S. IMGs who ranked this specialty first and matched into it." },
+    { k: "imgTotal",       label: "IMGs who tried",       t: "int",  help: "Non-U.S. IMGs who ranked this specialty first." },
+    { k: "imgMatched",     label: "Matched",              t: "int" },
+    { k: "imgNotMatched",  label: "Did not",              t: "int" },
+    { k: "positions",      label: "Positions",            t: "int",  help: "Total positions offered in the specialty (all applicant types)." },
+    { k: "allPerPos",      label: "Applicants / position", t: "dec", help: "All applicants preferring the specialty per position offered. Above 1.0 means oversubscribed." },
+    { k: "step2Matched",   label: "Step 2 (matched)",     t: "score", help: "Median USMLE Step 2 CK of IMGs who matched." },
+    { k: "ranksMatched",   label: "Ranks (matched)",      t: "dec1", help: "Median contiguous ranks of IMGs who matched." }
+  ];
+
+  function derived(s, k) {
+    if (k === "step2Matched") return med(s, "step2ck", "matched");
+    if (k === "ranksMatched") return med(s, "contiguous_ranks", "matched");
+    return s[k];
+  }
+  function med(s, metric, cohort) {
+    var m = s.metrics[metric];
+    return m && m[cohort] ? m[cohort].median : null;
+  }
+  function cell(s, c) {
+    var v = derived(s, c.k);
+    if (c.t === "int") return v == null ? "—" : v.toLocaleString();
+    if (c.t === "dec") return fmt(v, 2);
+    if (c.t === "dec1") return fmt(v, 1);
+    if (c.t === "score") return v == null ? "—" : String(Math.round(v));
+    return v;
+  }
+
+  function buildHead() {
+    var tr = $("#specHead");
+    tr.innerHTML = "";
+    COLS.forEach(function (c) {
+      var th = el("th", "sortable");
+      th.appendChild(document.createTextNode(c.label));
+      th.appendChild(el("span", "arrow", sortKey === c.k ? (sortDir < 0 ? "▼" : "▲") : "↕"));
+      if (sortKey === c.k) th.setAttribute("aria-sort", sortDir < 0 ? "descending" : "ascending");
+      if (c.help) {
+        th.style.cursor = "help";
+        th.addEventListener("mousemove", function (e) { showTip(e, "<b>" + esc(c.label) + "</b><br>" + esc(c.help)); });
+        th.addEventListener("mouseleave", hideTip);
+      }
+      th.addEventListener("click", function () {
+        if (sortKey === c.k) sortDir = -sortDir;
+        else { sortKey = c.k; sortDir = c.k === "short" ? 1 : -1; }
+        buildHead(); buildBody();
+      });
+      tr.appendChild(th);
+    });
+  }
+
+  function sortedSpecs() {
+    var list = S.filter(function (s) {
+      return !filterText || s.name.toLowerCase().indexOf(filterText) >= 0 ||
+        s.short.toLowerCase().indexOf(filterText) >= 0;
+    });
+    return list.slice().sort(function (a, b) {
+      var x = derived(a, sortKey), y = derived(b, sortKey);
+      if (x == null && y == null) return 0;
+      if (x == null) return 1;       /* suppressed values always sink */
+      if (y == null) return -1;
+      if (typeof x === "string") return sortDir * x.localeCompare(y);
+      return sortDir * (x - y);
+    });
+  }
+
+  function buildBody() {
+    var tb = $("#specBody");
+    tb.innerHTML = "";
+    var list = sortedSpecs();
+    if (!list.length) {
+      var tr0 = el("tr"), td0 = el("td", "", "No specialty matches that search.");
+      td0.colSpan = COLS.length; td0.style.textAlign = "center"; td0.style.color = "var(--ink-3)";
+      tr0.appendChild(td0); tb.appendChild(tr0); return;
+    }
+    list.forEach(function (s) {
+      var tr = el("tr", "clickable" + (openSpec === s.name ? " open" : ""));
+      tr.tabIndex = 0;
+      COLS.forEach(function (c) {
+        var td = el("td", c.t === "text" ? "name" : "num");
+        if (c.k === "short") {
+          td.appendChild(document.createTextNode(s.short));
+          var t = tier(s.matchRate);
+          var p = el("span", "pill tiny " + t.cls, t.label);
+          p.style.marginLeft = "8px";
+          td.appendChild(p);
+        } else if (c.t === "rate") {
+          var box = el("div", "ratebar");
+          box.appendChild(el("span", "num", fmt(s.matchRate, 1) + "%"));
+          var track = el("div", "track"), fill = el("div", "fill");
+          fill.style.width = s.matchRate + "%";
+          fill.style.background = s.matchRate >= 50 ? "var(--matched)"
+            : s.matchRate >= 33 ? "var(--unmatched)" : "var(--ink-3)";
+          track.appendChild(fill); box.appendChild(track);
+          td.appendChild(box);
+        } else {
+          td.textContent = cell(s, c);
+        }
+        tr.appendChild(td);
+      });
+      var toggle = function () {
+        openSpec = openSpec === s.name ? null : s.name;
+        buildBody();
+      };
+      tr.addEventListener("click", toggle);
+      tr.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); }
+      });
+      tb.appendChild(tr);
+
+      if (openSpec === s.name) {
+        var dr = el("tr", "detailrow");
+        var dtd = el("td");
+        dtd.colSpan = COLS.length;
+        dtd.appendChild(buildDetail(s));
+        dr.appendChild(dtd);
+        tb.appendChild(dr);
+      }
+    });
+  }
+
+  /* ---- per-specialty detail with box plots ---- */
+  function buildDetail(s) {
+    var box = el("div", "detail");
+
+    var hd = el("div", "detail-hd");
+    var h = el("h3", null, s.name);
+    hd.appendChild(h);
+    hd.appendChild(el("span", "sub",
+      s.imgMatched.toLocaleString() + " of " + s.imgTotal.toLocaleString() +
+      " non-U.S. IMGs matched (" + fmt(s.matchRate, 1) + "%) · " +
+      s.positions.toLocaleString() + " positions · " +
+      fmt(s.allPerPos, 2) + " applicants per position"));
+    box.appendChild(hd);
+
+    var nM = (s.metrics.step2ck && s.metrics.step2ck.matched) ? s.metrics.step2ck.matched.n : 0;
+    var nN = (s.metrics.step2ck && s.metrics.step2ck.not_matched) ? s.metrics.step2ck.not_matched.n : 0;
+    var note = el("p", "detail-note");
+    note.innerHTML = "Box shows the middle 50% of applicants (25th to 75th percentile); the vertical line is the median; " +
+      "whiskers run to the reported minimum and maximum. Based on <b>" + nM + "</b> matched and <b>" + nN +
+      "</b> unmatched applicants who consented to research use of their data.";
+    box.appendChild(note);
+
+    var leg = el("div", "legend");
+    leg.innerHTML = '<span><i class="sw-m"></i>Matched into this specialty</span>' +
+      '<span><i class="sw-n"></i>Did not match into this specialty</span>';
+    box.appendChild(leg);
+
+    var grid = el("div", "metricgrid");
+    M.forEach(function (m) {
+      grid.appendChild(metricCard(s, m));
+    });
+    grid.appendChild(degreeCard(s));
+    box.appendChild(grid);
+    return box;
+  }
+
+  function metricCard(s, m) {
+    var card = el("div", "mcard");
+    var data = s.metrics[m.key] || {};
+    var a = data.matched, b = data.not_matched;
+
+    var hd = el("div", "mcard-hd");
+    var t = el("span", "t", m.label);
+    if (m.verified) {
+      var vp = el("span", "pill tiny viable", "verified");
+      vp.style.marginLeft = "6px";
+      t.appendChild(vp);
+    }
+    hd.appendChild(t);
+
+    var dp = dpFor(m.key);
+    if (a && b && a.median != null && b.median != null) {
+      var diff = a.median - b.median;
+      var cls = Math.abs(diff) < (m.key === "step2ck" ? 1 : 0.05) ? "flat" : (diff > 0 ? "up" : "down");
+      var sign = diff > 0 ? "+" : "";
+      hd.appendChild(el("span", "d " + cls, sign + fmt(diff, dp) + " median"));
+    }
+    card.appendChild(hd);
+    card.appendChild(el("p", "why", m.desc));
+
+    if (!a || a.median == null || !b || b.median == null) {
+      var only = (a && a.median != null) ? a : (b && b.median != null) ? b : null;
+      if (only) {
+        card.appendChild(boxplot([{ label: (a && a.median != null) ? "Matched" : "Not matched", s: only, color: "var(--unmatched)" }], m));
+      }
+      card.appendChild(el("div", "suppressed",
+        "NRMP suppressed one cohort here — fewer than five consented applicants, so no median is published."));
+      return card;
+    }
+
+    card.appendChild(boxplot([
+      { label: "Matched", s: a, color: "var(--matched)" },
+      { label: "Not matched", s: b, color: "var(--unmatched)" }
+    ], m));
+    return card;
+  }
+
+  /* box-and-whisker rows on a shared scale */
+  function boxplot(rows, m) {
+    var W = 300, LEFT = 4, RIGHT = 46, rowH = 34, H = rows.length * rowH + 20;
+    var lo = Infinity, hi = -Infinity;
+    rows.forEach(function (r) {
+      lo = Math.min(lo, r.s.min); hi = Math.max(hi, r.s.max);
+    });
+    if (hi === lo) { hi = lo + 1; }
+    var pad = (hi - lo) * 0.04;
+    lo -= pad; hi += pad;
+    var x = function (v) { return LEFT + (v - lo) / (hi - lo) * (W - LEFT - RIGHT); };
+
+    var ns = "http://www.w3.org/2000/svg";
+    var svg = document.createElementNS(ns, "svg");
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+    svg.setAttribute("width", "100%");
+    svg.setAttribute("height", H);
+    svg.setAttribute("role", "img");
+
+    var dp = dpFor(m.key);
+    var labels = rows.map(function (r) {
+      return r.label + ": median " + fmt(r.s.median, dp) + ", middle 50% " +
+        fmt(r.s.q1, dp) + " to " + fmt(r.s.q3, dp) + ", range " + fmt(r.s.min, dp) + " to " + fmt(r.s.max, dp);
+    });
+    var title = document.createElementNS(ns, "title");
+    title.textContent = m.label + ". " + labels.join(". ");
+    svg.appendChild(title);
+
+    rows.forEach(function (r, i) {
+      var cy = 12 + i * rowH + rowH / 2 - 6;
+      var g = document.createElementNS(ns, "g");
+
+      var whisk = document.createElementNS(ns, "line");
+      whisk.setAttribute("x1", x(r.s.min)); whisk.setAttribute("x2", x(r.s.max));
+      whisk.setAttribute("y1", cy); whisk.setAttribute("y2", cy);
+      whisk.setAttribute("stroke", r.color); whisk.setAttribute("stroke-width", "1.25");
+      whisk.setAttribute("opacity", ".5");
+      g.appendChild(whisk);
+
+      [r.s.min, r.s.max].forEach(function (v) {
+        var c = document.createElementNS(ns, "line");
+        c.setAttribute("x1", x(v)); c.setAttribute("x2", x(v));
+        c.setAttribute("y1", cy - 4); c.setAttribute("y2", cy + 4);
+        c.setAttribute("stroke", r.color); c.setAttribute("stroke-width", "1.25");
+        c.setAttribute("opacity", ".5");
+        g.appendChild(c);
+      });
+
+      var bw = Math.max(2, x(r.s.q3) - x(r.s.q1));
+      var rect = document.createElementNS(ns, "rect");
+      rect.setAttribute("x", x(r.s.q1)); rect.setAttribute("y", cy - 9);
+      rect.setAttribute("width", bw); rect.setAttribute("height", 18);
+      rect.setAttribute("rx", "3");
+      rect.setAttribute("fill", r.color); rect.setAttribute("opacity", ".22");
+      rect.setAttribute("stroke", r.color); rect.setAttribute("stroke-width", "1");
+      g.appendChild(rect);
+
+      var mid = document.createElementNS(ns, "line");
+      mid.setAttribute("x1", x(r.s.median)); mid.setAttribute("x2", x(r.s.median));
+      mid.setAttribute("y1", cy - 10); mid.setAttribute("y2", cy + 10);
+      mid.setAttribute("stroke", r.color); mid.setAttribute("stroke-width", "2.5");
+      mid.setAttribute("stroke-linecap", "round");
+      g.appendChild(mid);
+
+      var lbl = document.createElementNS(ns, "text");
+      lbl.setAttribute("x", W - RIGHT + 8); lbl.setAttribute("y", cy + 4);
+      lbl.setAttribute("font-size", "12"); lbl.setAttribute("font-weight", "600");
+      lbl.setAttribute("fill", r.color);
+      lbl.setAttribute("font-family", "ui-monospace,Menlo,monospace");
+      lbl.textContent = fmt(r.s.median, dp);
+      g.appendChild(lbl);
+
+      g.style.cursor = "help";
+      g.addEventListener("mousemove", function (e) {
+        showTip(e, "<b>" + esc(r.label) + "</b> (n=" + r.s.n + ")<br>" +
+          "median <b>" + fmt(r.s.median, dp) + "</b><br>" +
+          "middle 50%: " + fmt(r.s.q1, dp) + "–" + fmt(r.s.q3, dp) + "<br>" +
+          "range: " + fmt(r.s.min, dp) + "–" + fmt(r.s.max, dp) + "<br>" +
+          "mean " + fmt(r.s.mean, dp) + " · SD " + fmt(r.s.sd, dp));
+      });
+      g.addEventListener("mouseleave", hideTip);
+      svg.appendChild(g);
+    });
+
+    var axis = document.createElementNS(ns, "g");
+    [lo, hi].forEach(function (v, i) {
+      var tx = document.createElementNS(ns, "text");
+      tx.setAttribute("x", i === 0 ? LEFT : x(hi));
+      tx.setAttribute("y", H - 3);
+      tx.setAttribute("font-size", "10.5");
+      tx.setAttribute("text-anchor", i === 0 ? "start" : "end");
+      tx.setAttribute("opacity", ".65");
+      tx.textContent = fmt(v, dp);
+      axis.appendChild(tx);
+    });
+    svg.appendChild(axis);
+    return svg;
+  }
+
+  function degreeCard(s) {
+    var card = el("div", "mcard");
+    var hd = el("div", "mcard-hd");
+    hd.appendChild(el("span", "t", "Ph.D. and other graduate degrees"));
+    card.appendChild(hd);
+    card.appendChild(el("p", "why",
+      "Share of each cohort holding the degree. Across most specialties a non-Ph.D. graduate degree is more common among applicants who did not match."));
+    var rows = [
+      { label: "Has a Ph.D.", d: s.phd },
+      { label: "Has another graduate degree", d: s.gradDegree }
+    ];
+    var tbl = el("table");
+    tbl.style.fontSize = "13px";
+    var tb = el("tbody");
+    rows.forEach(function (r) {
+      var tr = el("tr");
+      tr.appendChild(el("td", "name", r.label));
+      var m = el("td", "num", r.d.matched == null ? "—" : fmt(r.d.matched, 1) + "%");
+      m.style.color = "var(--matched)"; m.style.fontWeight = "600";
+      var n = el("td", "num", r.d.not_matched == null ? "—" : fmt(r.d.not_matched, 1) + "%");
+      n.style.color = "var(--unmatched)"; n.style.fontWeight = "600";
+      tr.appendChild(m); tr.appendChild(n);
+      tb.appendChild(tr);
+    });
+    tbl.appendChild(tb);
+    card.appendChild(tbl);
+    return card;
+  }
+
+  /* ============================================================
+     3. Cross-specialty metric comparison
+     ============================================================ */
+  var cmpMetric = "contiguous_ranks", cmpSort = "gap";
+
+  function renderCompare() {
+    var host = $("#cmpChart");
+    host.innerHTML = "";
+    var m = metricByKey[cmpMetric];
+    $("#cmpDesc").textContent = m.desc;
+
+    var rows = S.map(function (s) {
+      var d = s.metrics[cmpMetric] || {};
+      var a = d.matched && d.matched.median, b = d.not_matched && d.not_matched.median;
+      return { s: s, a: a == null ? null : a, b: b == null ? null : b,
+               gap: (a != null && b != null) ? a - b : null };
+    }).filter(function (r) { return r.a != null || r.b != null; });
+
+    rows.sort(function (p, q) {
+      if (cmpSort === "gap") {
+        if (p.gap == null) return 1; if (q.gap == null) return -1;
+        return q.gap - p.gap;
+      }
+      if (cmpSort === "matched") {
+        if (p.a == null) return 1; if (q.a == null) return -1;
+        return q.a - p.a;
+      }
+      return q.s.matchRate - p.s.matchRate;
+    });
+
+    var maxV = 0;
+    rows.forEach(function (r) { maxV = Math.max(maxV, r.a || 0, r.b || 0); });
+    var isScore = cmpMetric === "step2ck";
+    var lo = isScore ? 200 : 0, hi = isScore ? Math.ceil(maxV / 10) * 10 + 5 : maxV * 1.1 || 1;
+
+    var ns = "http://www.w3.org/2000/svg";
+    var LABEL = 190, RIGHT = 60, rowH = 30, TOP = 34;
+    var W = Math.max(620, host.clientWidth || 800);
+    var H = rows.length * rowH + TOP + 26;
+    var plotW = W - LABEL - RIGHT;
+    var x = function (v) { return LABEL + (v - lo) / (hi - lo) * plotW; };
+
+    var svg = document.createElementNS(ns, "svg");
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+    svg.setAttribute("width", "100%");
+    svg.setAttribute("height", H);
+    svg.style.minWidth = "620px";
+
+    var ticks = 5, dp = dpFor(cmpMetric);
+    for (var i = 0; i <= ticks; i++) {
+      var v = lo + (hi - lo) * i / ticks;
+      var gx = x(v);
+      var ln = document.createElementNS(ns, "line");
+      ln.setAttribute("x1", gx); ln.setAttribute("x2", gx);
+      ln.setAttribute("y1", TOP - 8); ln.setAttribute("y2", H - 24);
+      ln.setAttribute("class", "gridline");
+      svg.appendChild(ln);
+      var tx = document.createElementNS(ns, "text");
+      tx.setAttribute("x", gx); tx.setAttribute("y", TOP - 14);
+      tx.setAttribute("font-size", "11"); tx.setAttribute("text-anchor", "middle");
+      tx.setAttribute("opacity", ".7");
+      tx.textContent = fmt(v, isScore ? 0 : (hi <= 12 ? 0 : 0));
+      svg.appendChild(tx);
+    }
+
+    rows.forEach(function (r, i) {
+      var y = TOP + i * rowH;
+      var g = document.createElementNS(ns, "g");
+
+      var lbl = document.createElementNS(ns, "text");
+      lbl.setAttribute("x", LABEL - 12); lbl.setAttribute("y", y + 15);
+      lbl.setAttribute("font-size", "12.5"); lbl.setAttribute("text-anchor", "end");
+      lbl.textContent = r.s.short;
+      g.appendChild(lbl);
+
+      [[r.b, "var(--unmatched)", 1], [r.a, "var(--matched)", 0]].forEach(function (pair) {
+        if (pair[0] == null) return;
+        var bar = document.createElementNS(ns, "rect");
+        var bw = Math.max(1.5, x(pair[0]) - x(lo));
+        bar.setAttribute("x", x(lo));
+        bar.setAttribute("y", y + 3 + pair[2] * 10);
+        bar.setAttribute("width", bw);
+        bar.setAttribute("height", 9);
+        bar.setAttribute("rx", "2");
+        bar.setAttribute("fill", pair[1]);
+        bar.setAttribute("opacity", pair[2] ? ".62" : "1");
+        g.appendChild(bar);
+      });
+
+      var val = document.createElementNS(ns, "text");
+      val.setAttribute("x", W - RIGHT + 10); val.setAttribute("y", y + 16);
+      val.setAttribute("font-size", "11.5");
+      val.setAttribute("font-family", "ui-monospace,Menlo,monospace");
+      val.textContent = (r.a == null ? "—" : fmt(r.a, dp)) + " / " + (r.b == null ? "—" : fmt(r.b, dp));
+      g.appendChild(val);
+
+      var hit = document.createElementNS(ns, "rect");
+      hit.setAttribute("x", 0); hit.setAttribute("y", y);
+      hit.setAttribute("width", W); hit.setAttribute("height", rowH);
+      hit.setAttribute("fill", "transparent");
+      hit.style.cursor = "pointer";
+      hit.addEventListener("mousemove", function (e) {
+        showTip(e, "<b>" + esc(r.s.name) + "</b><br>" +
+          "Matched: <b>" + (r.a == null ? "suppressed" : fmt(r.a, dp)) + "</b><br>" +
+          "Not matched: <b>" + (r.b == null ? "suppressed" : fmt(r.b, dp)) + "</b><br>" +
+          (r.gap != null ? "Gap: " + (r.gap > 0 ? "+" : "") + fmt(r.gap, dp) + "<br>" : "") +
+          "IMG match rate " + fmt(r.s.matchRate, 1) + "%");
+      });
+      hit.addEventListener("mouseleave", hideTip);
+      hit.addEventListener("click", function () {
+        openSpec = r.s.name; buildBody();
+        document.getElementById("explorer").scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+      g.appendChild(hit);
+      svg.appendChild(g);
+    });
+
+    host.appendChild(svg);
+  }
+
+  /* ============================================================
+     4. Competitiveness scatter
+     ============================================================ */
+  function renderScatter() {
+    var host = $("#scatter");
+    host.innerHTML = "";
+    var ns = "http://www.w3.org/2000/svg";
+    var W = Math.max(640, host.clientWidth || 820), H = 460;
+    var L = 58, R = 24, T = 22, B = 58;
+
+    var xs = S.map(function (s) { return s.allPerPos; });
+    var xlo = 0.7, xhi = Math.max.apply(null, xs) + 0.1;
+    var ylo = 0, yhi = 75;
+    var X = function (v) { return L + (v - xlo) / (xhi - xlo) * (W - L - R); };
+    var Y = function (v) { return T + (1 - (v - ylo) / (yhi - ylo)) * (H - T - B); };
+
+    var svg = document.createElementNS(ns, "svg");
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+    svg.setAttribute("width", "100%"); svg.setAttribute("height", H);
+    svg.style.minWidth = "640px";
+
+    for (var gy = 0; gy <= 70; gy += 10) {
+      var ln = document.createElementNS(ns, "line");
+      ln.setAttribute("x1", L); ln.setAttribute("x2", W - R);
+      ln.setAttribute("y1", Y(gy)); ln.setAttribute("y2", Y(gy));
+      ln.setAttribute("class", gy === 0 ? "axisline" : "gridline");
+      svg.appendChild(ln);
+      var t = document.createElementNS(ns, "text");
+      t.setAttribute("x", L - 10); t.setAttribute("y", Y(gy) + 4);
+      t.setAttribute("font-size", "11"); t.setAttribute("text-anchor", "end");
+      t.setAttribute("opacity", ".7");
+      t.textContent = gy + "%";
+      svg.appendChild(t);
+    }
+    for (var gx = 0.8; gx <= xhi; gx += 0.2) {
+      var vl = document.createElementNS(ns, "line");
+      vl.setAttribute("x1", X(gx)); vl.setAttribute("x2", X(gx));
+      vl.setAttribute("y1", T); vl.setAttribute("y2", Y(0));
+      vl.setAttribute("class", "gridline");
+      svg.appendChild(vl);
+      var xt = document.createElementNS(ns, "text");
+      xt.setAttribute("x", X(gx)); xt.setAttribute("y", Y(0) + 18);
+      xt.setAttribute("font-size", "11"); xt.setAttribute("text-anchor", "middle");
+      xt.setAttribute("opacity", ".7");
+      xt.textContent = gx.toFixed(1);
+      svg.appendChild(xt);
+    }
+
+    /* 1.0 applicants-per-position reference: supply equals demand */
+    var one = document.createElementNS(ns, "line");
+    one.setAttribute("x1", X(1)); one.setAttribute("x2", X(1));
+    one.setAttribute("y1", T); one.setAttribute("y2", Y(0));
+    one.setAttribute("stroke", "var(--ink-3)"); one.setAttribute("stroke-dasharray", "4 4");
+    one.setAttribute("opacity", ".55");
+    svg.appendChild(one);
+    var oneT = document.createElementNS(ns, "text");
+    oneT.setAttribute("x", X(1) + 6); oneT.setAttribute("y", T + 12);
+    oneT.setAttribute("font-size", "10.5"); oneT.setAttribute("opacity", ".7");
+    oneT.textContent = "1 applicant per position";
+    svg.appendChild(oneT);
+
+    var xlab = document.createElementNS(ns, "text");
+    xlab.setAttribute("x", (L + W - R) / 2); xlab.setAttribute("y", H - 12);
+    xlab.setAttribute("font-size", "12"); xlab.setAttribute("text-anchor", "middle");
+    xlab.setAttribute("font-weight", "600");
+    xlab.textContent = "All applicants per position  →  more competitive";
+    svg.appendChild(xlab);
+
+    var ylab = document.createElementNS(ns, "text");
+    ylab.setAttribute("transform", "rotate(-90)");
+    ylab.setAttribute("x", -(T + H - B) / 2); ylab.setAttribute("y", 15);
+    ylab.setAttribute("font-size", "12"); ylab.setAttribute("text-anchor", "middle");
+    ylab.setAttribute("font-weight", "600");
+    ylab.textContent = "Non-U.S. IMG match rate";
+    svg.appendChild(ylab);
+
+    var maxN = Math.max.apply(null, S.map(function (s) { return s.imgTotal; }));
+    var radius = function (s) { return 5 + Math.sqrt(s.imgTotal / maxN) * 26; };
+    /* seeded with the reference-line annotation so no bubble label lands on it */
+    var placed = [{ x1: X(1) + 4, x2: X(1) + 132, y1: T + 2, y2: T + 16 }];
+    var overlaps = function (a, b) {
+      return !(a.x2 < b.x1 || b.x2 < a.x1 || a.y2 < b.y1 || b.y2 < a.y1);
+    };
+    /* every mark's footprint, so labels never sit on top of a circle */
+    var circles = S.map(function (s) {
+      var r = radius(s);
+      return { x1: X(s.allPerPos) - r, x2: X(s.allPerPos) + r,
+               y1: Y(s.matchRate) - r, y2: Y(s.matchRate) + r };
+    });
+
+    S.slice().sort(function (a, b) { return b.imgTotal - a.imgTotal; }).forEach(function (s) {
+      var r = radius(s);
+      var c = document.createElementNS(ns, "circle");
+      c.setAttribute("cx", X(s.allPerPos)); c.setAttribute("cy", Y(s.matchRate));
+      c.setAttribute("r", r);
+      var t = tier(s.matchRate);
+      c.setAttribute("fill", t.cls === "viable" ? "var(--matched)" : t.cls === "contested" ? "var(--unmatched)" : "var(--ink-3)");
+      c.setAttribute("opacity", ".42");
+      c.setAttribute("stroke", t.cls === "viable" ? "var(--matched)" : t.cls === "contested" ? "var(--unmatched)" : "var(--ink-3)");
+      c.setAttribute("stroke-width", "1.5");
+      c.setAttribute("class", "dot");
+      c.addEventListener("mousemove", function (e) {
+        showTip(e, "<b>" + esc(s.name) + "</b><br>" +
+          "IMG match rate <b>" + fmt(s.matchRate, 1) + "%</b><br>" +
+          s.imgMatched.toLocaleString() + " of " + s.imgTotal.toLocaleString() + " IMGs matched<br>" +
+          fmt(s.allPerPos, 2) + " applicants per position<br>" +
+          s.positions.toLocaleString() + " positions offered");
+      });
+      c.addEventListener("mouseleave", hideTip);
+      c.addEventListener("click", function () {
+        openSpec = s.name; buildBody();
+        document.getElementById("explorer").scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+      svg.appendChild(c);
+
+      /* Label the specialties worth naming, skipping any that would collide.
+         Bubbles are drawn largest-first, so the biggest cohorts win the space. */
+      if (s.imgTotal >= 130 || s.matchRate >= 58 || s.matchRate <= 20) {
+        var cx = X(s.allPerPos), cy = Y(s.matchRate);
+        var w = s.short.length * 5.9 + 4, h = 13;
+        var cands = [
+          { x: cx,             y: cy - r - 6,     anchor: "middle" },
+          { x: cx,             y: cy + r + 13,    anchor: "middle" },
+          { x: cx + r + 6,     y: cy + 4,         anchor: "start"  },
+          { x: cx - r - 6,     y: cy + 4,         anchor: "end"    }
+        ];
+        /* A bubble big enough to hold its own name keeps it inside, so the
+           largest cohorts never go unlabelled in a crowded neighbourhood. */
+        if (w < r * 1.9) cands.unshift({ x: cx, y: cy + 4, anchor: "middle", overMark: true });
+        /* Last resort for the biggest cohorts: sit over a neighbouring mark,
+           on a background plate that keeps the text readable. */
+        if (s.imgTotal >= 300) cands.push({ x: cx, y: cy - r - 6, anchor: "middle", overMark: true, plate: true });
+
+        for (var ci = 0; ci < cands.length; ci++) {
+          var p = cands[ci];
+          var x1 = p.anchor === "middle" ? p.x - w / 2 : p.anchor === "start" ? p.x : p.x - w;
+          var bx = { x1: x1, x2: x1 + w, y1: p.y - h + 3, y2: p.y + 3 };
+          if (bx.x1 < L || bx.x2 > W - R || bx.y1 < T || bx.y2 > Y(0)) continue;
+          if (placed.some(function (q) { return overlaps(bx, q); })) continue;
+          if (!p.overMark && circles.some(function (q) { return overlaps(bx, q); })) continue;
+          if (p.plate) {
+            var plate = document.createElementNS(ns, "rect");
+            plate.setAttribute("x", bx.x1 - 3); plate.setAttribute("y", bx.y1 - 1);
+            plate.setAttribute("width", w + 6); plate.setAttribute("height", h + 2);
+            plate.setAttribute("rx", "3");
+            plate.setAttribute("fill", "var(--bg-elev)");
+            plate.setAttribute("opacity", ".82");
+            plate.setAttribute("pointer-events", "none");
+            svg.appendChild(plate);
+          }
+          var lb = document.createElementNS(ns, "text");
+          lb.setAttribute("x", p.x); lb.setAttribute("y", p.y);
+          lb.setAttribute("font-size", "11"); lb.setAttribute("text-anchor", p.anchor);
+          lb.setAttribute("font-weight", "600");
+          lb.setAttribute("pointer-events", "none");
+          lb.textContent = s.short;
+          svg.appendChild(lb);
+          placed.push(bx);
+          break;
+        }
+      }
+    });
+    host.appendChild(svg);
+  }
+
+  /* ============================================================
+     5. Full data browser
+     ============================================================ */
+  var dbMetric = "all", dbSpec = "all";
+
+  function tidyRows() {
+    var out = [];
+    S.forEach(function (s) {
+      if (dbSpec !== "all" && s.name !== dbSpec) return;
+      M.forEach(function (m) {
+        if (dbMetric !== "all" && m.key !== dbMetric) return;
+        var d = s.metrics[m.key] || {};
+        ["matched", "not_matched"].forEach(function (c) {
+          var v = d[c];
+          if (!v) return;
+          out.push({
+            specialty: s.name, metric: m.label, metric_key: m.key,
+            cohort: c === "matched" ? "Matched" : "Not matched",
+            n: v.n, min: v.min, q1: v.q1, median: v.median, q3: v.q3,
+            max: v.max, iqr: v.iqr, mean: v.mean, sd: v.sd,
+            specialty_match_rate: s.matchRate, positions: s.positions,
+            img_total: s.imgTotal, img_matched: s.imgMatched, img_not_matched: s.imgNotMatched,
+            all_applicants_per_position: s.allPerPos
+          });
+        });
+      });
+    });
+    return out;
+  }
+
+  function renderDb() {
+    var rows = tidyRows();
+    $("#dbCount").textContent = rows.length.toLocaleString() + " rows";
+    var tb = $("#dbBody");
+    tb.innerHTML = "";
+    var frag = document.createDocumentFragment();
+    rows.forEach(function (r) {
+      var tr = el("tr");
+      var dp = dpFor(r.metric_key);
+      [["name", r.specialty], ["", r.metric],
+       ["", r.cohort], ["num", r.n], ["num", fmt(r.min, dp)], ["num", fmt(r.q1, dp)],
+       ["num", fmt(r.median, dp)], ["num", fmt(r.q3, dp)], ["num", fmt(r.max, dp)],
+       ["num", fmt(r.iqr, dp)], ["num", fmt(r.mean, dp)], ["num", fmt(r.sd, dp)]
+      ].forEach(function (c, i) {
+        var td = el("td", c[0], c[1] == null ? "—" : String(c[1]));
+        if (i === 2) {
+          td.innerHTML = "";
+          var p = el("span", "pill tiny " + (r.cohort === "Matched" ? "viable" : "contested"), r.cohort);
+          td.appendChild(p);
+        }
+        tr.appendChild(td);
+      });
+      frag.appendChild(tr);
+    });
+    tb.appendChild(frag);
+  }
+
+  /* ---------------- export ---------------- */
+  function toCSV(rows, cols) {
+    var head = cols.join(",");
+    var body = rows.map(function (r) {
+      return cols.map(function (c) {
+        var v = r[c];
+        if (v == null) return "";
+        v = String(v);
+        return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+      }).join(",");
+    }).join("\n");
+    return head + "\n" + body + "\n";
+  }
+  function download(name, text, mime) {
+    var blob = new Blob([text], { type: (mime || "text/csv") + ";charset=utf-8" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+  }
+  var TIDY_COLS = ["specialty", "metric", "metric_key", "cohort", "n", "min", "q1", "median", "q3",
+    "max", "iqr", "mean", "sd", "specialty_match_rate", "positions", "img_total",
+    "img_matched", "img_not_matched", "all_applicants_per_position"];
+
+  function summaryRows() {
+    return S.map(function (s) {
+      return {
+        specialty: s.name, positions: s.positions, all_applicants: s.allApplicants,
+        all_applicants_per_position: s.allPerPos, img_total: s.imgTotal,
+        img_matched: s.imgMatched, img_not_matched: s.imgNotMatched,
+        img_match_rate_pct: s.matchRate, img_per_position: s.imgPerPos,
+        step2ck_median_matched: med(s, "step2ck", "matched"),
+        step2ck_median_not_matched: med(s, "step2ck", "not_matched"),
+        contiguous_ranks_median_matched: med(s, "contiguous_ranks", "matched"),
+        contiguous_ranks_median_not_matched: med(s, "contiguous_ranks", "not_matched"),
+        publications_median_matched: med(s, "publications", "matched"),
+        publications_median_not_matched: med(s, "publications", "not_matched"),
+        phd_pct_matched: s.phd.matched, phd_pct_not_matched: s.phd.not_matched,
+        grad_degree_pct_matched: s.gradDegree.matched, grad_degree_pct_not_matched: s.gradDegree.not_matched
+      };
+    });
+  }
+  var SUM_COLS = Object.keys(summaryRows()[0]);
+
+  $("#dlTidy").addEventListener("click", function () {
+    download("nrmp-2026-nonus-img-full-tidy.csv", toCSV(tidyRows(), TIDY_COLS));
+  });
+  $("#dlSummary").addEventListener("click", function () {
+    download("nrmp-2026-nonus-img-specialty-summary.csv", toCSV(summaryRows(), SUM_COLS));
+  });
+  $("#dlJson").addEventListener("click", function () {
+    download("nrmp-2026-nonus-img.json", JSON.stringify(DATA, null, 1), "application/json");
+  });
+
+  /* ---------------- wiring ---------------- */
+  $("#specSearch").addEventListener("input", function (e) {
+    filterText = e.target.value.trim().toLowerCase();
+    buildBody();
+  });
+  $("#cmpMetric").addEventListener("change", function (e) {
+    cmpMetric = e.target.value; renderCompare();
+  });
+  document.querySelectorAll("#cmpSort button").forEach(function (b) {
+    b.addEventListener("click", function () {
+      cmpSort = b.dataset.sort;
+      document.querySelectorAll("#cmpSort button").forEach(function (x) {
+        x.setAttribute("aria-pressed", x === b ? "true" : "false");
+      });
+      renderCompare();
+    });
+  });
+  $("#dbMetric").addEventListener("change", function (e) { dbMetric = e.target.value; renderDb(); });
+  $("#dbSpec").addEventListener("change", function (e) { dbSpec = e.target.value; renderDb(); });
+
+  function populateSelects() {
+    var cm = $("#cmpMetric"), dm = $("#dbMetric"), ds = $("#dbSpec");
+    M.forEach(function (m) {
+      cm.appendChild(new Option(m.label, m.key));
+      dm.appendChild(new Option(m.label, m.key));
+    });
+    cm.value = cmpMetric;
+    S.slice().sort(function (a, b) { return a.name.localeCompare(b.name); })
+      .forEach(function (s) { ds.appendChild(new Option(s.short, s.name)); });
+  }
+
+  var rt;
+  function redrawCharts() { renderCompare(); renderScatter(); }
+  window.addEventListener("resize", function () {
+    clearTimeout(rt); rt = setTimeout(redrawCharts, 180);
+  });
+
+  populateSelects();
+  renderAggregate();
+  buildHead();
+  buildBody();
+  renderCompare();
+  renderScatter();
+  renderDb();
+})();
+</script>
+</body>
+</html>
