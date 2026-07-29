@@ -87,6 +87,57 @@ non-affiliation disclaimer. Contact if ever needed: datarequest@nrmp.org.
 
 ## Log
 
+### 2026-07-30 — Copy clarity pass
+- **Terminology unified.** The page had six names for one concept (rank-list
+  length / programs ranked in-specialty / contiguous ranks / Ranks / rank
+  length). Canonical technical term is now **contiguous ranks** everywhere a
+  label appears, matching NRMP and the CSV column, with a plain-language gloss
+  in the aggregate table. "Not matched" / "Did not" / "unmatched" as *labels*
+  are all now **Did not match**; prose still says "unmatched" as an adjective.
+- **The subject is defined before it is used.** "Non-U.S. IMG" is now glossed in
+  the hero. It was previously explained only in caveat #2, which is no good for
+  the audience who arrives not knowing the term applies to them.
+- **Two factual corrections.** The levers intro claimed the groups were
+  "statistically indistinguishable"; no test was run and none is in the report,
+  so it now says the medians are equal, which is what is actually shown. The
+  verdict pill "No signal" became "No separation" for the same reason, and
+  because it also has to cover the two degree rows, which are not identical.
+- **The tier labels ignore sample size.** Public Health sorts second in the whole
+  table wearing "Realistic" on three matches out of five. Said so in the legend,
+  and moved the legend above the table where it can be read before the labels
+  are. A sort-order or threshold fix is still open.
+- Accessible names: theme button now says where it will take you, sort glyphs
+  are `aria-hidden` with `aria-sort` on every sortable column, the compare and
+  scatter charts have titles, and the hero's pointer hint is hidden from screen
+  readers since it describes a canvas they cannot perceive.
+- Export buttons: "Filtered CSV" lied when nothing was filtered, so it is now
+  "Shown rows (CSV)" with the row count reading "18 of 432" when a filter is on.
+- **Gate measurement note.** `sentence_burstiness` is highly sensitive to how
+  headings are extracted: 0.549 with headings glued to the following sentence,
+  0.552 with headings excluded, 0.615 with headings as their own units. The
+  0.585 and 0.509 figures in the entry below were measured on the glued basis
+  and are not comparable to these. Running prose only is the honest basis; all
+  four gates pass on it (banned 0, structure clean, silhouette 0.412, grade 9.8).
+  The one readability flag, word repetition at 39%, is a direct consequence of
+  unifying terminology and is the correct trade.
+
+### 2026-07-30 — Product record captured
+- `PRODUCT.md` written: two primary audiences (applicants mid-decision and
+  MBBS students orienting years early), the 49.0% and seven-identical-measures
+  positioning, the rights position, and what the report does not contain and so
+  must never be fabricated.
+- Saieesh declined all four candidate hard constraints (zero external requests,
+  a cheap-phone perf floor, traceable derivation, permanent exports). The build
+  still does all four; they are incumbent behaviour, not commitments. The 608 KB
+  three.js is therefore neither protected nor condemned.
+- **Open question:** update cadence recorded as "bi-annually", which could mean
+  twice a year or once every two years. NRMP publishes annually, so the two
+  readings differ on whether a cycle gets skipped. Pin this before building a
+  year switcher, archived editions, or dated URLs.
+- `.impeccable/live/config.json` added for in-browser visual iteration, and
+  `.impeccable/` gitignored. Note that live injects into `index.html`, which
+  `build.py` overwrites; re-run live after any rebuild.
+
 ### 2026-07-29 — Hero redesign, dark default, repo live
 - Second de-slop pass after the new hero copy: `sentence_burstiness` came in at
   0.513 against a 0.55 floor, which `--genre docs` does not excuse. Merged some

@@ -41,10 +41,16 @@
     /* dark is the site default; light is opt-in and remembered */
     return document.documentElement.getAttribute("data-theme") || "dark";
   }
+  /* The button names where it will take you, not where you are. */
+  function paintThemeBtn() {
+    var dark = currentTheme() === "dark";
+    themeBtn.textContent = dark ? "☀︎" : "☾";
+    themeBtn.setAttribute("aria-label", dark ? "Switch to light theme" : "Switch to dark theme");
+  }
   themeBtn.addEventListener("click", function () {
     var next = currentTheme() === "dark" ? "light" : "dark";
     document.documentElement.setAttribute("data-theme", next);
-    themeBtn.textContent = next === "dark" ? "☀︎" : "☾";
+    paintThemeBtn();
     try { localStorage.setItem("img2026-theme", next); } catch (e) {}
     redrawCharts();
   });
@@ -52,7 +58,7 @@
     var saved = localStorage.getItem("img2026-theme");
     if (saved) document.documentElement.setAttribute("data-theme", saved);
   } catch (e) {}
-  themeBtn.textContent = currentTheme() === "dark" ? "☀︎" : "☾";
+  paintThemeBtn();
 
   /* ---------------- tooltip ---------------- */
   var tip = el("div", "tip");
@@ -72,6 +78,19 @@
   /* ============================================================
      1. Headline aggregate — the two levers
      ============================================================ */
+  /* Labels a first-time reader cannot be expected to decode. The other rows
+     say what they are. Keyed on the label used in the aggregate table. */
+  var GLOSS = {
+    "Contiguous ranks":
+      "Programs ranked in one specialty before a program from another specialty appears on the list.",
+    "Publications":
+      "Peer-reviewed articles, book chapters, monographs and case reports. Counted separately from abstracts for the first time in 2026.",
+    "Abstracts":
+      "Conference abstracts later published in a peer-reviewed journal.",
+    "Presentations":
+      "Posters and talks at conferences or school research days."
+  };
+
   function renderAggregate() {
     var tb = $("#aggBody");
     O.aggregate.forEach(function (r) {
@@ -83,12 +102,15 @@
         p.style.marginLeft = "8px";
         td0.appendChild(p);
       }
+      if (GLOSS[r.measure]) td0.appendChild(el("span", "gloss", GLOSS[r.measure]));
       tr.appendChild(td0);
       tr.appendChild(el("td", "num", r.matched));
       tr.appendChild(el("td", "num", r.notMatched));
       var verdict = el("td");
+      /* "No separation" rather than "no signal": what the row shows is that the
+         two groups land in the same place, not that the measure is meaningless. */
       var pill = el("span", "pill " + (r.separates ? "viable" : "closed"),
-        r.separates ? "Separates" : "No signal");
+        r.separates ? "Separates" : "No separation");
       verdict.appendChild(pill);
       tr.appendChild(verdict);
       tb.appendChild(tr);
@@ -104,12 +126,12 @@
     { k: "short",          label: "Specialty",            t: "text" },
     { k: "matchRate",      label: "IMG match rate",       t: "rate", help: "Share of non-U.S. IMGs who ranked this specialty first and matched into it." },
     { k: "imgTotal",       label: "IMGs who tried",       t: "int",  help: "Non-U.S. IMGs who ranked this specialty first." },
-    { k: "imgMatched",     label: "Matched",              t: "int" },
-    { k: "imgNotMatched",  label: "Did not",              t: "int" },
+    { k: "imgMatched",     label: "Matched",              t: "int",  help: "Non-U.S. IMGs who ranked this specialty first and got in." },
+    { k: "imgNotMatched",  label: "Did not match",        t: "int",  help: "Non-U.S. IMGs who ranked this specialty first and did not get in." },
     { k: "positions",      label: "Positions",            t: "int",  help: "Total positions offered in the specialty (all applicant types)." },
     { k: "allPerPos",      label: "Applicants / position", t: "dec", help: "All applicants preferring the specialty per position offered. Above 1.0 means oversubscribed." },
-    { k: "step2Matched",   label: "Step 2 (matched)",     t: "score", help: "Median USMLE Step 2 CK of IMGs who matched." },
-    { k: "ranksMatched",   label: "Ranks (matched)",      t: "dec1", help: "Median contiguous ranks of IMGs who matched." }
+    { k: "step2Matched",   label: "Step 2 CK (matched)",  t: "score", help: "Median USMLE Step 2 CK of the IMGs who matched into this specialty." },
+    { k: "ranksMatched",   label: "Contiguous ranks (matched)", t: "dec1", help: "Median number of programs the matched IMGs ranked inside this specialty before a program from another specialty appeared on their list." }
   ];
 
   function derived(s, k) {
@@ -136,8 +158,12 @@
     COLS.forEach(function (c) {
       var th = el("th", "sortable");
       th.appendChild(document.createTextNode(c.label));
-      th.appendChild(el("span", "arrow", sortKey === c.k ? (sortDir < 0 ? "▼" : "▲") : "↕"));
-      if (sortKey === c.k) th.setAttribute("aria-sort", sortDir < 0 ? "descending" : "ascending");
+      /* the glyph is decoration; aria-sort carries the meaning */
+      var arrow = el("span", "arrow", sortKey === c.k ? (sortDir < 0 ? "▼" : "▲") : "↕");
+      arrow.setAttribute("aria-hidden", "true");
+      th.appendChild(arrow);
+      th.setAttribute("aria-sort",
+        sortKey !== c.k ? "none" : sortDir < 0 ? "descending" : "ascending");
       if (c.help) {
         th.style.cursor = "help";
         th.addEventListener("mousemove", function (e) { showTip(e, "<b>" + esc(c.label) + "</b><br>" + esc(c.help)); });
@@ -172,7 +198,7 @@
     tb.innerHTML = "";
     var list = sortedSpecs();
     if (!list.length) {
-      var tr0 = el("tr"), td0 = el("td", "", "No specialty matches that search.");
+      var tr0 = el("tr"), td0 = el("td", "", "No specialty matches that search. Clear the box to see all 24.");
       td0.colSpan = COLS.length; td0.style.textAlign = "center"; td0.style.color = "var(--ink-3)";
       tr0.appendChild(td0); tb.appendChild(tr0); return;
     }
@@ -239,8 +265,9 @@
     var nM = (s.metrics.step2ck && s.metrics.step2ck.matched) ? s.metrics.step2ck.matched.n : 0;
     var nN = (s.metrics.step2ck && s.metrics.step2ck.not_matched) ? s.metrics.step2ck.not_matched.n : 0;
     var note = el("p", "detail-note");
-    note.innerHTML = "Box shows the middle 50% of applicants (25th to 75th percentile); the vertical line is the median; " +
-      "whiskers run to the reported minimum and maximum. Based on <b>" + nM + "</b> matched and <b>" + nN +
+    note.innerHTML = "Each bar reads left to right. The box covers the middle 50% of applicants (25th to 75th " +
+      "percentile), the vertical line inside it is the median, and the thin line running out either side reaches " +
+      "the lowest and highest reported values. Based on <b>" + nM + "</b> matched and <b>" + nN +
       "</b> unmatched applicants who consented to research use of their data.";
     box.appendChild(note);
 
@@ -277,7 +304,7 @@
       var diff = a.median - b.median;
       var cls = Math.abs(diff) < (m.key === "step2ck" ? 1 : 0.05) ? "flat" : (diff > 0 ? "up" : "down");
       var sign = diff > 0 ? "+" : "";
-      hd.appendChild(el("span", "d " + cls, sign + fmt(diff, dp) + " median"));
+      hd.appendChild(el("span", "d " + cls, "median " + sign + fmt(diff, dp)));
     }
     card.appendChild(hd);
     card.appendChild(el("p", "why", m.desc));
@@ -285,16 +312,16 @@
     if (!a || a.median == null || !b || b.median == null) {
       var only = (a && a.median != null) ? a : (b && b.median != null) ? b : null;
       if (only) {
-        card.appendChild(boxplot([{ label: (a && a.median != null) ? "Matched" : "Not matched", s: only, color: "var(--unmatched)" }], m));
+        card.appendChild(boxplot([{ label: (a && a.median != null) ? "Matched" : "Did not match", s: only, color: "var(--unmatched)" }], m));
       }
       card.appendChild(el("div", "suppressed",
-        "NRMP suppressed one cohort here — fewer than five consented applicants, so no median is published."));
+        "NRMP withheld one of the two groups here. Fewer than five of its applicants consented to research use of their data, so no median was published."));
       return card;
     }
 
     card.appendChild(boxplot([
       { label: "Matched", s: a, color: "var(--matched)" },
-      { label: "Not matched", s: b, color: "var(--unmatched)" }
+      { label: "Did not match", s: b, color: "var(--unmatched)" }
     ], m));
     return card;
   }
@@ -473,7 +500,12 @@
     svg.setAttribute("viewBox", "0 0 " + W + " " + H);
     svg.setAttribute("width", "100%");
     svg.setAttribute("height", H);
+    svg.setAttribute("role", "img");
     svg.style.minWidth = "620px";
+    var cmpTitle = document.createElementNS(ns, "title");
+    cmpTitle.textContent = m.label + ", median for every specialty, matched against did not match. " +
+      "The same figures are listed in the full data table below.";
+    svg.appendChild(cmpTitle);
 
     var ticks = 5, dp = dpFor(cmpMetric);
     for (var i = 0; i <= ticks; i++) {
@@ -530,8 +562,8 @@
       hit.style.cursor = "pointer";
       hit.addEventListener("mousemove", function (e) {
         showTip(e, "<b>" + esc(r.s.name) + "</b><br>" +
-          "Matched: <b>" + (r.a == null ? "suppressed" : fmt(r.a, dp)) + "</b><br>" +
-          "Not matched: <b>" + (r.b == null ? "suppressed" : fmt(r.b, dp)) + "</b><br>" +
+          "Matched: <b>" + (r.a == null ? "withheld" : fmt(r.a, dp)) + "</b><br>" +
+          "Did not match: <b>" + (r.b == null ? "withheld" : fmt(r.b, dp)) + "</b><br>" +
           (r.gap != null ? "Gap: " + (r.gap > 0 ? "+" : "") + fmt(r.gap, dp) + "<br>" : "") +
           "IMG match rate " + fmt(r.s.matchRate, 1) + "%");
       });
@@ -566,7 +598,13 @@
     var svg = document.createElementNS(ns, "svg");
     svg.setAttribute("viewBox", "0 0 " + W + " " + H);
     svg.setAttribute("width", "100%"); svg.setAttribute("height", H);
+    svg.setAttribute("role", "img");
     svg.style.minWidth = "640px";
+    var scTitle = document.createElementNS(ns, "title");
+    scTitle.textContent = "Scatter plot of non-U.S. IMG match rate against all applicants per position, " +
+      "one circle per specialty, sized by how many IMGs ranked it first. Match rate falls as applicants " +
+      "per position rises. Every value is listed in the specialty table above.";
+    svg.appendChild(scTitle);
 
     for (var gy = 0; gy <= 70; gy += 10) {
       var ln = document.createElementNS(ns, "line");
@@ -729,7 +767,7 @@
           if (!v) return;
           out.push({
             specialty: s.name, metric: m.label, metric_key: m.key,
-            cohort: c === "matched" ? "Matched" : "Not matched",
+            cohort: c === "matched" ? "Matched" : "Did not match",
             n: v.n, min: v.min, q1: v.q1, median: v.median, q3: v.q3,
             max: v.max, iqr: v.iqr, mean: v.mean, sd: v.sd,
             specialty_match_rate: s.matchRate, positions: s.positions,
@@ -742,9 +780,16 @@
     return out;
   }
 
+  /* computed while both filters are still "all", so it is the true total */
+  var TOTAL_ROWS = tidyRows().length;
+
   function renderDb() {
     var rows = tidyRows();
-    $("#dbCount").textContent = rows.length.toLocaleString() + " rows";
+    /* say "18 of 432" when filtered, so the filter's effect is legible */
+    var filtered = dbSpec !== "all" || dbMetric !== "all";
+    $("#dbCount").textContent = filtered
+      ? rows.length.toLocaleString() + " of " + TOTAL_ROWS.toLocaleString() + " rows"
+      : rows.length.toLocaleString() + " rows";
     var tb = $("#dbBody");
     tb.innerHTML = "";
     var frag = document.createDocumentFragment();
@@ -816,7 +861,7 @@
   var SUM_COLS = Object.keys(summaryRows()[0]);
 
   $("#dlTidy").addEventListener("click", function () {
-    download("nrmp-2026-nonus-img-full-tidy.csv", toCSV(tidyRows(), TIDY_COLS));
+    download("nrmp-2026-nonus-img-rows.csv", toCSV(tidyRows(), TIDY_COLS));
   });
   $("#dlSummary").addEventListener("click", function () {
     download("nrmp-2026-nonus-img-specialty-summary.csv", toCSV(summaryRows(), SUM_COLS));
