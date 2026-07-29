@@ -3,44 +3,44 @@
 A single self-contained HTML page presenting NRMP *Charting Outcomes: Non-U.S. IMGs*
 (Main Residency Match, 2026 Appointment Year) as an explorable, exportable dataset.
 
+Live at **https://match.saieesh.dev**
+
 ## Files
 
 | File | Purpose |
 |---|---|
 | `index.html` | The entire site. Data, CSS, JS and favicon are inlined. |
 | `og-image.png` | 1200×630 social preview card. Must sit next to `index.html`. |
-
-## Before the first deploy
-
-`index.html` contains four copies of the placeholder
-`https://REPLACE-WITH-YOUR-DOMAIN`, in the `og:url`, `og:image`, `twitter:image`
-tags. Replace all four with the real origin:
-
-```bash
-sed -i '' 's|https://REPLACE-WITH-YOUR-DOMAIN|https://match.example.com|g' index.html
-```
-
-Facebook, X, LinkedIn and Slack all require `og:image` to be an absolute URL. A
-relative path silently produces no preview card, which is why the placeholder is
-deliberately obvious rather than a working-but-wrong relative path.
+| `make-og-image.py` | Regenerates the card. Needs Pillow and macOS system fonts. |
+| `CNAME` | Custom domain for GitHub Pages. |
+| `.nojekyll` | Stops Pages running the files through Jekyll. |
 
 ## Deploying
 
 No build step, no dependencies, no external requests, so it works from any static
 host and from `file://`.
 
-**GitHub Pages** — commit the folder, enable Pages on the branch, and add a
-`CNAME` file containing just the hostname (`match.example.com`). Point a DNS
-CNAME record at `<username>.github.io`. Add an empty `.nojekyll` file so Pages
-serves the directory as-is.
+**GitHub Pages.** Push to the default branch, then Settings → Pages → deploy from
+branch, root. The `CNAME` file already holds `match.saieesh.dev`, so the only
+remaining step is the DNS record:
 
-**Netlify / Vercel / Cloudflare Pages** — drag the folder in, or point the project
-at this directory with no build command and this directory as the publish dir.
+| Type | Name | Value |
+|---|---|---|
+| CNAME | `match` | `<github-username>.github.io.` |
 
-**Any web server / S3 / nginx** — copy both files to the document root.
+Pages provisions the TLS certificate on its own once DNS resolves, which usually
+takes a few minutes. Tick "Enforce HTTPS" after it appears.
 
-To change the page title or the text in link previews, edit the `<title>`,
-`<meta name="description">` and `og:`/`twitter:` tags at the top of `index.html`.
+**Netlify / Vercel / Cloudflare Pages** — point the project at this directory
+with no build command and this directory as the publish dir.
+
+**Any web server / S3 / nginx** — copy `index.html` and `og-image.png` to the
+document root.
+
+The absolute URLs in the `og:`/`twitter:` tags are already set to
+`https://match.saieesh.dev`. If the host ever changes, update those four tags,
+`CNAME`, and the domain line inside `make-og-image.py`; Facebook, X, LinkedIn and
+Slack all reject a relative `og:image`.
 
 ## What's in it
 
