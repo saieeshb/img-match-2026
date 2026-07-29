@@ -28,14 +28,14 @@
   <div class="topbar-in">
     <div class="brand">IMG Match Outcomes <span>· 2026</span></div>
     <nav class="navlinks">
-      <a href="#levers">The two levers</a>
+      <a href="#levers">The two measures</a>
       <a href="#explorer">Specialties</a>
       <a href="#compare">Compare</a>
       <a href="#competition">Competition</a>
       <a href="#data">Full data</a>
       <a href="#caveats">Caveats</a>
     </nav>
-    <button class="themebtn" id="themeBtn" title="Toggle light / dark" aria-label="Toggle light or dark theme">☾</button>
+    <button class="themebtn" id="themeBtn" aria-label="Switch to light theme">☾</button>
   </div>
 </div>
 
@@ -44,18 +44,19 @@
   <div class="hero-inner">
     <h1>Two numbers out of nine</h1>
     <p class="hero-sub">
-      The 2026 Match recorded nine measures for every non-U.S. international medical graduate, and two
-      of them told the applicants who matched apart from those who did not. The other seven came out
-      identical.
+      The 2026 Match recorded nine measures for every non-U.S. IMG: an applicant who went to medical
+      school outside the United States and is not a U.S. citizen. Two of those measures told the
+      applicants who matched apart from those who did not. The other seven came out identical.
     </p>
     <div class="hero-key">
       <span><i style="background:#5c9dff"></i>4,429 matched</span>
-      <span><i style="background:#f0a92e"></i>4,541 did not</span>
-      <span>one particle each</span>
+      <span><i style="background:#f0a92e"></i>4,541 did not match</span>
+      <span>one dot per applicant</span>
     </div>
-    <div class="hero-hint">Move to look around · click to hold the split</div>
+    <div class="hero-hint" aria-hidden="true">Move your pointer to look around · click to hold the two groups apart</div>
     <div class="hero-meta">
-      <span>National Resident Matching Program, <em>Charting Outcomes: Non-U.S. IMGs</em>, July 2026</span>
+      <span><em>Charting Outcomes: Non-U.S. IMGs</em>, the National Resident Matching Program's annual
+      report on who matched, July 2026</span>
       <span>· 24 specialties</span>
     </div>
   </div>
@@ -63,10 +64,10 @@
 
 <div class="wrap">
   <div class="statband">
-    <div class="stat"><div class="k">24.9%</div><div class="l">of all Match applicants were non-U.S. IMGs, the second-largest group</div></div>
+    <div class="stat"><div class="k">24.9%</div><div class="l">of all Match applicants were non-U.S. IMGs, second only to U.S. MD seniors at 43.6%</div></div>
     <div class="stat"><div class="k">49.0%</div><div class="l">matched into the specialty they ranked first</div></div>
-    <div class="stat"><div class="k">5 vs 2</div><div class="l">median programs ranked in-specialty, matched vs unmatched</div></div>
-    <div class="stat"><div class="k">248 vs 242</div><div class="l">median Step 2 CK, matched vs unmatched</div></div>
+    <div class="stat"><div class="k">5 vs 2</div><div class="l">median programs ranked inside the preferred specialty, matched and not</div></div>
+    <div class="stat"><div class="k">248 vs 242</div><div class="l">median Step 2 CK, matched and not</div></div>
     <div class="stat"><div class="k">59.8%</div><div class="l">of non-U.S. IMGs ranked Internal Medicine first</div></div>
   </div>
 </div>
@@ -79,9 +80,9 @@
     <div class="shead">
       <h2>Only two measures separate matched from unmatched</h2>
       <p>
-        Pooling every specialty, applicants who matched and applicants who did not are statistically
-        indistinguishable on research output, work history and volunteering, where the medians come out
-        identical rather than merely close. Only rank-list length and Step 2 CK move.
+        Pooling every specialty, applicants who matched and applicants who did not report the same median
+        research output, work history and volunteering. The medians are equal. Two things move: how many
+        programs an applicant ranked inside their preferred specialty, and their Step 2 CK score.
       </p>
     </div>
 
@@ -89,7 +90,7 @@
       <table>
         <caption class="vis-hidden">Median values for matched and unmatched non-U.S. IMGs across all specialties</caption>
         <thead><tr>
-          <th>Measure</th><th>Matched (n=4,429)</th><th>Not matched (n=4,541)</th><th style="text-align:left">Verdict</th>
+          <th>Measure</th><th>Matched (n=4,429)</th><th>Did not match (n=4,541)</th><th style="text-align:left">Verdict</th>
         </tr></thead>
         <tbody id="aggBody"></tbody>
       </table>
@@ -128,8 +129,16 @@
         <input type="search" id="specSearch" placeholder="e.g. pathology" autocomplete="off">
       </div>
       <div class="spacer"></div>
-      <button class="btn" id="dlSummary">↓ Summary CSV</button>
+      <button class="btn" id="dlSummary" aria-label="Download a summary CSV, one row per specialty">↓ Summary CSV</button>
     </div>
+
+    <p class="sub" style="margin:0 0 12px;max-width:78ch">
+      Each specialty carries a label for how it went. <strong>Realistic</strong> means at least half the IMGs
+      who ranked it first matched into it, <strong>contested</strong> is 33 to 50%, and <strong>long shot</strong>
+      is under 33%. The label ignores how many people tried, so Public Health sits near the top on three
+      matches out of five. A dash instead of a number means NRMP withheld that figure, because fewer than five
+      applicants in that group consented to research use of their data.
+    </p>
 
     <div class="tablescroll">
       <table>
@@ -138,11 +147,6 @@
         <tbody id="specBody"></tbody>
       </table>
     </div>
-    <p class="sub" style="margin-top:12px">
-      "Realistic" = 50% or more of IMGs who tried, matched. "Contested" = 33–50%. "Long shot" = under 33%.
-      A dash means NRMP suppressed the figure because fewer than five applicants in that cohort consented to
-      research use of their data.
-    </p>
   </div>
 </section>
 
@@ -176,7 +180,7 @@
     <div class="legend">
       <span><i class="sw-m"></i>Matched</span>
       <span><i class="sw-n"></i>Did not match</span>
-      <span style="color:var(--ink-3)">Values at right: matched / not matched</span>
+      <span style="color:var(--ink-3)">Values at right: matched / did not match</span>
     </div>
     <div class="chartbox" id="cmpChart"></div>
   </div>
@@ -204,7 +208,7 @@
       <div>
         <h3>Family Medicine breaks the pattern</h3>
         <p>FM was the least subscribed specialty in the Match, with 5,491 positions against 4,685 applicants preferring it, and yet 513 of the 1,112 non-U.S. IMGs who ranked it first still did not match into it.</p>
-        <p>Their Step 2 medians were identical to those who matched (230 vs 231). The only separator was rank-list length: 3 versus 1.</p>
+        <p>Their Step 2 medians were identical to those who matched (230 vs 231). The only separator was contiguous ranks: 3 versus 1.</p>
       </div>
       <div>
         <h3>Concentration risk</h3>
@@ -221,8 +225,8 @@
     <div class="shead">
       <h2>All 432 rows</h2>
       <p>
-        24 specialties by 9 measures by 2 cohorts, with sample size, minimum, quartiles, median, maximum,
-        interquartile range, mean and standard deviation. Filter it, then export it.
+        24 specialties by 9 measures by 2 outcomes, with sample size (n), minimum, quartiles, median,
+        maximum, interquartile range (IQR), mean and standard deviation. Filter it, then export it.
       </p>
     </div>
 
@@ -236,16 +240,16 @@
         <select id="dbMetric"><option value="all">All measures</option></select>
       </div>
       <div class="spacer"></div>
-      <button class="btn primary" id="dlTidy">↓ Filtered CSV</button>
-      <button class="btn" id="dlJson">↓ Full JSON</button>
+      <button class="btn primary" id="dlTidy" aria-label="Download the rows currently shown as CSV">↓ Shown rows (CSV)</button>
+      <button class="btn" id="dlJson" aria-label="Download the complete dataset as JSON">↓ Full JSON</button>
     </div>
-    <p class="sub" style="margin:0 0 12px"><span id="dbCount"></span> · one row per specialty, measure and cohort</p>
+    <p class="sub" style="margin:0 0 12px"><span id="dbCount"></span></p>
 
     <div class="tablescroll" style="max-height:620px;overflow-y:auto">
       <table>
         <caption class="vis-hidden">Complete summary statistics for all specialties and measures</caption>
         <thead><tr>
-          <th>Specialty</th><th style="text-align:left">Measure</th><th style="text-align:left">Cohort</th>
+          <th>Specialty</th><th style="text-align:left">Measure</th><th style="text-align:left">Outcome</th>
           <th>n</th><th>Min</th><th>Q1</th><th>Median</th><th>Q3</th><th>Max</th><th>IQR</th><th>Mean</th><th>SD</th>
         </tr></thead>
         <tbody id="dbBody"></tbody>
@@ -267,7 +271,7 @@
         <h3>Only Step 2 CK is verified</h3>
         <div>
           <p>NRMP obtains Step 2 CK scores directly from the USMLE program. Everything else, from research and abstracts through publications, work, volunteering and degrees, is self-reported at registration and is neither verified nor quality-assessed.</p>
-          <p>The Neurosurgery matched cohort (n=8) reports a median of 44 research experiences and 70 publications, with one applicant claiming 199. Orthopaedics shows a maximum of 493. Those figures are reporting artefacts, and nothing in the report checks them.</p>
+          <p>The eight Neurosurgery applicants who matched report a median of 44 research experiences and 70 publications, with one applicant claiming 199. Orthopaedics shows a maximum of 493. Those figures are reporting artefacts, and nothing in the report checks them.</p>
         </div>
       </div>
       <div>
@@ -278,9 +282,9 @@
         </div>
       </div>
       <div>
-        <h3>Rank length mostly measures interview volume</h3>
+        <h3>Contiguous ranks mostly measure interview volume</h3>
         <div>
-          <p>You cannot rank a program that did not interview you. A long contiguous rank list largely reflects how many interviews an applicant received, so it works as a symptom of a strong application rather than a lever you pull directly.</p>
+          <p>You cannot rank a program that did not interview you. A long run of ranks inside one specialty largely reflects how many interviews an applicant received, so it works as a symptom of a strong application rather than a lever you pull directly.</p>
           <p>The useful signal is the unmatched median of 1 to 2. A large share of unmatched IMGs got only one or two interviews, which puts the failure earlier in the cycle than the rank list.</p>
         </div>
       </div>
@@ -294,7 +298,7 @@
       <div>
         <h3>The biggest variables are missing</h3>
         <div>
-          <p>Visa status, year of graduation, U.S. clinical experience, letters, and the MSPE are plausibly the strongest determinants for non-U.S. IMGs. None of them appear anywhere in this report.</p>
+          <p>Visa status, year of graduation, U.S. clinical experience, letters of recommendation, and the MSPE (the Medical Student Performance Evaluation, or dean's letter) are plausibly the strongest determinants for non-U.S. IMGs. None of them appear anywhere in this report.</p>
           <p>NRMP itself notes that course evaluations, reference letters and the MSPE also contribute to outcomes.</p>
         </div>
       </div>

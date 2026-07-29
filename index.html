@@ -173,6 +173,9 @@ tbody tr.open td{background:var(--matched-soft)}
 tbody tr.open td:first-child{background:var(--matched-soft)}
 td.name{font-weight:550}
 .sub{color:var(--ink-3);font-size:12px;font-weight:400}
+/* plain-language line under a measure name whose label is not self-explanatory */
+.gloss{display:block;margin-top:3px;max-width:46ch;color:var(--ink-3);font-size:12.5px;
+  font-weight:400;line-height:1.45;text-wrap:pretty}
 
 .ratebar{display:flex;align-items:center;gap:9px;justify-content:flex-end}
 .ratebar .track{width:74px;height:7px;border-radius:4px;background:var(--bg-sunk);overflow:hidden;flex-shrink:0}
@@ -235,14 +238,14 @@ footer a{color:var(--ink-2)}
   <div class="topbar-in">
     <div class="brand">IMG Match Outcomes <span>· 2026</span></div>
     <nav class="navlinks">
-      <a href="#levers">The two levers</a>
+      <a href="#levers">The two measures</a>
       <a href="#explorer">Specialties</a>
       <a href="#compare">Compare</a>
       <a href="#competition">Competition</a>
       <a href="#data">Full data</a>
       <a href="#caveats">Caveats</a>
     </nav>
-    <button class="themebtn" id="themeBtn" title="Toggle light / dark" aria-label="Toggle light or dark theme">☾</button>
+    <button class="themebtn" id="themeBtn" aria-label="Switch to light theme">☾</button>
   </div>
 </div>
 
@@ -251,18 +254,19 @@ footer a{color:var(--ink-2)}
   <div class="hero-inner">
     <h1>Two numbers out of nine</h1>
     <p class="hero-sub">
-      The 2026 Match recorded nine measures for every non-U.S. international medical graduate, and two
-      of them told the applicants who matched apart from those who did not. The other seven came out
-      identical.
+      The 2026 Match recorded nine measures for every non-U.S. IMG: an applicant who went to medical
+      school outside the United States and is not a U.S. citizen. Two of those measures told the
+      applicants who matched apart from those who did not. The other seven came out identical.
     </p>
     <div class="hero-key">
       <span><i style="background:#5c9dff"></i>4,429 matched</span>
-      <span><i style="background:#f0a92e"></i>4,541 did not</span>
-      <span>one particle each</span>
+      <span><i style="background:#f0a92e"></i>4,541 did not match</span>
+      <span>one dot per applicant</span>
     </div>
-    <div class="hero-hint">Move to look around · click to hold the split</div>
+    <div class="hero-hint" aria-hidden="true">Move your pointer to look around · click to hold the two groups apart</div>
     <div class="hero-meta">
-      <span>National Resident Matching Program, <em>Charting Outcomes: Non-U.S. IMGs</em>, July 2026</span>
+      <span><em>Charting Outcomes: Non-U.S. IMGs</em>, the National Resident Matching Program's annual
+      report on who matched, July 2026</span>
       <span>· 24 specialties</span>
     </div>
   </div>
@@ -270,10 +274,10 @@ footer a{color:var(--ink-2)}
 
 <div class="wrap">
   <div class="statband">
-    <div class="stat"><div class="k">24.9%</div><div class="l">of all Match applicants were non-U.S. IMGs, the second-largest group</div></div>
+    <div class="stat"><div class="k">24.9%</div><div class="l">of all Match applicants were non-U.S. IMGs, second only to U.S. MD seniors at 43.6%</div></div>
     <div class="stat"><div class="k">49.0%</div><div class="l">matched into the specialty they ranked first</div></div>
-    <div class="stat"><div class="k">5 vs 2</div><div class="l">median programs ranked in-specialty, matched vs unmatched</div></div>
-    <div class="stat"><div class="k">248 vs 242</div><div class="l">median Step 2 CK, matched vs unmatched</div></div>
+    <div class="stat"><div class="k">5 vs 2</div><div class="l">median programs ranked inside the preferred specialty, matched and not</div></div>
+    <div class="stat"><div class="k">248 vs 242</div><div class="l">median Step 2 CK, matched and not</div></div>
     <div class="stat"><div class="k">59.8%</div><div class="l">of non-U.S. IMGs ranked Internal Medicine first</div></div>
   </div>
 </div>
@@ -286,9 +290,9 @@ footer a{color:var(--ink-2)}
     <div class="shead">
       <h2>Only two measures separate matched from unmatched</h2>
       <p>
-        Pooling every specialty, applicants who matched and applicants who did not are statistically
-        indistinguishable on research output, work history and volunteering, where the medians come out
-        identical rather than merely close. Only rank-list length and Step 2 CK move.
+        Pooling every specialty, applicants who matched and applicants who did not report the same median
+        research output, work history and volunteering. The medians are equal. Two things move: how many
+        programs an applicant ranked inside their preferred specialty, and their Step 2 CK score.
       </p>
     </div>
 
@@ -296,7 +300,7 @@ footer a{color:var(--ink-2)}
       <table>
         <caption class="vis-hidden">Median values for matched and unmatched non-U.S. IMGs across all specialties</caption>
         <thead><tr>
-          <th>Measure</th><th>Matched (n=4,429)</th><th>Not matched (n=4,541)</th><th style="text-align:left">Verdict</th>
+          <th>Measure</th><th>Matched (n=4,429)</th><th>Did not match (n=4,541)</th><th style="text-align:left">Verdict</th>
         </tr></thead>
         <tbody id="aggBody"></tbody>
       </table>
@@ -335,8 +339,16 @@ footer a{color:var(--ink-2)}
         <input type="search" id="specSearch" placeholder="e.g. pathology" autocomplete="off">
       </div>
       <div class="spacer"></div>
-      <button class="btn" id="dlSummary">↓ Summary CSV</button>
+      <button class="btn" id="dlSummary" aria-label="Download a summary CSV, one row per specialty">↓ Summary CSV</button>
     </div>
+
+    <p class="sub" style="margin:0 0 12px;max-width:78ch">
+      Each specialty carries a label for how it went. <strong>Realistic</strong> means at least half the IMGs
+      who ranked it first matched into it, <strong>contested</strong> is 33 to 50%, and <strong>long shot</strong>
+      is under 33%. The label ignores how many people tried, so Public Health sits near the top on three
+      matches out of five. A dash instead of a number means NRMP withheld that figure, because fewer than five
+      applicants in that group consented to research use of their data.
+    </p>
 
     <div class="tablescroll">
       <table>
@@ -345,11 +357,6 @@ footer a{color:var(--ink-2)}
         <tbody id="specBody"></tbody>
       </table>
     </div>
-    <p class="sub" style="margin-top:12px">
-      "Realistic" = 50% or more of IMGs who tried, matched. "Contested" = 33–50%. "Long shot" = under 33%.
-      A dash means NRMP suppressed the figure because fewer than five applicants in that cohort consented to
-      research use of their data.
-    </p>
   </div>
 </section>
 
@@ -383,7 +390,7 @@ footer a{color:var(--ink-2)}
     <div class="legend">
       <span><i class="sw-m"></i>Matched</span>
       <span><i class="sw-n"></i>Did not match</span>
-      <span style="color:var(--ink-3)">Values at right: matched / not matched</span>
+      <span style="color:var(--ink-3)">Values at right: matched / did not match</span>
     </div>
     <div class="chartbox" id="cmpChart"></div>
   </div>
@@ -411,7 +418,7 @@ footer a{color:var(--ink-2)}
       <div>
         <h3>Family Medicine breaks the pattern</h3>
         <p>FM was the least subscribed specialty in the Match, with 5,491 positions against 4,685 applicants preferring it, and yet 513 of the 1,112 non-U.S. IMGs who ranked it first still did not match into it.</p>
-        <p>Their Step 2 medians were identical to those who matched (230 vs 231). The only separator was rank-list length: 3 versus 1.</p>
+        <p>Their Step 2 medians were identical to those who matched (230 vs 231). The only separator was contiguous ranks: 3 versus 1.</p>
       </div>
       <div>
         <h3>Concentration risk</h3>
@@ -428,8 +435,8 @@ footer a{color:var(--ink-2)}
     <div class="shead">
       <h2>All 432 rows</h2>
       <p>
-        24 specialties by 9 measures by 2 cohorts, with sample size, minimum, quartiles, median, maximum,
-        interquartile range, mean and standard deviation. Filter it, then export it.
+        24 specialties by 9 measures by 2 outcomes, with sample size (n), minimum, quartiles, median,
+        maximum, interquartile range (IQR), mean and standard deviation. Filter it, then export it.
       </p>
     </div>
 
@@ -443,16 +450,16 @@ footer a{color:var(--ink-2)}
         <select id="dbMetric"><option value="all">All measures</option></select>
       </div>
       <div class="spacer"></div>
-      <button class="btn primary" id="dlTidy">↓ Filtered CSV</button>
-      <button class="btn" id="dlJson">↓ Full JSON</button>
+      <button class="btn primary" id="dlTidy" aria-label="Download the rows currently shown as CSV">↓ Shown rows (CSV)</button>
+      <button class="btn" id="dlJson" aria-label="Download the complete dataset as JSON">↓ Full JSON</button>
     </div>
-    <p class="sub" style="margin:0 0 12px"><span id="dbCount"></span> · one row per specialty, measure and cohort</p>
+    <p class="sub" style="margin:0 0 12px"><span id="dbCount"></span></p>
 
     <div class="tablescroll" style="max-height:620px;overflow-y:auto">
       <table>
         <caption class="vis-hidden">Complete summary statistics for all specialties and measures</caption>
         <thead><tr>
-          <th>Specialty</th><th style="text-align:left">Measure</th><th style="text-align:left">Cohort</th>
+          <th>Specialty</th><th style="text-align:left">Measure</th><th style="text-align:left">Outcome</th>
           <th>n</th><th>Min</th><th>Q1</th><th>Median</th><th>Q3</th><th>Max</th><th>IQR</th><th>Mean</th><th>SD</th>
         </tr></thead>
         <tbody id="dbBody"></tbody>
@@ -474,7 +481,7 @@ footer a{color:var(--ink-2)}
         <h3>Only Step 2 CK is verified</h3>
         <div>
           <p>NRMP obtains Step 2 CK scores directly from the USMLE program. Everything else, from research and abstracts through publications, work, volunteering and degrees, is self-reported at registration and is neither verified nor quality-assessed.</p>
-          <p>The Neurosurgery matched cohort (n=8) reports a median of 44 research experiences and 70 publications, with one applicant claiming 199. Orthopaedics shows a maximum of 493. Those figures are reporting artefacts, and nothing in the report checks them.</p>
+          <p>The eight Neurosurgery applicants who matched report a median of 44 research experiences and 70 publications, with one applicant claiming 199. Orthopaedics shows a maximum of 493. Those figures are reporting artefacts, and nothing in the report checks them.</p>
         </div>
       </div>
       <div>
@@ -485,9 +492,9 @@ footer a{color:var(--ink-2)}
         </div>
       </div>
       <div>
-        <h3>Rank length mostly measures interview volume</h3>
+        <h3>Contiguous ranks mostly measure interview volume</h3>
         <div>
-          <p>You cannot rank a program that did not interview you. A long contiguous rank list largely reflects how many interviews an applicant received, so it works as a symptom of a strong application rather than a lever you pull directly.</p>
+          <p>You cannot rank a program that did not interview you. A long run of ranks inside one specialty largely reflects how many interviews an applicant received, so it works as a symptom of a strong application rather than a lever you pull directly.</p>
           <p>The useful signal is the unmatched median of 1 to 2. A large share of unmatched IMGs got only one or two interviews, which puts the failure earlier in the cycle than the rank list.</p>
         </div>
       </div>
@@ -501,7 +508,7 @@ footer a{color:var(--ink-2)}
       <div>
         <h3>The biggest variables are missing</h3>
         <div>
-          <p>Visa status, year of graduation, U.S. clinical experience, letters, and the MSPE are plausibly the strongest determinants for non-U.S. IMGs. None of them appear anywhere in this report.</p>
+          <p>Visa status, year of graduation, U.S. clinical experience, letters of recommendation, and the MSPE (the Medical Student Performance Evaluation, or dean's letter) are plausibly the strongest determinants for non-U.S. IMGs. None of them appear anywhere in this report.</p>
           <p>NRMP itself notes that course evaluations, reference letters and the MSPE also contribute to outcomes.</p>
         </div>
       </div>
@@ -6663,10 +6670,16 @@ footer a{color:var(--ink-2)}
     /* dark is the site default; light is opt-in and remembered */
     return document.documentElement.getAttribute("data-theme") || "dark";
   }
+  /* The button names where it will take you, not where you are. */
+  function paintThemeBtn() {
+    var dark = currentTheme() === "dark";
+    themeBtn.textContent = dark ? "☀︎" : "☾";
+    themeBtn.setAttribute("aria-label", dark ? "Switch to light theme" : "Switch to dark theme");
+  }
   themeBtn.addEventListener("click", function () {
     var next = currentTheme() === "dark" ? "light" : "dark";
     document.documentElement.setAttribute("data-theme", next);
-    themeBtn.textContent = next === "dark" ? "☀︎" : "☾";
+    paintThemeBtn();
     try { localStorage.setItem("img2026-theme", next); } catch (e) {}
     redrawCharts();
   });
@@ -6674,7 +6687,7 @@ footer a{color:var(--ink-2)}
     var saved = localStorage.getItem("img2026-theme");
     if (saved) document.documentElement.setAttribute("data-theme", saved);
   } catch (e) {}
-  themeBtn.textContent = currentTheme() === "dark" ? "☀︎" : "☾";
+  paintThemeBtn();
 
   /* ---------------- tooltip ---------------- */
   var tip = el("div", "tip");
@@ -6694,6 +6707,19 @@ footer a{color:var(--ink-2)}
   /* ============================================================
      1. Headline aggregate — the two levers
      ============================================================ */
+  /* Labels a first-time reader cannot be expected to decode. The other rows
+     say what they are. Keyed on the label used in the aggregate table. */
+  var GLOSS = {
+    "Contiguous ranks":
+      "Programs ranked in one specialty before a program from another specialty appears on the list.",
+    "Publications":
+      "Peer-reviewed articles, book chapters, monographs and case reports. Counted separately from abstracts for the first time in 2026.",
+    "Abstracts":
+      "Conference abstracts later published in a peer-reviewed journal.",
+    "Presentations":
+      "Posters and talks at conferences or school research days."
+  };
+
   function renderAggregate() {
     var tb = $("#aggBody");
     O.aggregate.forEach(function (r) {
@@ -6705,12 +6731,15 @@ footer a{color:var(--ink-2)}
         p.style.marginLeft = "8px";
         td0.appendChild(p);
       }
+      if (GLOSS[r.measure]) td0.appendChild(el("span", "gloss", GLOSS[r.measure]));
       tr.appendChild(td0);
       tr.appendChild(el("td", "num", r.matched));
       tr.appendChild(el("td", "num", r.notMatched));
       var verdict = el("td");
+      /* "No separation" rather than "no signal": what the row shows is that the
+         two groups land in the same place, not that the measure is meaningless. */
       var pill = el("span", "pill " + (r.separates ? "viable" : "closed"),
-        r.separates ? "Separates" : "No signal");
+        r.separates ? "Separates" : "No separation");
       verdict.appendChild(pill);
       tr.appendChild(verdict);
       tb.appendChild(tr);
@@ -6726,12 +6755,12 @@ footer a{color:var(--ink-2)}
     { k: "short",          label: "Specialty",            t: "text" },
     { k: "matchRate",      label: "IMG match rate",       t: "rate", help: "Share of non-U.S. IMGs who ranked this specialty first and matched into it." },
     { k: "imgTotal",       label: "IMGs who tried",       t: "int",  help: "Non-U.S. IMGs who ranked this specialty first." },
-    { k: "imgMatched",     label: "Matched",              t: "int" },
-    { k: "imgNotMatched",  label: "Did not",              t: "int" },
+    { k: "imgMatched",     label: "Matched",              t: "int",  help: "Non-U.S. IMGs who ranked this specialty first and got in." },
+    { k: "imgNotMatched",  label: "Did not match",        t: "int",  help: "Non-U.S. IMGs who ranked this specialty first and did not get in." },
     { k: "positions",      label: "Positions",            t: "int",  help: "Total positions offered in the specialty (all applicant types)." },
     { k: "allPerPos",      label: "Applicants / position", t: "dec", help: "All applicants preferring the specialty per position offered. Above 1.0 means oversubscribed." },
-    { k: "step2Matched",   label: "Step 2 (matched)",     t: "score", help: "Median USMLE Step 2 CK of IMGs who matched." },
-    { k: "ranksMatched",   label: "Ranks (matched)",      t: "dec1", help: "Median contiguous ranks of IMGs who matched." }
+    { k: "step2Matched",   label: "Step 2 CK (matched)",  t: "score", help: "Median USMLE Step 2 CK of the IMGs who matched into this specialty." },
+    { k: "ranksMatched",   label: "Contiguous ranks (matched)", t: "dec1", help: "Median number of programs the matched IMGs ranked inside this specialty before a program from another specialty appeared on their list." }
   ];
 
   function derived(s, k) {
@@ -6758,8 +6787,12 @@ footer a{color:var(--ink-2)}
     COLS.forEach(function (c) {
       var th = el("th", "sortable");
       th.appendChild(document.createTextNode(c.label));
-      th.appendChild(el("span", "arrow", sortKey === c.k ? (sortDir < 0 ? "▼" : "▲") : "↕"));
-      if (sortKey === c.k) th.setAttribute("aria-sort", sortDir < 0 ? "descending" : "ascending");
+      /* the glyph is decoration; aria-sort carries the meaning */
+      var arrow = el("span", "arrow", sortKey === c.k ? (sortDir < 0 ? "▼" : "▲") : "↕");
+      arrow.setAttribute("aria-hidden", "true");
+      th.appendChild(arrow);
+      th.setAttribute("aria-sort",
+        sortKey !== c.k ? "none" : sortDir < 0 ? "descending" : "ascending");
       if (c.help) {
         th.style.cursor = "help";
         th.addEventListener("mousemove", function (e) { showTip(e, "<b>" + esc(c.label) + "</b><br>" + esc(c.help)); });
@@ -6794,7 +6827,7 @@ footer a{color:var(--ink-2)}
     tb.innerHTML = "";
     var list = sortedSpecs();
     if (!list.length) {
-      var tr0 = el("tr"), td0 = el("td", "", "No specialty matches that search.");
+      var tr0 = el("tr"), td0 = el("td", "", "No specialty matches that search. Clear the box to see all 24.");
       td0.colSpan = COLS.length; td0.style.textAlign = "center"; td0.style.color = "var(--ink-3)";
       tr0.appendChild(td0); tb.appendChild(tr0); return;
     }
@@ -6861,8 +6894,9 @@ footer a{color:var(--ink-2)}
     var nM = (s.metrics.step2ck && s.metrics.step2ck.matched) ? s.metrics.step2ck.matched.n : 0;
     var nN = (s.metrics.step2ck && s.metrics.step2ck.not_matched) ? s.metrics.step2ck.not_matched.n : 0;
     var note = el("p", "detail-note");
-    note.innerHTML = "Box shows the middle 50% of applicants (25th to 75th percentile); the vertical line is the median; " +
-      "whiskers run to the reported minimum and maximum. Based on <b>" + nM + "</b> matched and <b>" + nN +
+    note.innerHTML = "Each bar reads left to right. The box covers the middle 50% of applicants (25th to 75th " +
+      "percentile), the vertical line inside it is the median, and the thin line running out either side reaches " +
+      "the lowest and highest reported values. Based on <b>" + nM + "</b> matched and <b>" + nN +
       "</b> unmatched applicants who consented to research use of their data.";
     box.appendChild(note);
 
@@ -6899,7 +6933,7 @@ footer a{color:var(--ink-2)}
       var diff = a.median - b.median;
       var cls = Math.abs(diff) < (m.key === "step2ck" ? 1 : 0.05) ? "flat" : (diff > 0 ? "up" : "down");
       var sign = diff > 0 ? "+" : "";
-      hd.appendChild(el("span", "d " + cls, sign + fmt(diff, dp) + " median"));
+      hd.appendChild(el("span", "d " + cls, "median " + sign + fmt(diff, dp)));
     }
     card.appendChild(hd);
     card.appendChild(el("p", "why", m.desc));
@@ -6907,16 +6941,16 @@ footer a{color:var(--ink-2)}
     if (!a || a.median == null || !b || b.median == null) {
       var only = (a && a.median != null) ? a : (b && b.median != null) ? b : null;
       if (only) {
-        card.appendChild(boxplot([{ label: (a && a.median != null) ? "Matched" : "Not matched", s: only, color: "var(--unmatched)" }], m));
+        card.appendChild(boxplot([{ label: (a && a.median != null) ? "Matched" : "Did not match", s: only, color: "var(--unmatched)" }], m));
       }
       card.appendChild(el("div", "suppressed",
-        "NRMP suppressed one cohort here — fewer than five consented applicants, so no median is published."));
+        "NRMP withheld one of the two groups here. Fewer than five of its applicants consented to research use of their data, so no median was published."));
       return card;
     }
 
     card.appendChild(boxplot([
       { label: "Matched", s: a, color: "var(--matched)" },
-      { label: "Not matched", s: b, color: "var(--unmatched)" }
+      { label: "Did not match", s: b, color: "var(--unmatched)" }
     ], m));
     return card;
   }
@@ -7095,7 +7129,12 @@ footer a{color:var(--ink-2)}
     svg.setAttribute("viewBox", "0 0 " + W + " " + H);
     svg.setAttribute("width", "100%");
     svg.setAttribute("height", H);
+    svg.setAttribute("role", "img");
     svg.style.minWidth = "620px";
+    var cmpTitle = document.createElementNS(ns, "title");
+    cmpTitle.textContent = m.label + ", median for every specialty, matched against did not match. " +
+      "The same figures are listed in the full data table below.";
+    svg.appendChild(cmpTitle);
 
     var ticks = 5, dp = dpFor(cmpMetric);
     for (var i = 0; i <= ticks; i++) {
@@ -7152,8 +7191,8 @@ footer a{color:var(--ink-2)}
       hit.style.cursor = "pointer";
       hit.addEventListener("mousemove", function (e) {
         showTip(e, "<b>" + esc(r.s.name) + "</b><br>" +
-          "Matched: <b>" + (r.a == null ? "suppressed" : fmt(r.a, dp)) + "</b><br>" +
-          "Not matched: <b>" + (r.b == null ? "suppressed" : fmt(r.b, dp)) + "</b><br>" +
+          "Matched: <b>" + (r.a == null ? "withheld" : fmt(r.a, dp)) + "</b><br>" +
+          "Did not match: <b>" + (r.b == null ? "withheld" : fmt(r.b, dp)) + "</b><br>" +
           (r.gap != null ? "Gap: " + (r.gap > 0 ? "+" : "") + fmt(r.gap, dp) + "<br>" : "") +
           "IMG match rate " + fmt(r.s.matchRate, 1) + "%");
       });
@@ -7188,7 +7227,13 @@ footer a{color:var(--ink-2)}
     var svg = document.createElementNS(ns, "svg");
     svg.setAttribute("viewBox", "0 0 " + W + " " + H);
     svg.setAttribute("width", "100%"); svg.setAttribute("height", H);
+    svg.setAttribute("role", "img");
     svg.style.minWidth = "640px";
+    var scTitle = document.createElementNS(ns, "title");
+    scTitle.textContent = "Scatter plot of non-U.S. IMG match rate against all applicants per position, " +
+      "one circle per specialty, sized by how many IMGs ranked it first. Match rate falls as applicants " +
+      "per position rises. Every value is listed in the specialty table above.";
+    svg.appendChild(scTitle);
 
     for (var gy = 0; gy <= 70; gy += 10) {
       var ln = document.createElementNS(ns, "line");
@@ -7351,7 +7396,7 @@ footer a{color:var(--ink-2)}
           if (!v) return;
           out.push({
             specialty: s.name, metric: m.label, metric_key: m.key,
-            cohort: c === "matched" ? "Matched" : "Not matched",
+            cohort: c === "matched" ? "Matched" : "Did not match",
             n: v.n, min: v.min, q1: v.q1, median: v.median, q3: v.q3,
             max: v.max, iqr: v.iqr, mean: v.mean, sd: v.sd,
             specialty_match_rate: s.matchRate, positions: s.positions,
@@ -7364,9 +7409,16 @@ footer a{color:var(--ink-2)}
     return out;
   }
 
+  /* computed while both filters are still "all", so it is the true total */
+  var TOTAL_ROWS = tidyRows().length;
+
   function renderDb() {
     var rows = tidyRows();
-    $("#dbCount").textContent = rows.length.toLocaleString() + " rows";
+    /* say "18 of 432" when filtered, so the filter's effect is legible */
+    var filtered = dbSpec !== "all" || dbMetric !== "all";
+    $("#dbCount").textContent = filtered
+      ? rows.length.toLocaleString() + " of " + TOTAL_ROWS.toLocaleString() + " rows"
+      : rows.length.toLocaleString() + " rows";
     var tb = $("#dbBody");
     tb.innerHTML = "";
     var frag = document.createDocumentFragment();
@@ -7438,7 +7490,7 @@ footer a{color:var(--ink-2)}
   var SUM_COLS = Object.keys(summaryRows()[0]);
 
   $("#dlTidy").addEventListener("click", function () {
-    download("nrmp-2026-nonus-img-full-tidy.csv", toCSV(tidyRows(), TIDY_COLS));
+    download("nrmp-2026-nonus-img-rows.csv", toCSV(tidyRows(), TIDY_COLS));
   });
   $("#dlSummary").addEventListener("click", function () {
     download("nrmp-2026-nonus-img-specialty-summary.csv", toCSV(summaryRows(), SUM_COLS));

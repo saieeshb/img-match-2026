@@ -151,6 +151,9 @@ tbody tr.open td{background:var(--matched-soft)}
 tbody tr.open td:first-child{background:var(--matched-soft)}
 td.name{font-weight:550}
 .sub{color:var(--ink-3);font-size:12px;font-weight:400}
+/* plain-language line under a measure name whose label is not self-explanatory */
+.gloss{display:block;margin-top:3px;max-width:46ch;color:var(--ink-3);font-size:12.5px;
+  font-weight:400;line-height:1.45;text-wrap:pretty}
 
 .ratebar{display:flex;align-items:center;gap:9px;justify-content:flex-end}
 .ratebar .track{width:74px;height:7px;border-radius:4px;background:var(--bg-sunk);overflow:hidden;flex-shrink:0}
