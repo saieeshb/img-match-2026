@@ -112,6 +112,13 @@ non-affiliation disclaimer. Contact if ever needed: datarequest@nrmp.org.
   readers since it describes a canvas they cannot perceive.
 - Export buttons: "Filtered CSV" lied when nothing was filtered, so it is now
   "Shown rows (CSV)" with the row count reading "18 of 432" when a filter is on.
+- **Hero contrast.** Glossing *Charting Outcomes* in the hero meta line pushed it
+  to three lines, down into the band where the scrim has faded, over dense
+  particles. Reverted to the compact citation and moved the gloss into caveat 2,
+  where a reader who needs it is actually looking. While measuring that, found
+  `.hero-hint` at **3.17:1** against the hero's own background, under the 4.5:1
+  floor and pre-dating this pass. Hero text now measures: sub 10.77, key 6.38,
+  meta 5.59, hint 5.16.
 - **Gate measurement note.** `sentence_burstiness` is highly sensitive to how
   headings are extracted: 0.549 with headings glued to the following sentence,
   0.552 with headings excluded, 0.615 with headings as their own units. The
