@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Non-U.S. IMG Match Outcomes 2026 — Interactive Explorer</title>
+<meta name="description" content="An interactive, exportable explorer of NRMP Charting Outcomes data for non-U.S. citizen international medical graduates in the 2026 Main Residency Match.">
+
+<meta property="og:title" content="Two numbers out of nine">
+<meta property="og:description" content="Every non-U.S. IMG in the 2026 Match, by preferred specialty. Two measures separated those who matched from those who did not.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://match.saieesh.dev/">
+<meta property="og:image" content="https://match.saieesh.dev/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Two dot plots showing the measures that separated matched from unmatched non-U.S. IMGs: programs ranked in-specialty, 5 versus 2, and USMLE Step 2 CK, 248 versus 242. Seven further measures, including research, publications and abstracts, are listed as identical in both groups.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Two numbers out of nine">
+<meta name="twitter:description" content="Every non-U.S. IMG in the 2026 Match, by preferred specialty. Two measures separated those who matched from those who did not.">
+<meta name="twitter:image" content="https://match.saieesh.dev/og-image.png">
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23111214'/><rect x='6.5' y='18' width='4.4' height='8' rx='1.2' fill='%23ece9e3'/><rect x='13.8' y='12' width='4.4' height='14' rx='1.2' fill='%235c9dff'/><rect x='21.1' y='6.5' width='4.4' height='19.5' rx='1.2' fill='%23f0a92e'/></svg>">
+<style>/*__CSS__*/</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <div class="brand">IMG Match Outcomes <span>· 2026</span></div>
+    <nav class="navlinks">
+      <a href="#levers">The two levers</a>
+      <a href="#explorer">Specialties</a>
+      <a href="#compare">Compare</a>
+      <a href="#competition">Competition</a>
+      <a href="#data">Full data</a>
+      <a href="#caveats">Caveats</a>
+    </nav>
+    <button class="themebtn" id="themeBtn" title="Toggle light / dark" aria-label="Toggle light or dark theme">☾</button>
+  </div>
+</div>
+
+<header class="hero">
+  <canvas id="heroCanvas" aria-hidden="true"></canvas>
+  <div class="hero-inner">
+    <h1>Two numbers out of nine</h1>
+    <p class="hero-sub">
+      The 2026 Match recorded nine measures for every non-U.S. international medical graduate, and two
+      of them told the applicants who matched apart from those who did not. The other seven came out
+      identical.
+    </p>
+    <div class="hero-key">
+      <span><i style="background:#5c9dff"></i>4,429 matched</span>
+      <span><i style="background:#f0a92e"></i>4,541 did not</span>
+      <span>one particle each</span>
+    </div>
+    <div class="hero-hint">Move to look around · click to hold the split</div>
+    <div class="hero-meta">
+      <span>National Resident Matching Program, <em>Charting Outcomes: Non-U.S. IMGs</em>, July 2026</span>
+      <span>· 24 specialties</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="statband">
+    <div class="stat"><div class="k">24.9%</div><div class="l">of all Match applicants were non-U.S. IMGs, the second-largest group</div></div>
+    <div class="stat"><div class="k">49.0%</div><div class="l">matched into the specialty they ranked first</div></div>
+    <div class="stat"><div class="k">5 vs 2</div><div class="l">median programs ranked in-specialty, matched vs unmatched</div></div>
+    <div class="stat"><div class="k">248 vs 242</div><div class="l">median Step 2 CK, matched vs unmatched</div></div>
+    <div class="stat"><div class="k">59.8%</div><div class="l">of non-U.S. IMGs ranked Internal Medicine first</div></div>
+  </div>
+</div>
+
+<main>
+
+<!-- ============ 1. THE TWO LEVERS ============ -->
+<section id="levers">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Only two measures separate matched from unmatched</h2>
+      <p>
+        Pooling every specialty, applicants who matched and applicants who did not are statistically
+        indistinguishable on research output, work history and volunteering, where the medians come out
+        identical rather than merely close. Only rank-list length and Step 2 CK move.
+      </p>
+    </div>
+
+    <div class="tablescroll" style="max-width:820px">
+      <table>
+        <caption class="vis-hidden">Median values for matched and unmatched non-U.S. IMGs across all specialties</caption>
+        <thead><tr>
+          <th>Measure</th><th>Matched (n=4,429)</th><th>Not matched (n=4,541)</th><th style="text-align:left">Verdict</th>
+        </tr></thead>
+        <tbody id="aggBody"></tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <h3>A note on the 41.5% you'll see quoted elsewhere</h3>
+      <p>
+        The NRMP report leads with "41.5 percent of non-U.S. IMGs matched to their preferred specialty."
+        That figure is the <strong>unweighted average of the 24 individual specialty rates</strong>, so it
+        counts Vascular Surgery, with 28 IMG applicants, the same as Internal Medicine, with 6,992.
+      </p>
+      <p>
+        The applicant-weighted rate, which is the number that describes an actual person's odds, is
+        <strong>49.0%</strong> (5,721 matched of 11,685). This site uses the weighted figure throughout and
+        shows the underlying counts so you can check it.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2. SPECIALTY EXPLORER ============ -->
+<section id="explorer">
+  <div class="wrap">
+    <div class="shead">
+      <h2>All 24 specialties, ranked</h2>
+      <p>
+        Click any row to open the full distribution for that specialty: all nine measures, matched against
+        unmatched, with quartiles and ranges. Sort by any column.
+      </p>
+    </div>
+
+    <div class="controls">
+      <div class="field">
+        <label for="specSearch">Find a specialty</label>
+        <input type="search" id="specSearch" placeholder="e.g. pathology" autocomplete="off">
+      </div>
+      <div class="spacer"></div>
+      <button class="btn" id="dlSummary">↓ Summary CSV</button>
+    </div>
+
+    <div class="tablescroll">
+      <table>
+        <caption class="vis-hidden">Non-U.S. IMG match outcomes by preferred specialty. Click a row for detail.</caption>
+        <thead><tr id="specHead"></tr></thead>
+        <tbody id="specBody"></tbody>
+      </table>
+    </div>
+    <p class="sub" style="margin-top:12px">
+      "Realistic" = 50% or more of IMGs who tried, matched. "Contested" = 33–50%. "Long shot" = under 33%.
+      A dash means NRMP suppressed the figure because fewer than five applicants in that cohort consented to
+      research use of their data.
+    </p>
+  </div>
+</section>
+
+<!-- ============ 3. COMPARE ACROSS SPECIALTIES ============ -->
+<section id="compare">
+  <div class="wrap">
+    <div class="shead">
+      <h2>One measure at a time, across every specialty</h2>
+      <p>
+        Solid bars are applicants who matched and pale bars are those who did not, so wherever the two run to
+        the same length, that measure did nothing to tell them apart. Click a row for the detail.
+      </p>
+    </div>
+
+    <div class="controls">
+      <div class="field">
+        <label for="cmpMetric">Measure</label>
+        <select id="cmpMetric"></select>
+      </div>
+      <div class="field">
+        <label>Order by</label>
+        <div class="seg" id="cmpSort">
+          <button data-sort="gap" aria-pressed="true">Biggest gap</button>
+          <button data-sort="matched" aria-pressed="false">Highest value</button>
+          <button data-sort="rate" aria-pressed="false">Match rate</button>
+        </div>
+      </div>
+    </div>
+    <p class="sub" id="cmpDesc" style="margin:0 0 14px;max-width:74ch"></p>
+
+    <div class="legend">
+      <span><i class="sw-m"></i>Matched</span>
+      <span><i class="sw-n"></i>Did not match</span>
+      <span style="color:var(--ink-3)">Values at right: matched / not matched</span>
+    </div>
+    <div class="chartbox" id="cmpChart"></div>
+  </div>
+</section>
+
+<!-- ============ 4. COMPETITION ============ -->
+<section id="competition">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Where the pressure comes from</h2>
+      <p>
+        Each circle is a specialty, sized by how many non-U.S. IMGs ranked it first, and the horizontal axis
+        is total applicants per available position, which measures how contested that specialty is overall.
+      </p>
+    </div>
+
+    <div class="chartbox" id="scatter"></div>
+
+    <div class="findings">
+      <div>
+        <h3>Overall pressure predicts IMG outcomes</h3>
+        <p>The correlation between all-applicants-per-position and IMG match rate is <strong>−0.84</strong>. The correlation between IMG density and IMG match rate is <strong>+0.19</strong>, which is essentially nothing.</p>
+        <p>Pathology has the second-highest IMG density of any specialty and a workable 45.1% rate. Dermatology has almost no IMG applicants and a 16.7% rate.</p>
+      </div>
+      <div>
+        <h3>Family Medicine breaks the pattern</h3>
+        <p>FM was the least subscribed specialty in the Match, with 5,491 positions against 4,685 applicants preferring it, and yet 513 of the 1,112 non-U.S. IMGs who ranked it first still did not match into it.</p>
+        <p>Their Step 2 medians were identical to those who matched (230 vs 231). The only separator was rank-list length: 3 versus 1.</p>
+      </div>
+      <div>
+        <h3>Concentration risk</h3>
+        <p>Internal Medicine absorbs <strong>59.8%</strong> of all non-U.S. IMG first choices, and the top three take 76.1%.</p>
+        <p>Pediatrics, the highest match rate in the entire report at 68.5%, draws only 6.8%.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5. FULL DATA ============ -->
+<section id="data">
+  <div class="wrap">
+    <div class="shead">
+      <h2>All 432 rows</h2>
+      <p>
+        24 specialties by 9 measures by 2 cohorts, with sample size, minimum, quartiles, median, maximum,
+        interquartile range, mean and standard deviation. Filter it, then export it.
+      </p>
+    </div>
+
+    <div class="controls">
+      <div class="field">
+        <label for="dbSpec">Specialty</label>
+        <select id="dbSpec"><option value="all">All specialties</option></select>
+      </div>
+      <div class="field">
+        <label for="dbMetric">Measure</label>
+        <select id="dbMetric"><option value="all">All measures</option></select>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn primary" id="dlTidy">↓ Filtered CSV</button>
+      <button class="btn" id="dlJson">↓ Full JSON</button>
+    </div>
+    <p class="sub" style="margin:0 0 12px"><span id="dbCount"></span> · one row per specialty, measure and cohort</p>
+
+    <div class="tablescroll" style="max-height:620px;overflow-y:auto">
+      <table>
+        <caption class="vis-hidden">Complete summary statistics for all specialties and measures</caption>
+        <thead><tr>
+          <th>Specialty</th><th style="text-align:left">Measure</th><th style="text-align:left">Cohort</th>
+          <th>n</th><th>Min</th><th>Q1</th><th>Median</th><th>Q3</th><th>Max</th><th>IQR</th><th>Mean</th><th>SD</th>
+        </tr></thead>
+        <tbody id="dbBody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6. CAVEATS ============ -->
+<section id="caveats">
+  <div class="wrap">
+    <div class="shead">
+      <h2>What this data cannot tell you</h2>
+      <p>Six limits that decide how far these numbers can be pushed.</p>
+    </div>
+
+    <div class="caveatlist">
+      <div>
+        <h3>Only Step 2 CK is verified</h3>
+        <div>
+          <p>NRMP obtains Step 2 CK scores directly from the USMLE program. Everything else, from research and abstracts through publications, work, volunteering and degrees, is self-reported at registration and is neither verified nor quality-assessed.</p>
+          <p>The Neurosurgery matched cohort (n=8) reports a median of 44 research experiences and 70 publications, with one applicant claiming 199. Orthopaedics shows a maximum of 493. Those figures are reporting artefacts, and nothing in the report checks them.</p>
+        </div>
+      </div>
+      <div>
+        <h3>2026 breaks comparability</h3>
+        <div>
+          <p>Abstracts, presentations and publications were a single combined item before 2026 and were split into three separate items this cycle. Do not compare these three against earlier editions of Charting Outcomes.</p>
+          <p>This is also the first year non-U.S. IMGs were reported separately from U.S.-citizen IMGs, so prior "IMG" figures are not comparable either.</p>
+        </div>
+      </div>
+      <div>
+        <h3>Rank length mostly measures interview volume</h3>
+        <div>
+          <p>You cannot rank a program that did not interview you. A long contiguous rank list largely reflects how many interviews an applicant received, so it works as a symptom of a strong application rather than a lever you pull directly.</p>
+          <p>The useful signal is the unmatched median of 1 to 2. A large share of unmatched IMGs got only one or two interviews, which puts the failure earlier in the cycle than the rank list.</p>
+        </div>
+      </div>
+      <div>
+        <h3>Distributions overlap heavily</h3>
+        <div>
+          <p>Matched Internal Medicine applicants ranged from 209 to 284 on Step 2 CK, and unmatched ones reached 279, so a high score does not secure a match and a modest one does not disqualify you. The overlap is nearly total.</p>
+          <p>A median describes a group and forecasts nothing about an individual applicant.</p>
+        </div>
+      </div>
+      <div>
+        <h3>The biggest variables are missing</h3>
+        <div>
+          <p>Visa status, year of graduation, U.S. clinical experience, letters, and the MSPE are plausibly the strongest determinants for non-U.S. IMGs. None of them appear anywhere in this report.</p>
+          <p>NRMP itself notes that course evaluations, reference letters and the MSPE also contribute to outcomes.</p>
+        </div>
+      </div>
+      <div>
+        <h3>Who is counted</h3>
+        <div>
+          <p>Only applicants who certified a rank order list and consented to research use of their data. Anyone who never reached the ranking stage is invisible here, and that is where a great many IMG applications actually end.</p>
+          <p>Applicants who ranked a preliminary or transitional-year program first are excluded, as are specialties offering fewer than 50 positions.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p><strong>Source and attribution.</strong> All figures are drawn from the National Resident Matching Program's
+    <em>Charting Outcomes™: Characteristics of Applicants Who Matched to Their Preferred Specialty, Non-U.S. IMGs
+    (Main Residency Match, 2026 Appointment Year)</em>, published July 2026. Match rates, the applicant-weighted
+    total, and the competitiveness correlations shown here are derived from the published counts. The underlying
+    statistics are the NRMP's.</p>
+    <p>NRMP data is copyright © 2026 National Resident Matching Program. Reuse and redistribution of NRMP
+    publications requires their permission; the contact is <a href="mailto:datarequest@nrmp.org">datarequest@nrmp.org</a>.
+    This page is an independent presentation and is not affiliated with, endorsed by, or reviewed by the NRMP.</p>
+    <p>Suggested citation for the underlying report:</p>
+    <div class="cite">National Resident Matching Program. 2026. Charting Outcomes™: Characteristics of Applicants Who Matched to Their Preferred Specialty, Non-U.S. IMGs (Main Residency Match, 2026 Appointment Year).</div>
+  </div>
+</footer>
+
+<script src="three.min.js"></script>
+<script>/*__HERO__*/</script>
+<script>/*__DATA__*/</script>
+<script>/*__APP__*/</script>
+</body>
+</html>

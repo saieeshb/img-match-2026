@@ -26,8 +26,8 @@ Newest entries at the top.
 ## Next actions
 
 1. Add the DNS record: `CNAME  match  saieeshb.github.io.` on `saieesh.dev`.
-2. In the repo: Settings → Pages → deploy from `main`, root. Tick Enforce HTTPS
-   once the certificate appears.
+2. Pages is already enabled on `main` / root with the CNAME registered. Tick
+   Enforce HTTPS once the certificate finishes provisioning.
 3. After the first public share, force a refetch of the preview card via
    Facebook's Sharing Debugger and X's Card Validator; both cache aggressively.
 
@@ -35,21 +35,24 @@ Newest entries at the top.
 
 ## How to rebuild
 
-The site is assembled from four sources in the scratchpad, not edited directly:
+The site is assembled from `src/`, not edited directly. `index.html` is a build
+artefact; editing it by hand will be overwritten.
 
 ```
-template.html   markup, with /*__CSS__*/ /*__DATA__*/ /*__APP__*/ placeholders
-style.css       all styling
-app.js          all interactivity
-data.js         the dataset (generated from the PDF, do not hand-edit)
+src/template.html   markup, with the /*__CSS__*/ /*__HERO__*/ /*__DATA__*/ /*__APP__*/ slots
+src/style.css       all styling
+src/app.js          all interactivity (tables, charts, exports, theme)
+src/hero.js         the WebGL particle field
+src/data.js         the dataset, generated from the PDF — do not hand-edit
 ```
 
-Build = substitute the three placeholders into `template.html`, write
-`index.html`. `make-og-image.py` regenerates the social card and needs Pillow
-plus macOS system fonts.
+```bash
+python3 build.py
+```
 
-**If the scratchpad is gone**, `index.html` is self-contained and still the
-source of truth; the four parts can be split back out of it.
+`three.min.js` stays a separate same-origin file rather than being inlined; at
+608 KB it caches better on its own. `make-og-image.py` regenerates the social
+card and needs Pillow plus macOS system fonts.
 
 ---
 
@@ -85,14 +88,34 @@ non-affiliation disclaimer. Contact if ever needed: datarequest@nrmp.org.
 ## Log
 
 ### 2026-07-29 — Hero redesign, dark default, repo live
-- Repo `saieeshb/img-match-2026` created and pushed; Pages configured.
+- Second de-slop pass after the new hero copy: `sentence_burstiness` came in at
+  0.513 against a 0.55 floor, which `--genre docs` does not excuse. Merged some
+  mid-length sentence pairs and left short ones short; now 0.585 and clean.
+  (This flag was present at 0.509 in the previous version too and was missed
+  because structure_scan had been run on a flattened, single-paragraph extract.)
+- Repo `saieeshb/img-match-2026` created and pushed; Pages configured with the
+  CNAME already picked up.
+- three.js r149 (MIT, UMD build) vendored locally as `three.min.js`, so the site
+  still makes zero external requests. It is 608 KB, by far the heaviest thing
+  here; a raw-WebGL point cloud would drop that to nothing if load time ever
+  matters more than the convenience.
 - Dark mode is now the default; light is opt-in via the toggle.
 - Replaced the left-aligned hero with a centered WebGL particle field: one
-  particle per analysed applicant (8,943), split 4,429 blue / 4,514 amber in the
+  particle per analysed applicant (8,943), split 4,429 blue / 4,541 amber in the
   true matched / unmatched proportion.
 - Dropped the teal uppercase eyebrow and the teal accent throughout. Palette is
   now near-black, cream, and the two data colours only.
-- New headline: "Two numbers separated 8,943 IMG applicants".
+- New headline: "Two numbers out of nine". Deliberately avoids a total count,
+  because the report is internally inconsistent about it: the introduction says
+  the sample was 8,943 while Table 2's cohorts sum to 8,970 (4,429 + 4,541). The
+  particle field uses the two cohort figures, which are the ones actually drawn.
+- Favicon recoloured off teal; no teal remains anywhere in the build.
+- Hardened the hero against loading in a background tab: the fade-in now fires
+  on the first frame that actually renders, and a ResizeObserver plus a
+  visibilitychange handler catch the case where the canvas lays out at zero
+  width and `resize()` bails.
+- Sources moved into `src/` with `build.py`, so the project no longer depends on
+  a scratchpad surviving between sessions.
 
 ### 2026-07-29 — De-slop pass
 - Audit found 12 banned-phrase violations, 10 hard; em-dash density 16.3/1k.
