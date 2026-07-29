@@ -63,15 +63,25 @@
   /* ---------------- tooltip ---------------- */
   var tip = el("div", "tip");
   document.body.appendChild(tip);
+  function placeTip(x, y) {
+    var pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
+    var lx = x + pad, ly = y + pad;
+    if (lx + w > window.innerWidth - 8) lx = x - w - pad;
+    if (ly + h > window.innerHeight - 8) ly = y - h - pad;
+    tip.style.left = lx + "px";
+    tip.style.top = ly + "px";
+  }
   function showTip(evt, html) {
     tip.innerHTML = html;
     tip.classList.add("on");
-    var pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
-    var x = evt.clientX + pad, y = evt.clientY + pad;
-    if (x + w > window.innerWidth - 8) x = evt.clientX - w - pad;
-    if (y + h > window.innerHeight - 8) y = evt.clientY - h - pad;
-    tip.style.left = x + "px";
-    tip.style.top = y + "px";
+    placeTip(evt.clientX, evt.clientY);
+  }
+  /* same explanation, reached by keyboard instead of by pointer */
+  function showTipAt(node, html) {
+    tip.innerHTML = html;
+    tip.classList.add("on");
+    var r = node.getBoundingClientRect();
+    placeTip(r.left + r.width / 2, r.bottom - 4);
   }
   function hideTip() { tip.classList.remove("on"); }
 
@@ -152,11 +162,16 @@
     return v;
   }
 
+  /* buildHead() replaces every th, so a keyboard sort would drop focus to the
+     body. Remember which column asked and hand focus back to its replacement. */
+  var refocusCol = null;
+
   function buildHead() {
     var tr = $("#specHead");
     tr.innerHTML = "";
     COLS.forEach(function (c) {
       var th = el("th", "sortable");
+      th.tabIndex = 0;                       /* sorting is not mouse-only */
       th.appendChild(document.createTextNode(c.label));
       /* the glyph is decoration; aria-sort carries the meaning */
       var arrow = el("span", "arrow", sortKey === c.k ? (sortDir < 0 ? "▼" : "▲") : "↕");
@@ -165,17 +180,28 @@
       th.setAttribute("aria-sort",
         sortKey !== c.k ? "none" : sortDir < 0 ? "descending" : "ascending");
       if (c.help) {
+        var help = "<b>" + esc(c.label) + "</b><br>" + esc(c.help);
         th.style.cursor = "help";
-        th.addEventListener("mousemove", function (e) { showTip(e, "<b>" + esc(c.label) + "</b><br>" + esc(c.help)); });
+        th.addEventListener("mousemove", function (e) { showTip(e, help); });
         th.addEventListener("mouseleave", hideTip);
+        /* the same explanation, reachable without a pointer */
+        th.addEventListener("focus", function () { showTipAt(th, help); });
+        th.addEventListener("blur", hideTip);
       }
-      th.addEventListener("click", function () {
+      var sort = function (fromKey) {
         if (sortKey === c.k) sortDir = -sortDir;
         else { sortKey = c.k; sortDir = c.k === "short" ? 1 : -1; }
+        refocusCol = fromKey ? c.k : null;
         buildHead(); buildBody();
+      };
+      th.addEventListener("click", function () { sort(false); });
+      th.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); sort(true); }
       });
       tr.appendChild(th);
+      if (refocusCol === c.k) th.focus();
     });
+    refocusCol = null;
   }
 
   function sortedSpecs() {

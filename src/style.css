@@ -6,7 +6,6 @@
   --matched:#5c9dff; --matched-soft:#16304f;
   --unmatched:#f0a92e; --unmatched-soft:#3d2c0c;
   --accent:#ece9e3;
-  --warn-bg:#221c10; --warn-rule:#6b5a2a;
   --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
   --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
   --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
@@ -19,7 +18,6 @@
   --matched:#1f6feb; --matched-soft:#dbeafe;
   --unmatched:#b45309; --unmatched-soft:#fef3c7;
   --accent:#17181b;
-  --warn-bg:#fdf8ec; --warn-rule:#dfc98c;
 }
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--sans);
@@ -45,7 +43,16 @@ h1,h2,h3,h4{line-height:1.2;margin:0}
 .themebtn{background:none;border:1px solid var(--rule);color:var(--ink-2);border-radius:6px;
   padding:5px 9px;cursor:pointer;font-size:13px;line-height:1;flex-shrink:0}
 .themebtn:hover{border-color:var(--rule-2);color:var(--ink)}
-@media(max-width:820px){.navlinks{display:none}}
+/* Below 820 the links drop to their own full-width row and scroll sideways
+   rather than disappearing; the six sections are the only way around the page.
+   The mask fades the right edge so there is a visible hint of more. */
+@media(max-width:820px){
+  .topbar-in{flex-wrap:wrap;gap:9px 14px;padding:9px 16px}
+  .brand{margin-right:auto}
+  .navlinks{order:3;width:100%;margin-left:0;gap:20px;padding-bottom:1px;
+    mask-image:linear-gradient(to right,#000 90%,transparent);
+    -webkit-mask-image:linear-gradient(to right,#000 90%,transparent)}
+}
 
 /* ---------- hero ---------- */
 header.hero{position:relative;isolation:isolate;background:#0b0c0e;overflow:hidden;
@@ -72,7 +79,17 @@ h1{font-family:var(--serif);font-size:clamp(40px,7.4vw,84px);letter-spacing:-.02
 /* both sit over the particle field, so they clear 4.5:1 against the hero's own
    near-black rather than only against a mid-grey */
 .hero-hint{margin-top:14px;font-size:11.5px;color:#85837c;letter-spacing:.02em}
-@media(max-width:640px){.hero-inner{min-height:min(84vh,640px);padding:0 18px}}
+/* a touch device has no pointer to move, so it gets the gesture it can perform */
+.hint-coarse{display:none}
+@media(pointer:coarse){.hint-fine{display:none}.hint-coarse{display:inline}}
+@media(max-width:640px){
+  .hero-inner{min-height:min(84vh,640px);padding:0 18px}
+  /* the field fills far more of a narrow frame, so the scrim has to reach
+     further out and hold more of its density under the text */
+  header.hero::after{background:
+    radial-gradient(ellipse 82% 54% at 50% 45%,rgba(11,12,14,.96) 0%,rgba(11,12,14,.9) 44%,rgba(11,12,14,.5) 74%,rgba(11,12,14,0) 94%),
+    linear-gradient(to bottom,rgba(11,12,14,.82) 0%,rgba(11,12,14,.12) 18%,rgba(11,12,14,.12) 70%,rgba(11,12,14,.95) 100%)}
+}
 @media(prefers-reduced-motion:reduce){#heroCanvas{transition:none}}
 
 /* ---------- stat band ---------- */
@@ -107,11 +124,14 @@ h3{font-size:17px;font-weight:650;letter-spacing:-.01em}
 .caveatlist p+p{margin-top:11px}
 @media(max-width:720px){.caveatlist>div{grid-template-columns:1fr;gap:8px}}
 
-.callout{background:var(--warn-bg);border:1px solid var(--warn-rule);border-left-width:4px;
-  border-radius:8px;padding:20px 22px;margin:26px 0}
-.callout h3{margin-bottom:8px;font-size:16px}
-.callout p{margin:0;color:var(--ink-2);font-size:15px}
-.callout p+p{margin-top:10px}
+/* An aside, set in the page's own grammar: a hairline and space, with a short
+   accent segment on the rule. The rest of the page never uses filled cards. */
+.callout{position:relative;margin:38px 0 0;padding:26px 0 0;border-top:1px solid var(--rule)}
+.callout::before{content:"";position:absolute;top:-1px;left:0;width:88px;height:1px;
+  background:var(--unmatched)}
+.callout h3{margin-bottom:10px;font-size:16px;color:var(--ink)}
+.callout p{margin:0;color:var(--ink-2);font-size:15px;max-width:76ch}
+.callout p+p{margin-top:12px}
 
 /* ---------- controls ---------- */
 .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:18px}
@@ -119,7 +139,13 @@ h3{font-size:17px;font-weight:650;letter-spacing:-.01em}
 .field label{font-size:11.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3);font-weight:600}
 select,input[type=search]{background:var(--bg-elev);border:1px solid var(--rule-2);color:var(--ink);
   border-radius:7px;padding:8px 11px;font-size:14px;font-family:inherit;min-width:170px}
-select:focus,input:focus{outline:2px solid var(--matched);outline-offset:1px}
+/* One focus treatment for everything reachable by keyboard. :focus-visible so a
+   mouse click does not leave a ring behind, and the table row gets an inset
+   outline because an outset one is clipped by the scroll container. */
+a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,
+th.sortable:focus-visible{outline:2px solid var(--matched);outline-offset:2px;border-radius:3px}
+tbody tr.clickable:focus-visible{outline:2px solid var(--matched);outline-offset:-2px}
+tbody tr.clickable:focus-visible td:first-child{background:var(--matched-soft)}
 .btn{background:var(--bg-elev);border:1px solid var(--rule-2);color:var(--ink);border-radius:7px;
   padding:8px 13px;font-size:13.5px;cursor:pointer;font-family:inherit;white-space:nowrap}
 .btn:hover{border-color:var(--ink-3)}
@@ -132,6 +158,14 @@ select:focus,input:focus{outline:2px solid var(--matched);outline-offset:1px}
 .seg button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
 .spacer{margin-left:auto}
 @media(max-width:640px){.spacer{margin-left:0;width:100%}}
+/* touch needs a 44px target; a mouse does not, so this only applies to coarse
+   pointers rather than inflating every control at narrow widths */
+@media(pointer:coarse){
+  .themebtn{min-width:44px;min-height:44px;padding:5px 9px}
+  .btn,.seg button{min-height:44px;padding:12px 15px}
+  .navlinks a{padding:11px 0}
+  select,input[type=search]{min-height:44px}
+}
 
 /* ---------- tables ---------- */
 .tablescroll{overflow-x:auto;border:1px solid var(--rule);border-radius:10px;background:var(--bg-elev)}
@@ -144,7 +178,8 @@ thead th:first-child{z-index:3;background:var(--bg-sunk)}
 th.sortable{cursor:pointer;user-select:none}
 th.sortable:hover{color:var(--ink)}
 th .arrow{opacity:.35;margin-left:3px}
-th[aria-sort] .arrow{opacity:1;color:var(--ink)}
+/* every sortable column now carries aria-sort, so only a real direction lights up */
+th[aria-sort]:not([aria-sort=none]) .arrow{opacity:1;color:var(--ink)}
 tbody tr:last-child td{border-bottom:0}
 tbody tr.clickable{cursor:pointer}
 tbody tr.clickable:hover td{background:var(--bg-sunk)}

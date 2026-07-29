@@ -87,6 +87,39 @@ non-affiliation disclaimer. Contact if ever needed: datarequest@nrmp.org.
 
 ## Log
 
+### 2026-07-30 — Polish pass
+- **Keyboard path was broken, not just imperfect.** Nothing on the page showed a
+  focus ring: buttons, links and the `tabIndex=0` specialty rows all had
+  `outline:none`, so a keyboard user navigated blind. One `:focus-visible`
+  treatment now covers every reachable control. Sorting was also mouse-only —
+  the `th` elements had no tabindex and no key handler — so it now takes Enter
+  and Space, and hands focus back to the same column after the header rebuilds.
+- **Column help was mouse-only too.** The tooltips explaining "Applicants /
+  position" and the rest fired on `mousemove` alone. They now open on focus.
+- **Mobile had no navigation at all.** `@media(max-width:820px){.navlinks{display:none}}`
+  hid the six-section jump list below 820px, on a page that is six long tables,
+  for an audience substantially on phones. The links now take their own
+  full-width row and scroll sideways, with a mask fading the right edge.
+  `.navlinks` already had `overflow-x:auto` — the affordance was built and then
+  thrown away.
+- **The callout was the only card on the page.** Everything else uses hairline
+  rules and space (`.shead::before`, `.findings` border-top, `.caveatlist`
+  border-bottom). The 41.5% note was a filled, rounded, amber-tinted box with a
+  4px left border — both the detector's one finding and a genuine system
+  outlier. Rebuilt as a hairline with an 88px accent segment, in the page's own
+  grammar. `--warn-bg` and `--warn-rule` existed only for it and are gone.
+- **Regression from the clarify pass, caught and fixed.** Setting
+  `aria-sort="none"` on unsorted columns collided with
+  `th[aria-sort] .arrow{opacity:1}`, so all nine sort arrows rendered as active.
+  Selector now excludes `none`.
+- Touch targets under `@media(pointer:coarse)` only, so a mouse does not get
+  inflated controls: the theme button was 33×25.
+- The hero hint told touch users to "move your pointer"; they now get the
+  gesture they can actually perform.
+- Mobile hero scrim widened. The field fills far more of a narrow frame, and
+  the text was sitting on live particles.
+- Detector: **0 findings** (was 1). Copy gates still clean.
+
 ### 2026-07-30 — Copy clarity pass
 - **Terminology unified.** The page had six names for one concept (rank-list
   length / programs ranked in-specialty / contiguous ranks / Ranks / rank
