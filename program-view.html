@@ -438,7 +438,7 @@ body.anno-on .pd-annocell .pd-anno{margin:0;border:0;border-left:3px solid var(-
     to filter, sort and open the applications it receives.
   </p>
   <p>
-    It was rebuilt from screenshots of a demo program and filled with 732 invented applicants. The filters
+    It is a demonstration program filled with 732 invented applicants. The filters
     run for real, so every count on it is computed. Open <strong>Manage Filters</strong> to read what a
     program can select on before anyone opens a personal statement: country of medical school, LCME
     accreditation, visa sponsorship, ECFMG certification, number of exam attempts. Build one yourself in
@@ -453,8 +453,7 @@ body.anno-on .pd-annocell .pd-anno{margin:0;border:0;border-left:3px solid var(-
     <h2>What is real here and what is not</h2>
     <p>
       <em>The interface is a recreation.</em> It carries no AAMC logo or branding, it is not connected to
-      any AAMC system, and it is not the product. Category and field names transcribed from the screenshots
-      are the ones the criteria builder marks as observed; the rest are reconstructed from what ERAS
+      any AAMC system, and it is not the product. Category and field names shown are the ones the criteria builder marks as observed; the rest are reconstructed from what ERAS
       collects, and the builder says so underneath whenever you are looking at one.
     </p>
     <p>
@@ -465,7 +464,7 @@ body.anno-on .pd-annocell .pd-anno{margin:0;border:0;border-left:3px solid var(-
       attended one.
     </p>
     <p>
-      <em>Sections that were not in the screenshots are not filled in.</em> Rankings, Reports, Archives and
+      <em>Sections that are not part of the demonstration are not filled in.</em> Rankings, Reports, Archives and
       the rest say so when you open them.
     </p>
   </div>
@@ -482,8 +481,7 @@ body.anno-on .pd-annocell .pd-anno{margin:0;border:0;border-left:3px solid var(-
 <footer>
   <div class="wrap">
     <p><strong>On the source.</strong> The layout, navigation, field labels and filter names reproduced here
-    were transcribed from screenshots of a demonstration program in the AAMC Program Director's WorkStation.
-    No applicant data was taken from them. This page is an independent recreation for the purpose of
+    are based on a demonstration program in the AAMC Program Director's WorkStation. No applicant data was taken from any real sources. This page is an independent recreation for the purpose of
     explaining the screening step to applicants, and it is not affiliated with, endorsed by, or reviewed by
     the AAMC, ERAS, Thalamus or the NRMP.</p>
     <p>The Step 2 CK medians cited in the applicant notes come from the National Resident Matching Program's
@@ -506,7 +504,7 @@ body.anno-on .pd-annocell .pd-anno{margin:0;border:0;border-left:3px solid var(-
 
    The interface being recreated is the AAMC Program Director's
    WorkStation (PDWS). Category and field names marked OBSERVED are
-   transcribed from screenshots of the live product. The rest are
+   taken from the observed demo interface. The rest are
    reconstructed and marked as such in the page's own disclosure.
    ============================================================ */
 var PD = (function () {
@@ -883,8 +881,8 @@ var PD = (function () {
   ];
 
   /* ---------------- criteria catalog ----------------
-     `seen: true` marks a category or field transcribed from a screenshot
-     of the real product. Everything else is reconstructed, and the page
+     `seen: true` marks a category or field observed in the demo product.
+     Everything else is reconstructed, and the page
      says so where a reader can see it. */
   var YESNO = { type: "yesno" };
   var DATE = { type: "date" };
@@ -2395,8 +2393,7 @@ var PD = (function () {
     if (!cat.seen) {
       var p = el("p");
       p.style.cssText = "font-size:12.5px;color:#767676;margin:8px 0 0";
-      p.textContent = "“" + cat.name + "” is a reconstructed category. The screenshots this "
-        + "page was built from show the category list only where it was scrolled to, so categories "
+      p.textContent = "“" + cat.name + "” is a reconstructed category. The available demo shows the category list only where it was scrolled to, so categories "
         + "past the letter L are inferred from what ERAS collects.";
       body.appendChild(p);
     }
@@ -2415,9 +2412,7 @@ var PD = (function () {
     b.appendChild(h);
     var p = el("p");
     p.style.cssText = "margin:0;font-size:14px;color:#4f4f4f;max-width:62ch;line-height:1.55";
-    p.textContent = "Not recreated. This page was built from screenshots of the applicant "
-      + "list, the applicant record, the filter manager and the criteria builder. Nothing was "
-      + "seen of this section, so inventing it would be a guess dressed as a fact.";
+    p.textContent = "Not reconstructed. This section was not observed in the demo and is therefore not filled in.";
     b.appendChild(p);
     var back = el("button", "pd-btn");
     back.textContent = "Back to applicants";
