@@ -1,0 +1,2492 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The screen on the other side — how programs filter applicants</title>
+<meta name="description" content="A working recreation of the program director's applicant workstation, filled with invented applicants, so you can see the fields a residency program can filter on before anyone reads an application.">
+
+<meta property="og:title" content="The screen on the other side">
+<meta property="og:description" content="A working recreation of the software a residency program uses to filter applicants, with every filter live over an invented applicant pool.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://match.saieesh.dev/program-view.html">
+<meta property="og:image" content="https://match.saieesh.dev/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The screen on the other side">
+<meta name="twitter:description" content="A working recreation of the software a residency program uses to filter applicants, with every filter live over an invented applicant pool.">
+<meta name="twitter:image" content="https://match.saieesh.dev/og-image.png">
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23111214'/><rect x='6.5' y='18' width='4.4' height='8' rx='1.2' fill='%23ece9e3'/><rect x='13.8' y='12' width='4.4' height='14' rx='1.2' fill='%235c9dff'/><rect x='21.1' y='6.5' width='4.4' height='19.5' rx='1.2' fill='%23f0a92e'/></svg>">
+<style>/* ============================================================
+   Program-view recreation.
+
+   Two visual worlds on one page, deliberately not blended:
+
+   .frame  — this site's own chrome. Dark, serif, quiet. It holds the
+             specimen and says what it is.
+   .pdws   — the recreation. Light, dense, enterprise. It stays light in
+             both site themes, because a light dense grid is what a
+             program actually looks at; restyling it to match this site
+             would misrepresent the thing being shown.
+   ============================================================ */
+:root{
+  --bg:#0e0f11; --bg-elev:#16181b; --bg-sunk:#0a0b0c;
+  --ink:#ece9e3; --ink-2:#aeaba4; --ink-3:#7b7973;
+  --rule:#26282c; --rule-2:#373a3f;
+  --matched:#5c9dff; --unmatched:#f0a92e;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --maxw:1180px;
+
+  /* specimen palette — fixed, not themed */
+  --pd-navy:#012f68;
+  --pd-navy-2:#01254f;
+  --pd-teal:#0f7681;
+  --pd-teal-dk:#0c626b;
+  --pd-page:#f1f1f1;
+  --pd-card:#ffffff;
+  --pd-line:#dcdcdc;
+  --pd-line-2:#c8c8c8;
+  --pd-ink:#1d1d1d;
+  --pd-ink-2:#4f4f4f;
+  --pd-ink-3:#767676;
+  --pd-zebra:#f7f7f7;
+  --pd-info:#e7f2fb;
+  --pd-info-line:#9fc9e8;
+  --pd-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+:root[data-theme="light"]{
+  --bg:#faf9f6; --bg-elev:#ffffff; --bg-sunk:#f1efea;
+  --ink:#17181b; --ink-2:#4c4e56; --ink-3:#797b83;
+  --rule:#e4e2db; --rule-2:#cfccc3;
+  --matched:#1f6feb; --unmatched:#b45309;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+  font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.vis-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ============================================================
+   THE FRAME — this site talking about the specimen
+   ============================================================ */
+.frame-bar{position:sticky;top:0;z-index:60;background:color-mix(in srgb,var(--bg) 92%,transparent);
+  backdrop-filter:blur(12px);border-bottom:1px solid var(--rule)}
+.frame-in{max-width:var(--maxw);margin:0 auto;padding:10px 24px;display:flex;
+  gap:8px 18px;align-items:center;flex-wrap:wrap}
+.frame-back{color:var(--ink-2);text-decoration:none;font-size:13px;white-space:nowrap;font-weight:500}
+.frame-back:hover{color:var(--ink)}
+.frame-title{font-weight:700;font-size:14px;letter-spacing:-.01em;white-space:nowrap}
+.frame-title span{color:var(--ink-3);font-weight:500}
+.frame-sp{margin-left:auto}
+.annotoggle{display:inline-flex;align-items:center;gap:8px;background:var(--bg-elev);
+  border:1px solid var(--rule-2);color:var(--ink);border-radius:7px;padding:7px 12px;
+  font-size:13px;font-family:inherit;cursor:pointer;white-space:nowrap}
+.annotoggle:hover{border-color:var(--ink-3)}
+.annotoggle .dot{width:8px;height:8px;border-radius:50%;background:var(--rule-2);flex-shrink:0}
+.annotoggle[aria-pressed=true]{background:var(--unmatched);border-color:var(--unmatched);color:#20160a}
+.annotoggle[aria-pressed=true] .dot{background:#20160a}
+a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,
+[tabindex]:focus-visible{outline:2px solid var(--matched);outline-offset:2px;border-radius:3px}
+
+.intro{max-width:var(--maxw);margin:0 auto;padding:44px 24px 30px}
+.intro h1{font-family:var(--serif);font-size:clamp(30px,4.6vw,46px);letter-spacing:-.022em;
+  font-weight:600;line-height:1.05;max-width:19ch;margin:0}
+.intro p{color:var(--ink-2);font-size:16.5px;max-width:68ch;margin:18px 0 0}
+.intro p+p{margin-top:12px}
+.intro strong{color:var(--ink);font-weight:600}
+/* the disclosure sits in the page's own grammar: a hairline with an accent
+   segment, the same device the main site uses for its one aside */
+.disclose{position:relative;margin:30px 0 0;padding:22px 0 0;border-top:1px solid var(--rule)}
+.disclose::before{content:"";position:absolute;top:-1px;left:0;width:88px;height:1px;background:var(--unmatched)}
+.disclose h2{font-size:15px;font-weight:650;letter-spacing:-.01em;margin:0 0 9px}
+.disclose p{margin:0;color:var(--ink-2);font-size:14.5px;max-width:76ch}
+.disclose p+p{margin-top:9px}
+.disclose em{color:var(--ink);font-style:normal;font-weight:600}
+
+.stage{max-width:var(--maxw);margin:0 auto;padding:8px 24px 56px}
+.stage-hint{color:var(--ink-3);font-size:12.5px;margin:0 0 10px;display:flex;
+  flex-wrap:wrap;gap:4px 14px;align-items:baseline}
+
+footer{border-top:1px solid var(--rule);padding:36px 0 60px;color:var(--ink-3);font-size:13.5px}
+footer .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+footer p{margin:0 0 12px;max-width:76ch}
+footer a{color:var(--ink-2)}
+@media(max-width:640px){
+  .intro,.stage,.frame-in,footer .wrap{padding-left:16px;padding-right:16px}
+}
+
+/* ============================================================
+   THE SPECIMEN
+   ============================================================ */
+.pdws{background:var(--pd-page);color:var(--pd-ink);font-family:var(--pd-sans);
+  font-size:14px;line-height:1.45;border:1px solid var(--rule-2);border-radius:10px;
+  overflow:hidden;box-shadow:0 22px 60px -30px rgba(0,0,0,.65)}
+.pdws *{box-sizing:border-box}
+.pdws button,.pdws input,.pdws select{font-family:inherit;font-size:inherit}
+.pdws a{color:var(--pd-teal);text-decoration:none}
+.pdws a:hover{text-decoration:underline}
+.pdws :focus-visible{outline:2px solid #ffb020;outline-offset:1px}
+
+/* ---------- top navigation ---------- */
+.pd-util{background:var(--pd-navy);display:flex;align-items:center;gap:14px;
+  padding:7px 18px;color:#fff}
+.pd-util .sp{margin-left:auto}
+.pd-help{width:22px;height:22px;border-radius:50%;border:1.5px solid #9fc0e4;color:#cfe1f5;
+  background:none;display:grid;place-items:center;font-size:12px;cursor:pointer;flex-shrink:0}
+.pd-search{position:relative}
+.pd-search input{width:220px;border:1px solid #cfd8e3;border-radius:3px;padding:5px 9px 5px 27px;
+  background:#fff;color:#1d1d1d;font-size:13px}
+.pd-search::before{content:"⌕";position:absolute;left:8px;top:50%;transform:translateY(-50%);
+  color:#767676;font-size:14px;pointer-events:none}
+.pd-user{display:flex;align-items:center;gap:10px;padding-left:14px;border-left:1px solid #35577f}
+.pd-user .who{font-size:12.5px;color:#dce7f3;text-align:right;line-height:1.25}
+.pd-user .who b{display:block;font-weight:600;color:#fff}
+.pd-avatar{width:26px;height:26px;border-radius:50%;background:#e8eef5;flex-shrink:0}
+.pd-mark{font-weight:700;letter-spacing:.14em;font-size:13px;color:#fff}
+.pd-mark span{font-weight:400;letter-spacing:.02em;color:#a8c3e2;margin-left:8px;font-size:11.5px}
+
+/* the nine sections do not fit under ~1180px; the mask makes the overflow read
+   as scrollable rather than as a clipped last item */
+.pd-nav{background:var(--pd-navy);display:flex;align-items:stretch;padding:0 12px;
+  overflow-x:auto;scrollbar-width:none;
+  mask-image:linear-gradient(to right,#000 94%,transparent);
+  -webkit-mask-image:linear-gradient(to right,#000 94%,transparent)}
+.pd-nav::-webkit-scrollbar{display:none}
+.pd-nav button{background:none;border:0;color:#e6eef7;padding:13px 15px 14px;font-size:14px;
+  cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent}
+.pd-nav button:hover{background:rgba(255,255,255,.09)}
+.pd-nav button[aria-current=page]{background:#fff;color:var(--pd-navy);font-weight:600}
+.pd-nav .caret{font-size:9px;margin-left:5px;vertical-align:1px}
+
+.pd-subbar{background:#ebebeb;border-bottom:1px solid var(--pd-line);padding:6px 18px;
+  font-size:12.5px;color:var(--pd-ink-2)}
+.pd-subbar a+a{margin-left:6px;padding-left:8px;border-left:1px solid var(--pd-line-2)}
+
+.pd-body{padding:16px 18px 26px;min-height:520px}
+
+/* ---------- shared card ---------- */
+.pd-card{background:var(--pd-card);border:1px solid var(--pd-line);margin-bottom:14px}
+.pd-card-hd{display:flex;align-items:center;gap:12px;padding:12px 16px;
+  border-bottom:1px solid var(--pd-line)}
+.pd-card-hd h3{margin:0;font-size:16px;font-weight:600;letter-spacing:-.01em}
+.pd-card-hd .sp{margin-left:auto}
+.pd-card-bd{padding:14px 16px}
+.pd-chev{background:none;border:0;color:var(--pd-ink-2);cursor:pointer;font-size:13px;padding:2px 4px}
+
+/* ---------- buttons ---------- */
+.pd-btn{background:#fff;border:1px solid var(--pd-teal);color:var(--pd-teal);
+  padding:7px 14px;font-size:12.5px;font-weight:600;letter-spacing:.04em;
+  text-transform:uppercase;cursor:pointer;border-radius:2px;white-space:nowrap}
+.pd-btn:hover{background:#eef7f8}
+.pd-btn.solid{background:var(--pd-teal);color:#fff}
+.pd-btn.solid:hover{background:var(--pd-teal-dk)}
+.pd-btn.plain{border-color:transparent;color:var(--pd-teal)}
+.pd-btn[disabled]{border-color:#c9c9c9;color:#9b9b9b;background:#f4f4f4;cursor:default}
+.pd-btn[disabled]:hover{background:#f4f4f4}
+.pd-link{background:none;border:0;color:var(--pd-teal);cursor:pointer;font-size:13px;padding:0}
+.pd-link:hover{text-decoration:underline}
+
+/* ---------- info banner ---------- */
+.pd-info{display:flex;gap:11px;align-items:flex-start;background:var(--pd-info);
+  border:1px solid var(--pd-info-line);padding:11px 14px;margin-bottom:14px;font-size:13.5px}
+.pd-info .i{width:18px;height:18px;border-radius:50%;background:#1c6fb5;color:#fff;
+  display:grid;place-items:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:1px}
+.pd-info .x{margin-left:auto;background:none;border:0;color:#4f4f4f;cursor:pointer;
+  font-size:16px;line-height:1;padding:0 2px}
+
+/* ---------- tables ---------- */
+.pd-tablewrap{overflow-x:auto}
+.pd-table{width:100%;border-collapse:collapse;font-size:13.5px}
+.pd-table th{text-align:left;font-weight:600;color:#333;padding:11px 12px;
+  border-bottom:1px solid var(--pd-line-2);white-space:nowrap;background:#fff}
+.pd-table td{padding:9px 12px;border-bottom:1px solid #ededed;white-space:nowrap;
+  color:var(--pd-ink-2)}
+.pd-table tbody tr:nth-child(even){background:var(--pd-zebra)}
+.pd-table tbody tr.pd-row{cursor:pointer}
+.pd-table tbody tr.pd-row:hover{background:#eaf3f5}
+.pd-table th.sortable{cursor:pointer;user-select:none}
+.pd-table th.sortable:hover{color:var(--pd-teal)}
+.pd-table th .sortglyph{color:#8a8a8a;margin-left:5px;font-size:11px}
+.pd-table th[aria-sort]:not([aria-sort=none]) .sortglyph{color:var(--pd-teal)}
+.pd-table td.name{color:var(--pd-teal);font-weight:500}
+.pd-table .cellmuted{color:#8f8f8f}
+/* school names run to 70-odd characters and the real product clips them, which
+   is also what keeps all six columns on screen at a normal desktop width */
+.pd-table td.school{max-width:292px;overflow:hidden;text-overflow:ellipsis}
+.pd-table th.selectall{width:46px;white-space:nowrap}
+.pd-table th.selectall .caret{color:#8a8a8a;font-size:10px;margin-left:4px}
+.pd-check{width:15px;height:15px;accent-color:var(--pd-teal);vertical-align:-2px}
+.pd-empty{padding:34px 16px;text-align:center;color:var(--pd-ink-3);font-size:13.5px}
+
+.pd-listtools{display:flex;align-items:center;gap:14px;padding:12px 16px;flex-wrap:wrap}
+.pd-listtools .sp{margin-left:auto}
+.pd-inputsearch{position:relative}
+.pd-inputsearch input{border:1px solid var(--pd-line-2);border-radius:2px;
+  padding:6px 9px 6px 26px;font-size:13px;width:190px;background:#fff;color:var(--pd-ink)}
+.pd-inputsearch::before{content:"⌕";position:absolute;left:8px;top:50%;transform:translateY(-50%);
+  color:#8a8a8a;font-size:14px;pointer-events:none}
+.pd-updated{font-size:12px;color:var(--pd-ink-3);margin:2px 0 0}
+
+.pd-pager{display:flex;align-items:center;gap:14px;padding:11px 16px;flex-wrap:wrap;
+  border-top:1px solid var(--pd-line);font-size:12.5px;color:var(--pd-ink-2)}
+.pd-pager .sp{margin-left:auto}
+.pd-pager select{border:1px solid var(--pd-line-2);border-radius:2px;padding:3px 5px;
+  font-size:12.5px;background:#fff;color:var(--pd-ink)}
+.pd-pager button{background:none;border:0;color:var(--pd-teal);cursor:pointer;
+  font-size:15px;padding:2px 6px;line-height:1}
+.pd-pager button[disabled]{color:#bdbdbd;cursor:default}
+
+/* ---------- dashboard ---------- */
+.pd-dash{display:grid;grid-template-columns:minmax(180px,224px) 1.12fr 1.12fr;gap:14px;align-items:start}
+/* Favorite Filters and Reports sit under Stats and Application Activity, not
+   under Quick Links, so they are placed rather than left to auto-flow */
+.pd-dash .row2a{grid-column:2}
+.pd-dash .row2b{grid-column:3}
+/* the heading sits outside the bordered list, so the wrapper carries no chrome */
+.pd-quickwrap h3{margin:0 0 10px;font-size:16px;font-weight:600;padding:0 2px}
+.pd-quickwrap ul{list-style:none;margin:0;padding:0;border:1px solid var(--pd-line);background:#fff}
+.pd-quickwrap li+li{border-top:1px solid var(--pd-line)}
+.pd-quickwrap a{display:flex;justify-content:space-between;gap:8px;padding:10px 13px;font-size:13.5px}
+.pd-quickwrap .ext{color:#8a8a8a;font-size:11px}
+.pd-quickwrap{background:none;border:0}
+.pd-stats{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center}
+.pd-statlist{margin:0}
+.pd-statrow{padding:8px 0;border-bottom:1px solid var(--pd-line)}
+.pd-statrow:last-child{border-bottom:0}
+.pd-statrow .n{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.2}
+.pd-statrow .t{font-size:13px}
+.pd-bigstat{text-align:center;padding-left:12px;min-width:112px}
+.pd-bigstat .n{font-size:34px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.05}
+.pd-bigstat .t{font-size:13px;color:var(--pd-teal)}
+.pd-daterow{display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px}
+.pd-datefield label{display:block;font-size:12.5px;font-weight:600;margin-bottom:4px}
+.pd-datefield input{border:1px solid var(--pd-line-2);border-radius:2px;padding:6px 9px;
+  font-size:13px;width:150px;background:#fff;color:var(--pd-ink)}
+.pd-datefield .hint{font-size:11px;color:var(--pd-ink-3);margin-top:3px}
+.pd-noresult{padding:42px 10px;text-align:center;color:var(--pd-ink-2);font-size:14px}
+@media(max-width:900px){.pd-dash{grid-template-columns:1fr}
+  .pd-dash .row2a,.pd-dash .row2b{grid-column:auto}}
+
+/* ---------- manage filters ---------- */
+.pd-filtergrid{display:grid;grid-template-columns:1fr 1fr;gap:0 34px}
+.pd-filterrow{display:flex;align-items:center;gap:10px;padding:7px 2px;
+  border-bottom:1px solid #f0f0f0;font-size:13.5px}
+.pd-filterrow .star{background:none;border:0;color:#9a9a9a;cursor:pointer;font-size:14px;
+  padding:0;line-height:1;flex-shrink:0}
+.pd-filterrow .star.on{color:#e0a800}
+.pd-filterrow .nm{flex:1;text-align:left;min-width:0;overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap}
+.pd-filterrow .cnt{color:var(--pd-ink-3);font-size:12px;font-variant-numeric:tabular-nums;flex-shrink:0}
+.pd-filterrow .act{background:none;border:0;color:#8a8a8a;cursor:pointer;padding:0 2px;
+  font-size:13px;flex-shrink:0}
+.pd-filterrow .act:hover{color:var(--pd-teal)}
+@media(max-width:760px){.pd-filtergrid{grid-template-columns:1fr}}
+
+/* ---------- criteria builder ---------- */
+.pd-crithd{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--pd-line)}
+.pd-crithd b{font-size:14px}
+.pd-crithd .sp{margin-left:auto}
+.pd-critcols{display:grid;grid-template-columns:1fr 1fr 1fr 1.15fr;gap:0}
+.pd-critcol{border-right:1px solid var(--pd-line);padding:14px 16px;min-height:330px}
+.pd-critcol:last-child{border-right:0}
+.pd-critsearch{position:relative;margin-bottom:10px}
+.pd-critsearch input{width:100%;border:1px solid var(--pd-line-2);border-radius:2px;
+  padding:6px 9px 6px 26px;font-size:13px;background:#fff;color:var(--pd-ink)}
+.pd-critsearch::before{content:"⌕";position:absolute;left:8px;top:50%;transform:translateY(-50%);
+  color:#8a8a8a;font-size:14px;pointer-events:none}
+.pd-critlist{max-height:290px;overflow-y:auto;border:0}
+.pd-critlist button{display:block;width:100%;text-align:left;background:none;border:0;
+  padding:7px 10px;font-size:13.5px;cursor:pointer;color:var(--pd-ink);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pd-critlist button:hover{background:#f0f0f0}
+.pd-critlist button[aria-selected=true]{background:#dff0f1;font-weight:500}
+.pd-critlab{font-size:12.5px;font-weight:600;margin:0 0 7px}
+.pd-critval select,.pd-critval input[type=text],.pd-critval input[type=number]{
+  width:100%;border:1px solid var(--pd-teal);border-radius:2px;padding:7px 9px;
+  font-size:13.5px;background:#fff;color:var(--pd-ink)}
+.pd-radio{display:flex;gap:22px;align-items:center;margin-top:4px}
+.pd-radio label{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;cursor:pointer}
+.pd-radio input{accent-color:var(--pd-teal);width:15px;height:15px}
+.pd-runtime{display:flex;align-items:center;gap:11px;margin-top:26px;padding-top:16px;
+  border-top:1px solid var(--pd-line);font-size:13px}
+.pd-switch{width:38px;height:20px;border-radius:99px;background:#c4c4c4;border:0;
+  position:relative;cursor:pointer;flex-shrink:0;transition:background .15s}
+.pd-switch::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;
+  border-radius:50%;background:#fff;transition:left .15s}
+.pd-switch[aria-pressed=true]{background:var(--pd-teal)}
+.pd-switch[aria-pressed=true]::after{left:20px}
+.pd-critfoot{padding:12px 16px;border-top:1px solid var(--pd-line);display:flex;
+  align-items:center;gap:12px;font-size:13px;color:var(--pd-ink-2);flex-wrap:wrap}
+.pd-critfoot .sp{margin-left:auto}
+@media(max-width:900px){.pd-critcols{grid-template-columns:1fr 1fr}
+  .pd-critcol{border-bottom:1px solid var(--pd-line);min-height:0}}
+@media(max-width:560px){.pd-critcols{grid-template-columns:1fr}}
+
+/* ---------- applicant detail ---------- */
+.pd-detailbar{display:flex;align-items:center;gap:14px;margin-bottom:12px;flex-wrap:wrap}
+.pd-detailbar .sp{margin-left:auto}
+.pd-count{font-size:13.5px;color:var(--pd-ink-2);font-variant-numeric:tabular-nums}
+.pd-detail{display:grid;grid-template-columns:minmax(220px,290px) 1fr;gap:14px;align-items:start}
+.pd-photo{background:#dfe3e8;height:112px;border-bottom:1px solid var(--pd-line);
+  display:grid;place-items:center;color:#a9b1ba;font-size:12px}
+.pd-idblock{padding:12px 14px}
+.pd-idblock .badge{display:inline-flex;align-items:center;gap:6px;background:#ececec;
+  border-radius:2px;padding:3px 9px;font-size:12px;font-weight:600;margin-bottom:10px}
+.pd-idblock .badge.gold{background:#fdf1d4;color:#7a5800}
+.pd-idblock .badge.silver{background:#eceff1;color:#4a5560}
+.pd-fieldlab{font-size:12.5px;font-weight:700;margin-top:11px}
+.pd-fieldval{font-size:13px;color:var(--pd-ink-2)}
+.pd-acc{border-top:0}
+.pd-acc button{display:flex;width:100%;align-items:center;justify-content:space-between;
+  gap:10px;background:none;border:0;border-bottom:1px solid var(--pd-line);
+  padding:11px 14px;font-size:13.5px;color:var(--pd-teal);cursor:pointer;text-align:left}
+.pd-acc button:hover{background:#f6f9fa}
+.pd-acc .chev{color:#9a9a9a;font-size:12px}
+.pd-notes{background:var(--pd-teal-dk);color:#fff;padding:11px 14px;display:flex;
+  align-items:center;justify-content:space-between;font-size:13.5px;font-weight:600}
+.pd-glance dl{display:grid;grid-template-columns:minmax(150px,210px) 1fr;gap:11px 18px;margin:0}
+.pd-glance dt{font-size:13px;font-weight:700}
+.pd-glance dd{margin:0;font-size:13px;color:var(--pd-ink-2)}
+.pd-redact{display:inline-block;height:11px;border-radius:2px;background:#d9d9d9;
+  vertical-align:-1px;min-width:90px}
+.pd-pencil{background:none;border:0;color:#8a8a8a;cursor:pointer;font-size:12px;padding:0 4px}
+
+.pd-tabs{display:flex;gap:0;border-bottom:1px solid var(--pd-line);overflow-x:auto;
+  scrollbar-width:none}
+.pd-tabs::-webkit-scrollbar{display:none}
+.pd-tabs button{background:none;border:0;border-bottom:3px solid transparent;
+  padding:12px 17px;font-size:13.5px;color:var(--pd-teal);cursor:pointer;white-space:nowrap}
+.pd-tabs button:hover{background:#f6f9fa}
+.pd-tabs button[aria-selected=true]{background:var(--pd-teal);color:#fff;font-weight:600}
+.pd-panel{padding:16px}
+.pd-panel h4{margin:0 0 12px;font-size:16px;font-weight:600}
+.pd-cols2{display:grid;grid-template-columns:1fr 1fr;gap:22px 34px}
+@media(max-width:820px){.pd-detail{grid-template-columns:1fr}.pd-cols2{grid-template-columns:1fr}}
+
+/* ---------- the specimen on a narrow screen ----------
+   The source is a desktop application and is reproduced as one. What has to
+   change is only what would otherwise be unreachable: .pdws clips its overflow
+   to keep the rounded frame, so any header row that does not wrap loses its
+   buttons off the right edge. */
+@media(max-width:640px){
+  .pd-util{flex-wrap:wrap;gap:9px 12px;padding:9px 14px}
+  .pd-util .sp{display:none}
+  .pd-search{order:3;width:100%}
+  .pd-search input{width:100%}
+  .pd-user{margin-left:auto;padding-left:11px}
+  .pd-user .who{font-size:11px}
+  .pd-card-hd,.pd-crithd,.pd-detailbar{flex-wrap:wrap;gap:9px}
+  .pd-card-hd .sp,.pd-crithd .sp{margin-left:auto}
+  .pd-body{padding:12px 12px 20px}
+  .pd-glance dl{grid-template-columns:1fr;gap:1px 0}
+  .pd-glance dt{margin-top:10px}
+  .pd-pager{gap:9px 12px}
+  .pd-pager .sp{margin-left:0;width:100%;height:0}
+}
+/* the source's 30px controls are a mouse target; a finger needs more */
+@media(pointer:coarse){
+  .pd-btn,.pd-nav button{min-height:44px}
+  .pd-link,.pd-chev,.pd-pencil,.pd-filterrow .star,.pd-filterrow .act,
+  .pd-info .x,.pd-help,.pd-pager button{min-width:44px;min-height:44px}
+  .pd-filterrow .star,.pd-filterrow .act,.pd-pager button,.pd-info .x{
+    display:inline-grid;place-items:center}
+  .pd-tabs button,.pd-acc button{min-height:46px}
+  .pd-check{width:20px;height:20px}
+  .pd-critlist button{padding:12px 10px}
+}
+
+/* ============================================================
+   ANNOTATIONS — off by default so the default state is the recreation
+   ============================================================ */
+.pd-anno{display:none}
+body.anno-on .pd-anno{display:block;background:#fff6e2;border:1px solid #e8c877;
+  border-left:3px solid var(--unmatched);padding:9px 12px;margin:8px 0;max-width:82ch;
+  font-size:12.5px;line-height:1.5;color:#3e3117;font-family:var(--sans);text-wrap:pretty}
+body.anno-on .pd-anno b{color:#241c08}
+body.anno-on .pd-anno.inrow{margin:0;max-width:none}
+body.anno-on [data-anno]{outline:2px dashed rgba(240,169,46,.85);outline-offset:1px;
+  border-radius:2px;background:rgba(240,169,46,.1)}
+/* a dd is a grid item and would otherwise take the whole column, so the marker
+   would read as a long empty box rather than as a highlight on the value */
+body.anno-on dd[data-anno]{justify-self:start}
+.pd-annocell{display:none}
+body.anno-on .pd-annocell{display:table-row}
+body.anno-on .pd-annocell td{background:#fff6e2 !important;padding:0;border-bottom:1px solid #e8c877}
+body.anno-on .pd-annocell .pd-anno{margin:0;border:0;border-left:3px solid var(--unmatched);
+  white-space:normal}
+</style>
+</head>
+<body>
+
+<div class="frame-bar">
+  <div class="frame-in">
+    <a class="frame-back" href="index.html">← IMG Match Outcomes</a>
+    <div class="frame-title">Program view <span>· recreation</span></div>
+    <div class="frame-sp"></div>
+    <button class="annotoggle" id="annoBtn" aria-pressed="false"><span class="dot" aria-hidden="true"></span><span>Applicant notes off</span></button>
+  </div>
+</div>
+
+<div class="intro">
+  <h1>The screen on the other side</h1>
+  <p>
+    The rest of this site measures what happened after programs chose who to look at. This page is that
+    choosing. It recreates the Program Director's WorkStation, the AAMC software a residency program uses
+    to filter, sort and open the applications it receives.
+  </p>
+  <p>
+    It was rebuilt from screenshots of a demo program and filled with 732 invented applicants. The filters
+    run for real, so every count on it is computed. Open <strong>Manage Filters</strong> to read what a
+    program can select on before anyone opens a personal statement: country of medical school, LCME
+    accreditation, visa sponsorship, ECFMG certification, number of exam attempts. Build one yourself in
+    <strong>New Criteria</strong> and the line under the builder says how many of the 732 come through it.
+  </p>
+  <p>
+    Turn on <strong>applicant notes</strong> and the fields that decide most for a non-U.S. IMG pick up a
+    line of commentary. Leave them off and what is left is the interface.
+  </p>
+
+  <div class="disclose">
+    <h2>What is real here and what is not</h2>
+    <p>
+      <em>The interface is a recreation.</em> It carries no AAMC logo or branding, it is not connected to
+      any AAMC system, and it is not the product. Category and field names transcribed from the screenshots
+      are the ones the criteria builder marks as observed; the rest are reconstructed from what ERAS
+      collects, and the builder says so underneath whenever you are looking at one.
+    </p>
+    <p>
+      <em>Every applicant is invented.</em> Names, AAMC IDs, scores, dates and document states come from a
+      seeded random generator, and the mix of applicant types is chosen to resemble a large Internal
+      Medicine pool rather than measured from one. Medical school names are real institutions, because a
+      filter on medical school means nothing without them, and no record here belongs to anyone who
+      attended one.
+    </p>
+    <p>
+      <em>Sections that were not in the screenshots are not filled in.</em> Rankings, Reports, Archives and
+      the rest say so when you open them.
+    </p>
+  </div>
+</div>
+
+<div class="stage">
+  <p class="stage-hint">
+    <span>Move through it the way a program would: pick a filter, sort a column, open a row.</span>
+    <span>Applications ▾ → Manage Filters</span>
+  </p>
+  <div id="pdwsRoot"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <p><strong>On the source.</strong> The layout, navigation, field labels and filter names reproduced here
+    were transcribed from screenshots of a demonstration program in the AAMC Program Director's WorkStation.
+    No applicant data was taken from them. This page is an independent recreation for the purpose of
+    explaining the screening step to applicants, and it is not affiliated with, endorsed by, or reviewed by
+    the AAMC, ERAS, Thalamus or the NRMP.</p>
+    <p>The Step 2 CK medians cited in the applicant notes come from the National Resident Matching Program's
+    <em>Charting Outcomes™: Non-U.S. IMGs (Main Residency Match, 2026 Appointment Year)</em>, which is the
+    dataset behind <a href="index.html">the rest of this site</a>.</p>
+  </div>
+</footer>
+
+<script>/* ============================================================
+   Program-view recreation — synthetic applicant pool and filter catalog.
+
+   EVERY APPLICANT RECORD BELOW IS INVENTED. Names, AAMC IDs, scores,
+   dates and document states are generated from a seeded PRNG so the
+   page is stable between loads. Nothing here came from a real
+   application, a real program, or a real person.
+
+   Medical school names are real institutions, used because a filter
+   on "Most Recent Medical School" is meaningless without them. No
+   record is attached to anyone who attended one.
+
+   The interface being recreated is the AAMC Program Director's
+   WorkStation (PDWS). Category and field names marked OBSERVED are
+   transcribed from screenshots of the live product. The rest are
+   reconstructed and marked as such in the page's own disclosure.
+   ============================================================ */
+var PD = (function () {
+  "use strict";
+
+  /* mulberry32 — small, seeded, good enough for stable fixtures */
+  function rng(seed) {
+    return function () {
+      seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+      var t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  var r = rng(20260924);
+  function pick(a) { return a[Math.floor(r() * a.length)]; }
+  function chance(p) { return r() < p; }
+  function intBetween(lo, hi) { return lo + Math.floor(r() * (hi - lo + 1)); }
+
+  /* ---------------- name pools ---------------- */
+  /* Invented surnames and given names. Deliberately common-shaped so the
+     table reads naturally, deliberately not drawn from any roster. */
+  var GIVEN = [
+    "Aditi", "Ahmed", "Alina", "Amara", "Anand", "Andrea", "Anjali", "Arun",
+    "Benedict", "Bijan", "Camille", "Carlos", "Chidi", "Clara", "Daniel",
+    "Divya", "Elena", "Emeka", "Farah", "Gabriel", "Grace", "Hana", "Hassan",
+    "Ines", "Ismail", "Jacob", "Jasmin", "Javier", "Julia", "Karan", "Katrin",
+    "Kavya", "Kwame", "Laila", "Leon", "Lucia", "Maria", "Mariam", "Marcus",
+    "Mateo", "Meera", "Miguel", "Nadia", "Naveen", "Nikhil", "Nina", "Omar",
+    "Paulo", "Priya", "Rahul", "Rania", "Ravi", "Rosa", "Ruth", "Salma",
+    "Samuel", "Sanjay", "Sara", "Simone", "Sofia", "Tarek", "Thomas", "Tobias",
+    "Vera", "Vikram", "Yasmin", "Yusuf", "Zainab", "Zara"
+  ];
+  var FAMILY = [
+    "Abadi", "Achebe", "Ademola", "Aguirre", "Almeida", "Ansari", "Arbogast",
+    "Balogun", "Bhandari", "Cardoso", "Castellan", "Chatterjee", "Cortez",
+    "Dagher", "Delacroix", "Deshmukh", "Duarte", "Eze", "Faridi", "Ferreira",
+    "Gadkari", "Ghorbani", "Halloran", "Haruna", "Iyengar", "Jozwiak",
+    "Kalvani", "Kapadia", "Khoury", "Kovalenko", "Lindqvist", "Machado",
+    "Madubuike", "Mahfouz", "Marchetti", "Mbeki", "Mendonca", "Nakamura",
+    "Narayan", "Nkemdirim", "Okonkwo", "Oyelaran", "Pahlavi", "Pandit",
+    "Petrossian", "Quiroga", "Rahimi", "Ramaswamy", "Rasmussen", "Rebello",
+    "Salvatierra", "Sandoval", "Sarkissian", "Sepulveda", "Shirazi", "Sindhu",
+    "Tarrant", "Thackeray", "Tolentino", "Uwakwe", "Vaidya", "Valdivia",
+    "Varghese", "Vasquez", "Whitmore", "Yilmaz", "Zabriskie", "Zeleke"
+  ];
+
+  /* ---------------- school pools (real institutions) ---------------- */
+  var US_MD = [
+    "University of Michigan Medical School",
+    "Vanderbilt University School of Medicine",
+    "Pennsylvania State University College of Medicine",
+    "University of Louisville School of Medicine",
+    "Meharry Medical College",
+    "Sidney Kimmel Medical College at Thomas Jefferson University",
+    "University of Missouri-Kansas City School of Medicine",
+    "University of Arizona College of Medicine - Phoenix",
+    "Texas A&M Health Science Center College of Medicine",
+    "University of Illinois College of Medicine - Rockford",
+    "University of Illinois College of Medicine",
+    "Wayne State University School of Medicine",
+    "Indiana University School of Medicine",
+    "Ohio State University College of Medicine",
+    "The University of Texas Southwestern Medical School",
+    "Wright State University Boonshoft School of Medicine",
+    "University of Alabama at Birmingham Marnix E. Heersink School of Medicine",
+    "The University of Toledo College of Medicine and Life Sciences",
+    "Northwestern University The Feinberg School of Medicine",
+    "Medical College of Wisconsin",
+    "University of Iowa Roy J. and Lucille A. Carver College of Medicine",
+    "Saint Louis University School of Medicine"
+  ];
+  var US_DO = [
+    "Rowan-Virtua School of Osteopathic Medicine",
+    "Kansas City University College of Osteopathic Medicine",
+    "Des Moines University College of Osteopathic Medicine",
+    "Philadelphia College of Osteopathic Medicine",
+    "Midwestern University Chicago College of Osteopathic Medicine",
+    "Lake Erie College of Osteopathic Medicine",
+    "A.T. Still University Kirksville College of Osteopathic Medicine"
+  ];
+  var CARIB = [
+    "American University of Antigua College of Medicine",
+    "St. George's University School of Medicine",
+    "Ross University School of Medicine",
+    "Saba University School of Medicine",
+    "American University of the Caribbean School of Medicine"
+  ];
+  var INTL = [
+    "Mashhad University of Medical Sciences",
+    "Nepal Medical College",
+    "Nnamdi Azikiwe University College of Health Sciences",
+    "Kasturba Medical College, Manipal",
+    "Grant Government Medical College",
+    "Dow Medical College",
+    "Aga Khan University Medical College",
+    "Cairo University Faculty of Medicine",
+    "University of Lagos College of Medicine",
+    "Universidad Nacional Autonoma de Mexico Faculty of Medicine",
+    "Shahid Beheshti University of Medical Sciences",
+    "Ain Shams University Faculty of Medicine",
+    "Jordan University of Science and Technology Faculty of Medicine",
+    "Osmania Medical College",
+    "Bangalore Medical College and Research Institute",
+    "University of Damascus Faculty of Medicine",
+    "Sechenov First Moscow State Medical University",
+    "Chinese University of Hong Kong Faculty of Medicine",
+    "University of Santo Tomas Faculty of Medicine and Surgery",
+    "Lviv National Medical University",
+    "Tbilisi State Medical University",
+    "Universidad Central del Caribe School of Medicine",
+    "Christian Medical College, Vellore",
+    "King Edward Medical University"
+  ];
+  var CANADA = [
+    "University of Toronto Faculty of Medicine",
+    "McGill University Faculty of Medicine",
+    "University of British Columbia Faculty of Medicine"
+  ];
+
+  /* US census divisions — the values behind "Division Preference" */
+  var DIVISIONS = [
+    "New England", "Middle Atlantic", "South Atlantic", "East North Central",
+    "East South Central", "West North Central", "West South Central",
+    "Mountain", "Pacific"
+  ];
+  var SETTINGS = [
+    "No Preference", "Rural", "Rural or Suburban", "Suburban",
+    "Suburban or Urban", "Urban"
+  ];
+  var PRONOUNS = ["He/Him/His", "She/Her/Hers", "They/Them/Theirs", ""];
+  var TRACKS = ["Categorical", "Primary Care", "Research Pathway"];
+
+  /* ---------------- the pool ---------------- */
+  /* Mix is invented. It leans IMG-heavy the way a large Internal Medicine
+     pool does, which is the whole reason this page exists; it is not a
+     measurement of any real program's applicants. */
+  var TYPE_MIX = [
+    ["Non-U.S. IMG", 0.45], ["U.S. MD Senior", 0.19], ["U.S. DO Senior", 0.12],
+    ["U.S. IMG", 0.11], ["Previous Graduate", 0.13]
+  ];
+  function drawType() {
+    var x = r(), acc = 0;
+    for (var i = 0; i < TYPE_MIX.length; i++) {
+      acc += TYPE_MIX[i][1];
+      if (x < acc) return TYPE_MIX[i][0];
+    }
+    return "Non-U.S. IMG";
+  }
+
+  var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  function fmtDate(d) {
+    return MONTHS[d.getMonth()] + " " + d.getDate() + ", " + d.getFullYear();
+  }
+  /* ERAS releases every application to programs on one day, so most rows
+     share a date and the stragglers trail in behind it. */
+  function drawApplied() {
+    if (chance(0.68)) return new Date(2025, 8, 24);
+    return new Date(2025, 8, 24 + intBetween(1, 52));
+  }
+
+  var applicants = [];
+  var usedIds = {};
+  for (var i = 0; i < 732; i++) {
+    var type = drawType();
+    var isDO = type === "U.S. DO Senior";
+    var school, country;
+    if (type === "U.S. MD Senior") { school = pick(US_MD); country = "United States"; }
+    else if (isDO) { school = pick(US_DO); country = "United States"; }
+    else if (type === "U.S. IMG") {
+      school = chance(0.72) ? pick(CARIB) : pick(INTL);
+      country = "Other";
+    } else if (type === "Previous Graduate") {
+      school = chance(0.45) ? pick(US_MD) : pick(INTL);
+      country = school.indexOf("University of Michigan") === 0 ? "United States" : "Other";
+    } else {
+      school = chance(0.06) ? pick(CANADA) : pick(INTL);
+      country = "Other";
+    }
+    var lcme = US_MD.indexOf(school) >= 0;
+    var nonUsImg = type === "Non-U.S. IMG";
+
+    var id;
+    do { id = String(intBetween(10000000, 19999999)); } while (usedIds[id]);
+    usedIds[id] = 1;
+
+    /* Step 2 CK medians track the main site's figures: 248 for matched
+       non-U.S. IMGs, 242 for unmatched. The spread here is invented. */
+    var base = nonUsImg ? 244 : type === "U.S. MD Senior" ? 250 : 245;
+    var step2 = chance(0.11) ? null : Math.max(196, Math.min(285,
+      Math.round(base + (r() + r() + r() - 1.5) * 13)));
+
+    var signal = chance(0.137) ? "Gold" : chance(0.19) ? "Silver" : "None";
+    var lors = chance(0.05) ? 2 : chance(0.08) ? 4 : 3;
+    var reviewed = chance(0.0);   /* the demo program has reviewed nothing yet */
+
+    applicants.push({
+      idx: i,
+      last: pick(FAMILY),
+      first: pick(GIVEN),
+      aamcId: id,
+      school: school,
+      country: country,
+      lcme: lcme,
+      osteopathic: isDO,
+      type: type,
+      applied: drawApplied(),
+      signal: signal,
+      divisionPref: chance(0.42) ? "Yes" : chance(0.55) ? "No Preference" : "",
+      division: pick(DIVISIONS),
+      setting: pick(SETTINGS),
+      pronouns: pick(PRONOUNS),
+      track: chance(0.82) ? "Categorical" : pick(TRACKS),
+      couples: chance(0.043),
+      step1: chance(0.965) ? "Pass" : "Fail",
+      step2: step2,
+      comlex: isDO ? intBetween(480, 720) : null,
+      attempts: chance(0.9) ? 1 : intBetween(2, 3),
+      ecfmg: nonUsImg || type === "U.S. IMG" ? chance(0.71) : null,
+      visaRequired: nonUsImg ? chance(0.88) : type === "U.S. IMG" ? false : false,
+      workAuth: nonUsImg ? chance(0.12) : true,
+      gradYear: type.indexOf("Senior") > 0 ? 2026 : intBetween(2016, 2025),
+      lors: lors,
+      chairLor: chance(0.38),
+      mspe: chance(0.86),
+      transcript: chance(0.91),
+      personalStatement: chance(0.98),
+      photo: chance(0.94),
+      usmleTranscript: !isDO && chance(0.93),
+      comlexTranscript: isDO && chance(0.9),
+      reviewed: reviewed,
+      inactive: chance(0.0),
+      interview: chance(0.0),
+      ranked: false,
+      pubs: intBetween(0, 9),
+      abstracts: intBetween(0, 12),
+      presentations: intBetween(0, 10),
+      research: intBetween(0, 7),
+      volunteer: intBetween(1, 9),
+      work: intBetween(0, 6),
+      docs: 0
+    });
+  }
+  applicants.forEach(function (a) {
+    a.name = a.last + ", " + a.first;
+    a.appliedStr = fmtDate(a.applied);
+    a.docs = 5 + a.lors + (a.chairLor ? 1 : 0) + (a.mspe ? 1 : 0) +
+             (a.usmleTranscript || a.comlexTranscript ? 1 : 0);
+    a.english = a.country === "United States" ? "Yes" : chance(0.93) ? "Yes" : "No";
+  });
+
+  /* ---------------- filter predicates ---------------- */
+  /* Each named filter is a real predicate over the pool, so the counts,
+     the pagination and the "Total Items" line are all computed, never typed. */
+  function has(n) { return function (a) { return a.lors >= n; }; }
+  var P = {
+    all: function () { return true; },
+    active: function (a) { return !a.inactive; },
+    gold: function (a) { return a.signal === "Gold"; },
+    silver: function (a) { return a.signal === "Silver"; },
+    signalled: function (a) { return a.signal !== "None"; },
+    couplesGold: function (a) { return a.couples && a.signal === "Gold"; },
+    couples: function (a) { return a.couples; },
+    notReviewed: function (a) { return !a.reviewed; },
+    reviewed: function (a) { return a.reviewed; },
+    noUsRes: function (a) { return a.country !== "United States"; },
+    usRes: function (a) { return a.country === "United States"; },
+    workAuth: function (a) { return a.workAuth; },
+    visa: function (a) { return a.visaRequired; },
+    foreign: function (a) { return !a.lcme && !a.osteopathic; },
+    canadian: function (a) { return a.school.indexOf("Toronto") > 0 || a.school.indexOf("McGill") >= 0 || a.school.indexOf("British Columbia") > 0; },
+    lcme: function (a) { return a.lcme; },
+    nonLcme: function (a) { return !a.lcme; },
+    osteo: function (a) { return a.osteopathic; },
+    ecfmg: function (a) { return a.ecfmg === true; },
+    noEcfmg: function (a) { return a.ecfmg === false; },
+    prevGrad: function (a) { return a.type === "Previous Graduate"; },
+    mspe: function (a) { return a.mspe; },
+    noMspe: function (a) { return !a.mspe; },
+    tx: function (a) { return a.transcript; },
+    noTx: function (a) { return !a.transcript; },
+    ps: function (a) { return a.personalStatement; },
+    noPs: function (a) { return !a.personalStatement; },
+    photo: function (a) { return a.photo; },
+    noPhoto: function (a) { return !a.photo; },
+    usmle: function (a) { return a.usmleTranscript; },
+    noUsmle: function (a) { return !a.usmleTranscript; },
+    comlex: function (a) { return a.comlexTranscript; },
+    noComlex: function (a) { return !a.comlexTranscript; },
+    chair: function (a) { return a.chairLor; },
+    noChair: function (a) { return !a.chairLor; },
+    lor3: has(3),
+    lorMissing: function (a) { return a.lors < 3; },
+    east: function (a) { return ["New England", "Middle Atlantic", "South Atlantic"].indexOf(a.division) >= 0; },
+    midwest: function (a) { return a.division.indexOf("North Central") > 0; },
+    south: function (a) { return a.division.indexOf("South") >= 0; },
+    west: function (a) { return a.division === "Mountain" || a.division === "Pacific"; },
+    none: function () { return false; }
+  };
+  function and() {
+    var fns = [].slice.call(arguments);
+    return function (a) { return fns.every(function (f) { return f(a); }); };
+  }
+
+  /* Row-major alphabetical, matching how PDWS lays the two columns out. */
+  var userFilters = [
+    { name: "All Gold Signals", fn: P.gold },
+    { name: "Couples Match Gold", fn: P.couplesGold },
+    { name: "east", fn: P.east },
+    { name: "Interviewed", fn: P.none },
+    { name: "Invite to Interview", fn: and(P.gold, P.lor3) },
+    { name: "Max", fn: and(P.signalled, P.mspe, P.lor3) },
+    { name: "midwest central", fn: P.midwest },
+    { name: "Program signal Silver", fn: P.silver },
+    { name: "Program signals Gold", fn: P.gold },
+    { name: "Reviewed and on Hold", fn: P.none },
+    { name: "south", fn: P.south },
+    { name: "west", fn: P.west },
+    { name: "zxc", fn: and(P.gold, P.usRes) }
+  ];
+
+  var systemFilters = [
+    { name: "2 LoRs and COMLEX-USA Transcript", fn: and(has(2), P.comlex) },
+    { name: "2 LoRs and USMLE Transcript", fn: and(has(2), P.usmle) },
+    { name: "3 LoRs and COMLEX-USA Transcript", fn: and(has(3), P.comlex) },
+    { name: "3 LoRs and USMLE Transcript", fn: and(has(3), P.usmle) },
+    { name: "3 LoRs Missing", fn: P.lorMissing },
+    { name: "3 LoRs Received", fn: P.lor3 },
+    { name: "3 LoRs, MSPE, COMLEX-USA Transcript", fn: and(has(3), P.mspe, P.comlex) },
+    { name: "3 LoRs, MSPE, USMLE Transcript", fn: and(has(3), P.mspe, P.usmle) },
+    { name: "Active Applicants", fn: P.active },
+    { name: "All Applicants", fn: P.all },
+    { name: "Applicant Applied Date", fn: P.all },
+    { name: "Applicants Assigned", fn: P.none },
+    { name: "Applicants Not Reviewed", fn: P.notReviewed },
+    { name: "Applicants Where Date Reviewed Precedes Date of Latest Document", fn: P.none },
+    { name: "Applicants with Interview Scheduled", fn: P.none },
+    { name: "Applicants with No US or Canadian Residency", fn: P.noUsRes },
+    { name: "Applicants with US or Canadian Residency", fn: P.usRes },
+    { name: "Authorized to Work in the US", fn: P.workAuth },
+    { name: "Canadian Graduates", fn: P.canadian },
+    { name: "COMLEX-USA Missing", fn: P.noComlex },
+    { name: "COMLEX-USA Received", fn: P.comlex },
+    { name: "Composite Score", fn: P.all },
+    { name: "Couples Match Applicants", fn: P.couples },
+    { name: "Dept. Chair LoR Missing", fn: P.noChair },
+    { name: "Dept. Chair LoR Received", fn: P.chair },
+    { name: "ECFMG Certified", fn: P.ecfmg },
+    { name: "ECFMG Not Certified", fn: P.noEcfmg },
+    { name: "Foreign Graduates", fn: P.foreign },
+    { name: "Last Name (Active Applicants)", fn: P.active },
+    { name: "LCME Accredited School", fn: P.lcme },
+    { name: "Medical School Transcript Missing", fn: P.noTx },
+    { name: "Medical School Transcript Received", fn: P.tx },
+    { name: "MSPE Missing", fn: P.noMspe },
+    { name: "MSPE Received", fn: P.mspe },
+    { name: "No Longer Under Consideration", fn: P.none },
+    { name: "Non-LCME Accredited School", fn: P.nonLcme },
+    { name: "Osteopathic Recognition", fn: P.osteo },
+    { name: "Personal Statement Missing", fn: P.noPs },
+    { name: "Personal Statement Received", fn: P.ps },
+    { name: "Photo Missing", fn: P.noPhoto },
+    { name: "Photo Received", fn: P.photo },
+    { name: "Previous Graduates", fn: P.prevGrad },
+    { name: "Program Signal - Gold", fn: P.gold },
+    { name: "Program Signal - Silver", fn: P.silver },
+    { name: "Program Signals Received", fn: P.signalled },
+    { name: "Ranked Applicants", fn: P.none },
+    { name: "Requires Visa Sponsorship", fn: P.visa },
+    { name: "Reviewed Applicants", fn: P.reviewed },
+    { name: "USMLE Transcript Missing", fn: P.noUsmle },
+    { name: "USMLE Transcript Received", fn: P.usmle }
+  ];
+
+  /* ---------------- criteria catalog ----------------
+     `seen: true` marks a category or field transcribed from a screenshot
+     of the real product. Everything else is reconstructed, and the page
+     says so where a reader can see it. */
+  var YESNO = { type: "yesno" };
+  var DATE = { type: "date" };
+  var NUM = { type: "number" };
+  var TEXT = { type: "text" };
+  function list() { return { type: "list", values: [].slice.call(arguments) }; }
+
+  var categories = [
+    { name: "Applicant Ranking", seen: true, fields: [
+      { name: "Rank Order", spec: NUM },
+      { name: "Ranked", spec: YESNO },
+      { name: "Rank List Certified", spec: YESNO }
+    ] },
+    { name: "Applicants Type", seen: true, fields: [
+      { name: "Applicant Type", spec: list("U.S. MD Senior", "U.S. DO Senior", "U.S. IMG", "Non-U.S. IMG", "Previous Graduate", "Canadian Graduate"), note: "type" },
+      { name: "Currently Enrolled", spec: YESNO },
+      { name: "Previous Graduate", spec: YESNO }
+    ] },
+    { name: "Application Status", seen: true, fields: [
+      { name: "Applicant Applied Date", seen: true, spec: DATE },
+      { name: "Application Reviewed", seen: true, spec: YESNO },
+      { name: "Application Reviewed Date", seen: true, spec: DATE },
+      { name: "Complete Application", seen: true, spec: YESNO },
+      { name: "Complete Application Date", seen: true, spec: DATE },
+      { name: "Couples match", seen: true, spec: YESNO, note: "couples" },
+      { name: "Inactive", seen: true, spec: YESNO },
+      { name: "Inactive Date", seen: true, spec: DATE },
+      { name: "Incomplete Application", seen: true, spec: YESNO },
+      { name: "Incomplete Application Date", seen: true, spec: DATE }
+    ] },
+    { name: "Assignment Information", seen: true, fields: [
+      { name: "Assigned To", spec: TEXT },
+      { name: "Assignment Date", spec: DATE },
+      { name: "Unassigned", spec: YESNO }
+    ] },
+    { name: "Communication", seen: true, fields: [
+      { name: "Message Sent", spec: YESNO },
+      { name: "Message Sent Date", spec: DATE },
+      { name: "Interview Invitation Sent", spec: YESNO }
+    ] },
+    { name: "Composite Score", seen: true, fields: [
+      { name: "Composite Score", spec: NUM },
+      { name: "Composite Score Entered", spec: YESNO }
+    ] },
+    { name: "Custom Scores", seen: true, fields: [
+      { name: "Custom Score 1", spec: NUM },
+      { name: "Custom Score 2", spec: NUM },
+      { name: "Custom Score Entered", spec: YESNO }
+    ] },
+    { name: "Custom Status", seen: true, fields: [
+      { name: "Custom Status", spec: list("On Hold", "Invite to Interview", "Do Not Interview", "No Longer Under Consideration") }
+    ] },
+    { name: "Demographics", seen: true, fields: [
+      { name: "Gender", spec: list("Man", "Woman", "Another Gender Identity", "Choose not to disclose"), note: "screened" },
+      { name: "Date of Birth", spec: DATE, note: "screened" },
+      { name: "Self-Identification", spec: list("American Indian or Alaska Native", "Asian", "Black or African American", "Hispanic, Latino or of Spanish Origin", "Native Hawaiian or Other Pacific Islander", "White", "Choose not to disclose"), note: "screened" },
+      { name: "Designated Pronouns", spec: list("He/Him/His", "She/Her/Hers", "They/Them/Theirs", "Not provided") }
+    ] },
+    { name: "Document Scores", seen: true, fields: [
+      { name: "Document Score", spec: NUM },
+      { name: "Document Score Entered", spec: YESNO }
+    ] },
+    { name: "Documents", seen: true, fields: [
+      { name: "MSPE Received", spec: YESNO, note: "docs" },
+      { name: "Medical School Transcript Received", spec: YESNO },
+      { name: "Personal Statement Received", spec: YESNO },
+      { name: "Photo Received", spec: YESNO },
+      { name: "Number of LoRs Received", spec: NUM },
+      { name: "Dept. Chair LoR Received", spec: YESNO }
+    ] },
+    { name: "Exams", seen: true, fields: [
+      { name: "USMLE Step 1 Result", spec: list("Pass", "Fail"), note: "step1" },
+      { name: "USMLE Step 2 CK Score", spec: NUM, note: "step2" },
+      { name: "USMLE Step 3 Score", spec: NUM },
+      { name: "COMLEX-USA Level 1 Result", spec: list("Pass", "Fail") },
+      { name: "COMLEX-USA Level 2 CE Score", spec: NUM },
+      { name: "Number of Exam Attempts", spec: NUM, note: "attempts" },
+      { name: "ECFMG Certified", spec: YESNO, note: "ecfmg" },
+      { name: "ECFMG Certification Date", spec: DATE }
+    ] },
+    { name: "Felony/Misdemeanor", seen: true, fields: [
+      { name: "Felony Conviction", spec: YESNO },
+      { name: "Misdemeanor Conviction", spec: YESNO },
+      { name: "Military Discharge Other Than Honorable", spec: YESNO }
+    ] },
+    { name: "Geographic Preferences", seen: true, fields: [
+      { name: "Division Preference", seen: true, spec: list.apply(null, ["No Preference"].concat(DIVISIONS)) },
+      { name: "Setting Preference", seen: true, spec: list.apply(null, SETTINGS) }
+    ] },
+    { name: "Higher Education", seen: true, fields: [
+      { name: "Undergraduate Institution", spec: TEXT },
+      { name: "Undergraduate Degree", spec: list("BA", "BS", "BSc", "Other") },
+      { name: "Graduate Degree", spec: list("MPH", "MS", "PhD", "MBA", "None") }
+    ] },
+    { name: "Honors & Awards", seen: true, fields: [
+      { name: "Alpha Omega Alpha", spec: YESNO },
+      { name: "Gold Humanism Honor Society", spec: YESNO },
+      { name: "Sigma Sigma Phi", spec: YESNO }
+    ] },
+    { name: "Interview Scores", seen: true, fields: [
+      { name: "Interview Score", spec: NUM },
+      { name: "Interview Completed", spec: YESNO },
+      { name: "Interview Date", spec: DATE }
+    ] },
+    { name: "Language", seen: true, fields: [
+      { name: "Language Spoken", spec: list("Arabic", "French", "Hindi", "Mandarin", "Russian", "Spanish", "Urdu", "Other") },
+      { name: "Language Fluency", spec: list("Native", "Advanced", "Good", "Basic") },
+      { name: "Advanced English Proficiency", spec: YESNO, note: "english" }
+    ] },
+    { name: "Licenses/Certifications", seen: true, fields: [
+      { name: "Medical License", spec: YESNO },
+      { name: "License State", spec: TEXT },
+      { name: "ACLS Certified", spec: YESNO },
+      { name: "BLS Certified", spec: YESNO }
+    ] },
+    { name: "Medical Education", fields: [
+      { name: "Most Recent Medical School", spec: TEXT, note: "school" },
+      { name: "Country of Medical School", spec: list("United States", "Canada", "Other"), note: "country" },
+      { name: "LCME Accredited", spec: YESNO, note: "lcme" },
+      { name: "Graduation Year", spec: NUM, note: "gradyear" },
+      { name: "Degree", spec: list("MD", "DO", "MBBS", "MBChB", "Other") },
+      { name: "Medical School Honors", spec: YESNO }
+    ] },
+    { name: "Membership", fields: [
+      { name: "Professional Society Member", spec: YESNO },
+      { name: "Society Name", spec: TEXT }
+    ] },
+    { name: "Military Service", fields: [
+      { name: "Military Obligation", spec: YESNO },
+      { name: "Branch of Service", spec: list("Army", "Navy", "Air Force", "Public Health Service", "None") }
+    ] },
+    { name: "Post-Review Scores", fields: [
+      { name: "Post-Review Score", spec: NUM },
+      { name: "Post-Review Score Entered", spec: YESNO }
+    ] },
+    { name: "Program Signals", fields: [
+      { name: "Program Signal Received", spec: YESNO, note: "signal" },
+      { name: "Signal Tier", spec: list("Gold", "Silver", "None"), note: "signal" },
+      { name: "Geographic Preference Signal", spec: YESNO }
+    ] },
+    { name: "Publications", fields: [
+      { name: "Peer-Reviewed Publications", spec: NUM, note: "pubs" },
+      { name: "Peer-Reviewed Abstracts", spec: NUM },
+      { name: "Poster Presentations", spec: NUM },
+      { name: "Research Experiences", spec: NUM }
+    ] },
+    { name: "Reviewer Scores", fields: [
+      { name: "Reviewer Score", spec: NUM },
+      { name: "Number of Reviews", spec: NUM }
+    ] },
+    { name: "Tracks", fields: [
+      { name: "Tracks Applied by Applicant", spec: list.apply(null, TRACKS) },
+      { name: "Tracks Considered by Program", spec: list.apply(null, TRACKS) }
+    ] },
+    { name: "Visa/Citizenship", fields: [
+      { name: "Current Work Authorization", spec: list("U.S. Citizen", "Permanent Resident", "J-1 Visa", "H-1B Visa", "F-1 / OPT", "Other", "None"), note: "visa" },
+      { name: "Visa Sponsorship Required", spec: YESNO, note: "visa" },
+      { name: "U.S. or Canadian Citizen", spec: YESNO },
+      { name: "Country of Citizenship", spec: TEXT }
+    ] },
+    { name: "Work Experience", fields: [
+      { name: "U.S. Clinical Experience", spec: YESNO, note: "usce" },
+      { name: "Work Experiences", spec: NUM },
+      { name: "Volunteer Experiences", spec: NUM }
+    ] }
+  ];
+
+  return {
+    applicants: applicants,
+    userFilters: userFilters,
+    systemFilters: systemFilters,
+    categories: categories,
+    divisions: DIVISIONS,
+    settings: SETTINGS,
+    fmtDate: fmtDate
+  };
+})();
+</script>
+<script>/* ============================================================
+   Program-view recreation — the interface.
+
+   Five views, routed off one state object: dashboard, applicant list,
+   applicant detail, manage filters, criteria builder. Every filter is a
+   predicate run over the synthetic pool, so every count on the page,
+   including "Total Items" and the page count, is computed rather than
+   written down.
+   ============================================================ */
+(function () {
+  "use strict";
+
+  var A = PD.applicants;
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  function el(tag, cls, txt) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (txt != null) n.textContent = txt;
+    return n;
+  }
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  }
+  function on(node, ev, fn) { node.addEventListener(ev, fn); return node; }
+  function n0(v) { return v == null ? "" : String(v); }
+  /* Every interaction rebuilds the view, which would otherwise throw focus back
+     to the document on each keystroke or checkbox. Anything reachable carries a
+     stable key so render() can put focus back where it was. */
+  function fk(node, key) { node.dataset.fkey = key; return node; }
+
+  /* ---------------- annotations ----------------
+     Kept in one place so the recreation and the commentary stay separable.
+     Each is written to describe what the interface makes possible, not to
+     assert what any particular program does with it. */
+  var NOTES = {
+    filterbar: "Nobody opens 732 applications. A reviewer opens a saved filter, and the "
+      + "list below is whatever survived it. The name of that filter is the only visible "
+      + "trace of what was excluded.",
+    school: "Medical school is a sortable column here, and a filterable field under Medical "
+      + "Education, alongside Country of Medical School and LCME Accredited. Those three "
+      + "separate graduates of U.S. medical schools from everyone else in one operation.",
+    signals: "A program signal is a token an applicant spends to tell a program they are "
+      + "genuinely interested. Gold and Silver are tiers. A saved filter can require one, "
+      + "which turns the signal into a threshold rather than a tiebreak.",
+    total: "The gap between this number and the size of the whole pool is the part of the "
+      + "process that leaves no record. An applicant filtered out at this step is not "
+      + "rejected; they are never displayed.",
+    reviewed: "Applications received and applications reviewed are counted separately. The "
+      + "difference is not idleness. It is the share of the pool that a filter never "
+      + "surfaced.",
+    screened: "Gender, date of birth and self-identification are withheld from the program "
+      + "by default and shown here as Screened. They are still listed as filter fields "
+      + "under Demographics.",
+    step2: "Step 2 CK is a number, so it takes a threshold. This is the measure the NRMP "
+      + "data on the main site does separate on: a median of 248 among non-U.S. IMGs who "
+      + "matched against 242 among those who did not. The distributions overlap almost "
+      + "entirely, and a threshold cuts straight through that overlap.",
+    step1: "Step 1 has been reported Pass/Fail since 2022, so as a filter it has two "
+      + "values. A single Fail is permanent and visible here for every cycle afterward.",
+    attempts: "Number of attempts is filterable independently of the score. Passing on a "
+      + "second attempt and passing on the first are the same result and different rows.",
+    ecfmg: "ECFMG certification is the credential that makes an IMG eligible to enter U.S. "
+      + "graduate medical education. As a filter it is a yes-or-no gate applied before "
+      + "anything else about the application is read.",
+    visa: "Visa status does not appear anywhere in the NRMP's Charting Outcomes report. The "
+      + "main site lists it among the variables the published data cannot measure. It is "
+      + "a filter field here, which is the asymmetry worth understanding: invisible in the "
+      + "outcome statistics, available at the first step of screening.",
+    type: "Applicant Type is a single dropdown. Non-U.S. IMG is one of its values, and the "
+      + "main site's whole dataset is the population that value selects.",
+    couples: "Couples in the Match submit paired rank lists and must be considered together. "
+      + "It is a yes/no field like any other.",
+    docs: "A missing document is indistinguishable from a weak one at this stage, because "
+      + "the filter runs on whether the file arrived, not on what it says. Documents "
+      + "arrive on different schedules and from different offices.",
+    school_country: "Country of Medical School reduces every international medical school to "
+      + "one of three values.",
+    runtime: "Ask for Value at Filter Run Time turns a saved filter into a reusable template: "
+      + "the criterion is fixed, the threshold is typed in fresh each time it runs.",
+    english: "Self-reported. The applicant answers this on the application; nothing verifies it.",
+    usce: "U.S. clinical experience is among the variables the main site names as plausibly "
+      + "decisive for non-U.S. IMGs and absent from the published outcome data."
+  };
+  function anno(key, extraClass) {
+    if (!NOTES[key]) return null;
+    var d = el("div", "pd-anno" + (extraClass ? " " + extraClass : ""));
+    d.innerHTML = "<b>What this means for an applicant.</b> " + esc(NOTES[key]);
+    return d;
+  }
+  function annoInto(parent, key) {
+    var a = anno(key);
+    if (a) parent.appendChild(a);
+    return parent;
+  }
+
+  /* ---------------- state ---------------- */
+  var byName = {};
+  PD.userFilters.concat(PD.systemFilters).forEach(function (f) { byName[f.name] = f; });
+
+  var state = {
+    view: "dashboard",
+    filter: byName["All Applicants"],
+    page: 0,
+    perPage: 100,
+    search: "",
+    sortKey: null,
+    sortDir: 1,
+    cursor: 0,
+    tab: "Personal",
+    cols: { type: false, step2: false, visa: false, ecfmg: false, tier: false },
+    showHide: false,
+    infoOpen: true,
+    /* opens on Applicants Type, whose dropdown carries "Non-U.S. IMG" — the one
+       value that selects the population the rest of this site is about */
+    crit: { cat: 1, field: 0, op: 0, value: null, runtime: false },
+    favs: {}
+  };
+
+  /* ---------------- result set ---------------- */
+  function results() {
+    var out = A.filter(state.filter.fn);
+    if (state.search) {
+      var q = state.search.toLowerCase();
+      out = out.filter(function (a) { return a.last.toLowerCase().indexOf(q) === 0; });
+    }
+    if (state.sortKey) {
+      var k = state.sortKey, d = state.sortDir;
+      out = out.slice().sort(function (x, y) {
+        var a = x[k], b = y[k];
+        if (a == null) return 1;
+        if (b == null) return -1;
+        if (typeof a === "string") return d * a.localeCompare(b);
+        return d * (a - b);
+      });
+    }
+    return out;
+  }
+  function pageCount(total) { return Math.max(1, Math.ceil(total / state.perPage)); }
+
+  /* ============================================================
+     CHROME
+     ============================================================ */
+  var NAV = [
+    { label: "Dashboard", view: "dashboard" },
+    { label: "Applications", menu: [
+      { label: "All Applicants", go: function () { setFilter("All Applicants"); } },
+      { label: "Manage Filters", go: function () { state.view = "filters"; render(); } },
+      { label: "Bulk Print Requests", go: function () { stub("Bulk Print Requests"); } }
+    ] },
+    { label: "Rankings", stub: 1 },
+    { label: "Reports", stub: 1 },
+    { label: "Archives", stub: 1 },
+    { label: "Program Management", menu: [
+      { label: "Program Profile", go: function () { stub("Program Profile"); } },
+      { label: "Users", go: function () { stub("Users"); } }
+    ] },
+    { label: "Setup", stub: 1 },
+    { label: "Program Messages", stub: 1 },
+    { label: "Thalamus", menu: [
+      { label: "Interview Scheduling", go: function () { stub("Interview Scheduling"); } }
+    ] }
+  ];
+  var stubName = "";
+  function stub(name) { stubName = name; state.view = "stub"; render(); }
+  function setFilter(name) {
+    state.filter = byName[name];
+    state.page = 0; state.search = ""; state.sortKey = null;
+    state.view = "list";
+    render();
+  }
+
+  function navFor() {
+    if (state.view === "dashboard") return "Dashboard";
+    if (state.view === "list" || state.view === "applicant" ||
+        state.view === "filters" || state.view === "criteria") return "Applications";
+    return stubName === "Program Profile" || stubName === "Users" ? "Program Management" : stubName;
+  }
+
+  var openMenu = null;
+  function closeMenu() {
+    if (openMenu) { openMenu.remove(); openMenu = null; }
+  }
+  document.addEventListener("click", function (e) {
+    if (openMenu && !openMenu.contains(e.target) && !e.target.closest(".pd-nav button")) closeMenu();
+  });
+
+  function buildNav() {
+    var nav = el("nav", "pd-nav");
+    nav.setAttribute("aria-label", "Recreated program workstation sections");
+    var active = navFor();
+    NAV.forEach(function (item) {
+      var b = fk(el("button", null), "nav-" + item.label);
+      b.textContent = item.label;
+      if (item.menu) {
+        var c = el("span", "caret", "▾");
+        c.setAttribute("aria-hidden", "true");
+        b.appendChild(c);
+        b.setAttribute("aria-haspopup", "true");
+      }
+      if (item.label === active) b.setAttribute("aria-current", "page");
+      on(b, "click", function (e) {
+        e.stopPropagation();
+        closeMenu();
+        if (item.view) { state.view = item.view; render(); return; }
+        if (item.stub) { stub(item.label); return; }
+        var m = el("div", "pd-menu");
+        m.style.cssText = "position:absolute;background:#fff;border:1px solid #dcdcdc;"
+          + "box-shadow:0 8px 24px -8px rgba(0,0,0,.35);z-index:40;min-width:200px;padding:4px 0";
+        item.menu.forEach(function (mi) {
+          var mb = el("button", null, mi.label);
+          mb.style.cssText = "display:block;width:100%;text-align:left;background:none;border:0;"
+            + "padding:9px 15px;font-size:13.5px;cursor:pointer;color:#1d1d1d";
+          on(mb, "mouseenter", function () { mb.style.background = "#f0f0f0"; });
+          on(mb, "mouseleave", function () { mb.style.background = "none"; });
+          on(mb, "click", function () { closeMenu(); mi.go(); });
+          m.appendChild(mb);
+        });
+        var r = b.getBoundingClientRect();
+        m.style.left = (r.left + window.scrollX) + "px";
+        m.style.top = (r.bottom + window.scrollY) + "px";
+        document.body.appendChild(m);
+        openMenu = m;
+      });
+      nav.appendChild(b);
+    });
+    return nav;
+  }
+
+  function buildChrome() {
+    var root = el("div", "pdws");
+
+    var util = el("div", "pd-util");
+    var mark = el("div", "pd-mark", "PDWS");
+    var ms = el("span", null, "recreation");
+    mark.appendChild(ms);
+    util.appendChild(mark);
+    util.appendChild(el("div", "sp"));
+    var help = fk(el("button", "pd-help", "?"), "help");
+    help.setAttribute("aria-label", "Help (not recreated)");
+    on(help, "click", function () { stub("Help"); });
+    util.appendChild(help);
+    var sw = el("div", "pd-search");
+    var si = el("input");
+    si.type = "search";
+    si.placeholder = "Search Applicants";
+    si.setAttribute("aria-label", "Search applicants by last name");
+    si.value = state.search;
+    fk(si, "utilsearch");
+    on(si, "input", function () {
+      state.search = si.value.trim();
+      state.page = 0;
+      if (state.view !== "list") state.view = "list";
+      render();
+    });
+    sw.appendChild(si);
+    util.appendChild(sw);
+    var user = el("div", "pd-user");
+    var who = el("div", "who");
+    who.innerHTML = "<b>Internal Medicine (Categorical)</b>Demo Program · Coordinator";
+    user.appendChild(who);
+    user.appendChild(el("div", "pd-avatar"));
+    util.appendChild(user);
+    root.appendChild(util);
+
+    root.appendChild(buildNav());
+
+    var sub = el("div", "pd-subbar");
+    sub.innerHTML = '<a href="#" role="button">Bulk Print Requests</a>'
+      + '<a href="#" role="button">History</a>';
+    sub.querySelectorAll("a").forEach(function (a) {
+      on(a, "click", function (e) { e.preventDefault(); stub(a.textContent); });
+    });
+    root.appendChild(sub);
+
+    var body = el("div", "pd-body");
+    body.id = "pdBody";
+    root.appendChild(body);
+    return { root: root, body: body };
+  }
+
+  /* ============================================================
+     VIEW — dashboard
+     ============================================================ */
+  function viewDashboard(body) {
+    var total = A.length;
+    var reviewed = A.filter(function (a) { return a.reviewed; }).length;
+    var inactive = A.filter(function (a) { return a.inactive; }).length;
+
+    var grid = el("div", "pd-dash");
+
+    var qwrap = el("div", "pd-quickwrap");
+    qwrap.appendChild(el("h3", null, "Quick Links"));
+    var ul = el("ul");
+    [["Manage Filters", 0], ["PDWS User Guide", 1], ["Job Aids & Training Videos", 1],
+     ["Contact Support", 1], ["PDWS Terms and Conditions", 0], ["About", 0]]
+      .forEach(function (p) {
+        var li = el("li");
+        var a = el("a", null, p[0]);
+        a.href = "#";
+        if (p[1]) { var x = el("span", "ext", "↗"); x.setAttribute("aria-hidden", "true"); a.appendChild(x); }
+        on(a, "click", function (e) {
+          e.preventDefault();
+          if (p[0] === "Manage Filters") { state.view = "filters"; render(); }
+          else stub(p[0]);
+        });
+        li.appendChild(a);
+        ul.appendChild(li);
+      });
+    qwrap.appendChild(ul);
+    grid.appendChild(qwrap);
+
+    var stats = el("div", "pd-card");
+    var sh = el("div", "pd-card-hd");
+    sh.appendChild(el("h3", null, "Stats"));
+    stats.appendChild(sh);
+    var sb = el("div", "pd-card-bd");
+    var sg = el("div", "pd-stats");
+    var sl = el("div", "pd-statlist");
+    [[total, "Applications Received"], [reviewed, "Applications Reviewed"],
+     [inactive, "No Longer Under Consideration"]].forEach(function (p) {
+      var row = el("div", "pd-statrow");
+      row.appendChild(el("div", "n", p[0].toLocaleString()));
+      var t = el("div", "t");
+      var a = el("a", null, p[1]);
+      a.href = "#";
+      on(a, "click", function (e) { e.preventDefault(); setFilter("All Applicants"); });
+      t.appendChild(a);
+      row.appendChild(t);
+      sl.appendChild(row);
+    });
+    sg.appendChild(sl);
+    var big = el("div", "pd-bigstat");
+    big.appendChild(el("div", "n", (total - inactive).toLocaleString()));
+    big.appendChild(el("div", "t", "Total Applicants Active"));
+    sg.appendChild(big);
+    sb.appendChild(sg);
+    annoInto(sb, "reviewed");
+    stats.appendChild(sb);
+    grid.appendChild(stats);
+
+    var act = el("div", "pd-card");
+    var ah = el("div", "pd-card-hd");
+    ah.appendChild(el("h3", null, "Application Activity"));
+    act.appendChild(ah);
+    var ab = el("div", "pd-card-bd");
+    var dr = el("div", "pd-daterow");
+    ["Start", "End"].forEach(function (lab) {
+      var f = el("div", "pd-datefield");
+      var id = "pd-date-" + lab;
+      var l = el("label", null, lab);
+      l.setAttribute("for", id);
+      f.appendChild(l);
+      var inp = el("input");
+      inp.type = "text"; inp.id = id; inp.placeholder = "";
+      f.appendChild(inp);
+      f.appendChild(el("div", "hint", "MMM DD, YYYY"));
+      dr.appendChild(f);
+    });
+    var upd = el("button", "pd-btn plain", "Update");
+    on(upd, "click", function () { stub("Application Activity"); });
+    dr.appendChild(upd);
+    ab.appendChild(dr);
+    var at = el("table", "pd-table");
+    at.innerHTML = "<thead><tr><th>Applicant Name</th><th>Change</th><th>Date Updated</th></tr></thead>";
+    ab.appendChild(at);
+    ab.appendChild(el("div", "pd-noresult", "No results displayed"));
+    act.appendChild(ab);
+    grid.appendChild(act);
+
+    [["Favorite Filters", "You have not set any favorites.", "row2a"],
+     ["Reports", "You have not set any reports.", "row2b"]].forEach(function (p) {
+      var c = el("div", "pd-card " + p[2]);
+      var h = el("div", "pd-card-hd");
+      h.appendChild(el("h3", null, p[0]));
+      c.appendChild(h);
+      var b = el("div", "pd-card-bd");
+      var favs = Object.keys(state.favs);
+      if (p[0] === "Favorite Filters" && favs.length) {
+        favs.forEach(function (nm) {
+          var row = el("div", "pd-filterrow");
+          var st = el("button", "star on", "★");
+          st.setAttribute("aria-label", "Remove " + nm + " from favorites");
+          on(st, "click", function () { delete state.favs[nm]; render(); });
+          row.appendChild(st);
+          var b2 = el("button", "nm pd-link", nm);
+          on(b2, "click", function () { setFilter(nm); });
+          row.appendChild(b2);
+          row.appendChild(el("span", "cnt", A.filter(byName[nm].fn).length.toLocaleString()));
+          b.appendChild(row);
+        });
+      } else {
+        b.appendChild(el("p", null, p[1])).style.cssText = "margin:0;font-size:13.5px;color:#4f4f4f";
+      }
+      c.appendChild(b);
+      grid.appendChild(c);
+    });
+
+    body.appendChild(grid);
+  }
+
+  /* ============================================================
+     VIEW — applicant list
+     ============================================================ */
+  var COLS = [
+    { key: "name", label: "Applicant Name", cls: "name" },
+    { key: "aamcId", label: "AAMC ID" },
+    { key: "school", label: "Most Recent Medical School", cls: "school", anno: "school" },
+    { key: "applied", label: "Applicant Applied Date", get: function (a) { return a.appliedStr; } },
+    { key: "signal", label: "Program Signals", anno: "signals",
+      get: function (a) { return a.signal === "None" ? "No" : "Yes"; } },
+    { key: "divisionPref", label: "Division Preference" }
+  ];
+  var OPTCOLS = [
+    { id: "tier", key: "signal", label: "Signal Tier" },
+    { id: "type", key: "type", label: "Applicant Type", anno: "type" },
+    { id: "step2", key: "step2", label: "Step 2 CK", anno: "step2",
+      get: function (a) { return a.step2 == null ? "—" : a.step2; } },
+    { id: "ecfmg", key: "ecfmg", label: "ECFMG Certified", anno: "ecfmg",
+      get: function (a) { return a.ecfmg == null ? "N/A" : a.ecfmg ? "Yes" : "No"; } },
+    { id: "visa", key: "visaRequired", label: "Visa Sponsorship Required", anno: "visa",
+      get: function (a) { return a.visaRequired ? "Yes" : "No"; } }
+  ];
+  function activeCols() {
+    return COLS.concat(OPTCOLS.filter(function (c) { return state.cols[c.id]; }));
+  }
+
+  function viewList(body) {
+    var all = results();
+    var pages = pageCount(all.length);
+    if (state.page >= pages) state.page = pages - 1;
+    var slice = all.slice(state.page * state.perPage, (state.page + 1) * state.perPage);
+
+    if (state.infoOpen) {
+      var info = el("div", "pd-info");
+      var ic = el("div", "i", "i");
+      ic.setAttribute("aria-hidden", "true");
+      info.appendChild(ic);
+      info.appendChild(el("div", null, "As part of our Thalamus integration, we request that you "
+        + "utilize the Action button to grant authorization for any data to Thalamus, "
+        + "particularly if your intention is to use Thalamus."));
+      var x = el("button", "x", "×");
+      x.setAttribute("aria-label", "Dismiss notice");
+      on(x, "click", function () { state.infoOpen = false; render(); });
+      info.appendChild(x);
+      body.appendChild(info);
+    }
+
+    /* filter criteria bar */
+    var fc = el("div", "pd-card");
+    var fh = el("div", "pd-card-hd");
+    fh.appendChild(el("h3", null, "Filter Criteria"));
+    fh.appendChild(el("div", "sp"));
+    var nb = fk(el("button", "pd-btn", "New Criteria"), "newcrit");
+    on(nb, "click", function () { state.view = "criteria"; render(); });
+    fh.appendChild(nb);
+    var mf = fk(el("button", "pd-btn plain", "Manage Filters"), "managefilters");
+    on(mf, "click", function () { state.view = "filters"; render(); });
+    fh.appendChild(mf);
+    var chev = el("button", "pd-chev", "⌄");
+    chev.setAttribute("aria-label", "Filter criteria detail");
+    on(chev, "click", function () { stub("Filter Criteria detail"); });
+    fh.appendChild(chev);
+    fc.appendChild(fh);
+    body.appendChild(fc);
+
+    var card = el("div", "pd-card");
+    var head = el("div", "pd-listtools");
+    head.style.cssText += ";display:block;padding-bottom:0";
+    var title = el("h3", null, state.filter.name);
+    title.style.cssText = "margin:0;font-size:19px;font-weight:600;letter-spacing:-.012em";
+    if (state.filter.name !== "All Applicants") title.setAttribute("data-anno", "1");
+    head.appendChild(title);
+    head.appendChild(el("div", "pd-updated", "Last updated on Sep 24, 2025 at 3:24 PM EST"));
+    var fa = anno("filterbar");
+    if (fa) head.appendChild(fa);
+    card.appendChild(head);
+
+    var tools = el("div", "pd-listtools");
+    var sw = el("div", "pd-inputsearch");
+    var si = el("input");
+    si.type = "search";
+    si.placeholder = "Search by last name";
+    si.setAttribute("aria-label", "Search by last name");
+    si.value = state.search;
+    fk(si, "listsearch");
+    on(si, "input", function () {
+      state.search = si.value.trim(); state.page = 0; render();
+    });
+    sw.appendChild(si);
+    tools.appendChild(sw);
+    var shb = fk(el("button", "pd-link", "👁 Show / Hide"), "showhide");
+    shb.setAttribute("aria-expanded", state.showHide ? "true" : "false");
+    on(shb, "click", function () { state.showHide = !state.showHide; render(); });
+    tools.appendChild(shb);
+    tools.appendChild(el("div", "sp"));
+    var rb = fk(el("button", "pd-btn", "Refresh"), "refresh");
+    on(rb, "click", function () { render(); });
+    tools.appendChild(rb);
+    var acb = fk(el("button", "pd-btn", "Actions ▾"), "actions");
+    on(acb, "click", function (e) {
+      e.stopPropagation();
+      closeMenu();
+      var m = el("div", "pd-menu");
+      m.style.cssText = "position:absolute;background:#fff;border:1px solid #dcdcdc;"
+        + "box-shadow:0 8px 24px -8px rgba(0,0,0,.35);z-index:40;min-width:220px;padding:4px 0";
+      [["Export to Excel (CSV)", function () { exportCsv(all); }],
+       ["Assign Applicants", null], ["Add to Custom Status", null],
+       ["Grant Thalamus Authorization", null], ["Bulk Print", null]]
+        .forEach(function (p) {
+          var mb = el("button", null, p[0]);
+          mb.style.cssText = "display:block;width:100%;text-align:left;background:none;border:0;"
+            + "padding:9px 15px;font-size:13.5px;cursor:pointer;color:"
+            + (p[1] ? "#1d1d1d" : "#9b9b9b");
+          if (p[1]) {
+            on(mb, "mouseenter", function () { mb.style.background = "#f0f0f0"; });
+            on(mb, "mouseleave", function () { mb.style.background = "none"; });
+            on(mb, "click", function () { closeMenu(); p[1](); });
+          }
+          m.appendChild(mb);
+        });
+      var r = acb.getBoundingClientRect();
+      m.style.left = (r.right - 220 + window.scrollX) + "px";
+      m.style.top = (r.bottom + window.scrollY) + "px";
+      document.body.appendChild(m);
+      openMenu = m;
+    });
+    tools.appendChild(acb);
+    card.appendChild(tools);
+
+    if (state.showHide) {
+      var sh = el("div", "pd-card-bd");
+      sh.style.cssText = "border-top:1px solid #dcdcdc;background:#fafafa";
+      sh.appendChild(el("div", "pd-critlab", "Additional columns"));
+      var row = el("div");
+      row.style.cssText = "display:flex;flex-wrap:wrap;gap:8px 20px";
+      OPTCOLS.forEach(function (c) {
+        var lab = el("label");
+        lab.style.cssText = "display:inline-flex;align-items:center;gap:7px;font-size:13.5px;cursor:pointer";
+        var cb = fk(el("input"), "col-" + c.id);
+        cb.type = "checkbox"; cb.className = "pd-check"; cb.checked = !!state.cols[c.id];
+        on(cb, "change", function () { state.cols[c.id] = cb.checked; render(); });
+        lab.appendChild(cb);
+        lab.appendChild(document.createTextNode(c.label));
+        row.appendChild(lab);
+      });
+      sh.appendChild(row);
+      card.appendChild(sh);
+    }
+
+    var cols = activeCols();
+    var wrap = el("div", "pd-tablewrap");
+    var t = el("table", "pd-table");
+    var cap = el("caption", "vis-hidden",
+      "Recreated applicant list, filter " + state.filter.name + ", " + all.length + " results");
+    t.appendChild(cap);
+    var thead = el("thead");
+    var htr = el("tr");
+    var chall = el("th", "selectall");
+    var cba = el("input");
+    cba.type = "checkbox"; cba.className = "pd-check";
+    cba.setAttribute("aria-label", "Select all rows on this page");
+    chall.appendChild(cba);
+    var cbc = el("span", "caret", "▾");
+    cbc.setAttribute("aria-hidden", "true");
+    chall.appendChild(cbc);
+    htr.appendChild(chall);
+    cols.forEach(function (c) {
+      var th = fk(el("th", "sortable"), "sort-" + c.key);
+      th.tabIndex = 0;
+      th.appendChild(document.createTextNode(c.label));
+      var g = el("span", "sortglyph", state.sortKey === c.key ? (state.sortDir < 0 ? "▼" : "▲") : "⇅");
+      g.setAttribute("aria-hidden", "true");
+      th.appendChild(g);
+      th.setAttribute("aria-sort", state.sortKey !== c.key ? "none"
+        : state.sortDir < 0 ? "descending" : "ascending");
+      if (c.anno) th.setAttribute("data-anno", "1");
+      var sort = function () {
+        if (state.sortKey === c.key) state.sortDir = -state.sortDir;
+        else { state.sortKey = c.key; state.sortDir = 1; }
+        state.page = 0;
+        render();
+      };
+      on(th, "click", sort);
+      on(th, "keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); sort(); }
+      });
+      htr.appendChild(th);
+    });
+    thead.appendChild(htr);
+    t.appendChild(thead);
+
+    var tb = el("tbody");
+    if (!slice.length) {
+      var etr = el("tr");
+      var etd = el("td");
+      etd.colSpan = cols.length + 1;
+      etd.appendChild(el("div", "pd-empty",
+        state.search ? 'No applicants in "' + state.filter.name + '" have a last name starting "'
+          + state.search + '".'
+          : 'The filter "' + state.filter.name + '" returned no applicants.'));
+      etr.appendChild(etd);
+      tb.appendChild(etr);
+    }
+    slice.forEach(function (a) {
+      var tr = el("tr", "pd-row");
+      tr.tabIndex = 0;
+      var open = function () {
+        state.cursor = all.indexOf(a);
+        state.view = "applicant";
+        state.tab = "Personal";
+        render();
+      };
+      on(tr, "click", function (e) { if (e.target.type !== "checkbox") open(); });
+      on(tr, "keydown", function (e) {
+        if (e.key === "Enter") { e.preventDefault(); open(); }
+      });
+      var ctd = el("td");
+      var cb = el("input");
+      cb.type = "checkbox"; cb.className = "pd-check";
+      cb.setAttribute("aria-label", "Select " + a.name);
+      on(cb, "click", function (e) { e.stopPropagation(); });
+      ctd.appendChild(cb);
+      tr.appendChild(ctd);
+      cols.forEach(function (c) {
+        var v = c.get ? c.get(a) : a[c.key];
+        var td = el("td", c.cls || (v === "" ? "cellmuted" : null), n0(v));
+        tr.appendChild(td);
+      });
+      tb.appendChild(tr);
+    });
+
+    /* the note about the result count sits at the foot of the rows, next to the
+       Total Items line it is talking about */
+    if (slice.length) {
+      var atr = el("tr", "pd-annocell");
+      var atd = el("td");
+      atd.colSpan = cols.length + 1;
+      var box = anno("total", "inrow");
+      if (box) atd.appendChild(box);
+      atr.appendChild(atd);
+      tb.appendChild(atr);
+    }
+    t.appendChild(tb);
+    wrap.appendChild(t);
+    card.appendChild(wrap);
+
+    var pager = el("div", "pd-pager");
+    var tot = el("div", null, "Total Items: " + all.length.toLocaleString());
+    tot.setAttribute("data-anno", "1");
+    pager.appendChild(tot);
+    pager.appendChild(el("div", "sp"));
+    var ppl = el("label", null, "Items per page:");
+    ppl.style.marginRight = "6px";
+    ppl.setAttribute("for", "pdPerPage");
+    pager.appendChild(ppl);
+    var ps = fk(el("select"), "perpage");
+    ps.id = "pdPerPage";
+    [25, 50, 100].forEach(function (v) {
+      var o = new Option(String(v), String(v));
+      ps.appendChild(o);
+    });
+    ps.value = String(state.perPage);
+    on(ps, "change", function () { state.perPage = +ps.value; state.page = 0; render(); });
+    pager.appendChild(ps);
+    pager.appendChild(el("div", null, "Page " + (state.page + 1) + " of " + pages));
+    [["|‹", 0, "First page"], ["‹", state.page - 1, "Previous page"],
+     ["›", state.page + 1, "Next page"], ["›|", pages - 1, "Last page"]]
+      .forEach(function (p) {
+        var b = fk(el("button", null, p[0]), "page-" + p[2]);
+        b.setAttribute("aria-label", p[2]);
+        if (p[1] < 0 || p[1] > pages - 1 || p[1] === state.page) b.disabled = true;
+        on(b, "click", function () { state.page = p[1]; render(); window.scrollTo({ top: stageTop() }); });
+        pager.appendChild(b);
+      });
+    card.appendChild(pager);
+    body.appendChild(card);
+  }
+
+  function exportCsv(rows) {
+    var cols = activeCols();
+    var head = ["Applicant Name"].concat(cols.slice(1).map(function (c) { return c.label; }));
+    var lines = [head.join(",")];
+    rows.forEach(function (a) {
+      lines.push(cols.map(function (c) {
+        var v = c.get ? c.get(a) : a[c.key];
+        v = n0(v);
+        return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+      }).join(","));
+    });
+    var blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
+    var url = URL.createObjectURL(blob);
+    var a = el("a");
+    a.href = url;
+    a.download = "recreated-applicant-list.csv";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
+  /* ============================================================
+     VIEW — applicant detail
+     ============================================================ */
+  var TABS = ["Personal", "Geo Preferences", "Education", "Experience", "Publications",
+              "Exams/Licences", "Limiting Factors", "Documents"];
+
+  function field(dl, label, value, note) {
+    var dt = el("dt", null, label);
+    dl.appendChild(dt);
+    var dd = el("dd");
+    if (value === null) {
+      var r = el("span", "pd-redact");
+      r.style.width = (70 + (label.length * 3) % 90) + "px";
+      r.setAttribute("aria-label", "redacted");
+      dd.appendChild(r);
+    } else {
+      dd.textContent = value;
+    }
+    if (note) dd.setAttribute("data-anno", "1");
+    dl.appendChild(dd);
+    return dd;
+  }
+
+  function viewApplicant(body) {
+    var all = results();
+    if (!all.length) { state.view = "list"; return viewList(body); }
+    if (state.cursor >= all.length) state.cursor = all.length - 1;
+    var a = all[state.cursor];
+
+    var bar = el("div", "pd-detailbar");
+    var back = el("button", "pd-link", "‹ Back to " + state.filter.name);
+    on(back, "click", function () { state.view = "list"; render(); });
+    bar.appendChild(back);
+    bar.appendChild(el("div", "sp"));
+    var prev = fk(el("button", "pd-link", "‹ PREVIOUS"), "prev");
+    prev.disabled = state.cursor === 0;
+    if (prev.disabled) prev.style.color = "#bdbdbd";
+    on(prev, "click", function () { if (state.cursor > 0) { state.cursor--; render(); } });
+    bar.appendChild(prev);
+    bar.appendChild(el("div", "pd-count",
+      "Applicant " + (state.cursor + 1) + " of " + all.length.toLocaleString()));
+    var next = fk(el("button", "pd-link", "NEXT ›"), "next");
+    next.disabled = state.cursor >= all.length - 1;
+    if (next.disabled) next.style.color = "#bdbdbd";
+    on(next, "click", function () { if (state.cursor < all.length - 1) { state.cursor++; render(); } });
+    bar.appendChild(next);
+    var act = el("button", "pd-btn", "Actions ▾");
+    on(act, "click", function () { stub("Applicant actions"); });
+    bar.appendChild(act);
+    body.appendChild(bar);
+
+    var grid = el("div", "pd-detail");
+
+    /* left rail */
+    var rail = el("div", "pd-card");
+    var ph = el("div", "pd-photo", "photo not shown");
+    rail.appendChild(ph);
+    var idb = el("div", "pd-idblock");
+    if (a.signal !== "None") {
+      var badge = el("div", "badge " + a.signal.toLowerCase());
+      var bi = el("span", null, "✦");
+      bi.setAttribute("aria-hidden", "true");
+      badge.appendChild(bi);
+      badge.appendChild(document.createTextNode("Signaled " + a.signal));
+      badge.setAttribute("data-anno", "1");
+      idb.appendChild(badge);
+    }
+    [["AAMC ID", a.aamcId], ["Applied Date", a.appliedStr],
+     ["Most Recent Medical School", a.school]].forEach(function (p) {
+      idb.appendChild(el("div", "pd-fieldlab", p[0]));
+      idb.appendChild(el("div", "pd-fieldval", p[1]));
+    });
+    rail.appendChild(idb);
+
+    var scoreHd = el("div", "pd-card-hd");
+    scoreHd.appendChild(el("h3", null, "Scores"));
+    scoreHd.appendChild(el("div", "sp"));
+    var sc = el("button", "pd-chev", "⌃");
+    sc.setAttribute("aria-label", "Collapse Scores");
+    scoreHd.appendChild(sc);
+    rail.appendChild(scoreHd);
+
+    var acc = el("div", "pd-acc");
+    ["Composite Score", "Board Scores", "Document Scores", "Interview Scores",
+     "Reviewer Scores", "Post-Review Scores", "Custom Scores"].forEach(function (nm) {
+      var b = el("button", null);
+      b.appendChild(document.createTextNode(nm));
+      var c = el("span", "chev", "›");
+      c.setAttribute("aria-hidden", "true");
+      b.appendChild(c);
+      on(b, "click", function () { stub(nm); });
+      acc.appendChild(b);
+    });
+    rail.appendChild(acc);
+    var notes = el("div", "pd-notes");
+    notes.appendChild(el("span", null, "Notes (0)"));
+    var nc = el("span", null, "⌃");
+    nc.setAttribute("aria-hidden", "true");
+    notes.appendChild(nc);
+    rail.appendChild(notes);
+    grid.appendChild(rail);
+
+    /* right column */
+    var right = el("div");
+
+    if (state.infoOpen) {
+      var info = el("div", "pd-info");
+      var ic = el("div", "i", "i");
+      ic.setAttribute("aria-hidden", "true");
+      info.appendChild(ic);
+      info.appendChild(el("div", null, "As part of our Thalamus integration, we request that you "
+        + "utilize the Action button to grant authorization for any data to Thalamus, "
+        + "particularly if your intention is to use Thalamus."));
+      var x = el("button", "x", "×");
+      x.setAttribute("aria-label", "Dismiss notice");
+      on(x, "click", function () { state.infoOpen = false; render(); });
+      info.appendChild(x);
+      right.appendChild(info);
+    }
+
+    var glance = el("div", "pd-card pd-glance");
+    var gh = el("div", "pd-card-hd");
+    gh.appendChild(el("h3", null, "At-a-Glance"));
+    gh.appendChild(el("div", "sp"));
+    var gc = el("button", "pd-chev", "⌃");
+    gc.setAttribute("aria-label", "Collapse At-a-Glance");
+    gh.appendChild(gc);
+    glance.appendChild(gh);
+    var gb = el("div", "pd-card-bd");
+    var gdl = el("dl");
+    field(gdl, "Assigned To", "");
+    field(gdl, "Tracks Applied by Applicant", a.track);
+    field(gdl, "Tracks Considered by Program", a.track);
+    gb.appendChild(gdl);
+    glance.appendChild(gb);
+    right.appendChild(glance);
+
+    var stc = el("div", "pd-card");
+    var sth = el("div", "pd-card-hd");
+    sth.appendChild(el("h3", null, "Statuses"));
+    var pen = el("button", "pd-pencil", "✎");
+    pen.setAttribute("aria-label", "Edit statuses");
+    on(pen, "click", function () { stub("Statuses"); });
+    sth.appendChild(pen);
+    stc.appendChild(sth);
+    right.appendChild(stc);
+
+    var tc = el("div", "pd-card");
+    var tabs = el("div", "pd-tabs");
+    tabs.setAttribute("role", "tablist");
+    TABS.forEach(function (nm) {
+      var label = nm === "Documents" ? "Documents (" + a.docs + ")" : nm;
+      var b = fk(el("button", null, label), "tab-" + nm);
+      b.setAttribute("role", "tab");
+      b.setAttribute("aria-selected", state.tab === nm ? "true" : "false");
+      on(b, "click", function () { state.tab = nm; render(); });
+      tabs.appendChild(b);
+    });
+    tc.appendChild(tabs);
+    var panel = el("div", "pd-panel");
+    panel.setAttribute("role", "tabpanel");
+    renderPanel(panel, a);
+    tc.appendChild(panel);
+    right.appendChild(tc);
+
+    grid.appendChild(right);
+    body.appendChild(grid);
+  }
+
+  function renderPanel(panel, a) {
+    var cols, dl;
+    function pair(title) {
+      panel.appendChild(el("h4", null, title));
+      dl = el("dl");
+      return dl;
+    }
+    if (state.tab === "Personal") {
+      cols = el("div", "pd-cols2");
+      var left = el("div");
+      left.appendChild(el("h4", null, "Personal"));
+      var d1 = el("dl");
+      d1.className = "";
+      var wrapDl = el("div", "pd-glance");
+      field(d1, "Preferred Name", "");
+      field(d1, "Previous Last Name", "");
+      field(d1, "Gender", "Screened", 1);
+      field(d1, "Designated Pronouns", a.pronouns || "Not provided");
+      field(d1, "Birth Date", "Screened", 1);
+      field(d1, "Self-identification", "Screened", 1);
+      field(d1, "Do you meet or exceed the Advanced level of proficiency in English?", a.english, 1);
+      wrapDl.appendChild(d1);
+      left.appendChild(wrapDl);
+      var sa = anno("screened");
+      if (sa) left.appendChild(sa);
+      var ea = anno("english");
+      if (ea) left.appendChild(ea);
+      cols.appendChild(left);
+
+      var right = el("div");
+      right.appendChild(el("h4", null, "Contact"));
+      var d2 = el("dl");
+      var w2 = el("div", "pd-glance");
+      field(d2, "Preferred Phone", null);
+      field(d2, "Email", null);
+      w2.appendChild(d2);
+      right.appendChild(w2);
+      right.appendChild(el("h4", null, "Address")).style.marginTop = "20px";
+      var d3 = el("dl");
+      var w3 = el("div", "pd-glance");
+      field(d3, "Street", null);
+      field(d3, "City", null);
+      field(d3, "Country", a.country === "United States" ? "United States" : null);
+      w3.appendChild(d3);
+      right.appendChild(w3);
+      cols.appendChild(right);
+      panel.appendChild(cols);
+      return;
+    }
+    var box = el("div", "pd-glance");
+    var d = el("dl");
+    if (state.tab === "Geo Preferences") {
+      panel.appendChild(el("h4", null, "Geographic Preferences"));
+      field(d, "Division Preference", a.divisionPref === "Yes" ? a.division : "No Preference");
+      field(d, "Setting Preference", a.setting);
+    } else if (state.tab === "Education") {
+      panel.appendChild(el("h4", null, "Medical Education"));
+      field(d, "Most Recent Medical School", a.school, 1);
+      field(d, "Country of Medical School", a.country, 1);
+      field(d, "LCME Accredited", a.lcme ? "Yes" : "No");
+      field(d, "Degree", a.osteopathic ? "DO" : a.country === "United States" ? "MD" : "MBBS");
+      field(d, "Graduation Year", String(a.gradYear));
+      field(d, "Applicant Type", a.type, 1);
+    } else if (state.tab === "Experience") {
+      panel.appendChild(el("h4", null, "Experience"));
+      field(d, "Research Experiences", String(a.research));
+      field(d, "Work Experiences", String(a.work));
+      field(d, "Volunteer Experiences", String(a.volunteer));
+      field(d, "U.S. Clinical Experience", "Not collected as a discrete field", 1);
+    } else if (state.tab === "Publications") {
+      panel.appendChild(el("h4", null, "Publications"));
+      field(d, "Peer-Reviewed Publications", String(a.pubs));
+      field(d, "Peer-Reviewed Abstracts", String(a.abstracts));
+      field(d, "Poster Presentations", String(a.presentations));
+    } else if (state.tab === "Exams/Licences") {
+      panel.appendChild(el("h4", null, "Exams and Licences"));
+      field(d, "USMLE Step 1 Result", a.step1, 1);
+      field(d, "USMLE Step 2 CK Score", a.step2 == null ? "Not reported" : String(a.step2), 1);
+      field(d, "COMLEX-USA Level 2 CE", a.comlex == null ? "N/A" : String(a.comlex));
+      field(d, "Number of Attempts", String(a.attempts), 1);
+      field(d, "ECFMG Certified", a.ecfmg == null ? "N/A" : a.ecfmg ? "Yes" : "No", 1);
+    } else if (state.tab === "Limiting Factors") {
+      panel.appendChild(el("h4", null, "Limiting Factors"));
+      field(d, "Visa Sponsorship Required", a.visaRequired ? "Yes" : "No", 1);
+      field(d, "Current Work Authorization",
+        a.workAuth ? (a.country === "United States" ? "U.S. Citizen" : "Permanent Resident") : "None");
+      field(d, "Couples Match", a.couples ? "Yes" : "No", 1);
+      field(d, "Felony Conviction", "No");
+      field(d, "Misdemeanor Conviction", "No");
+    } else {
+      panel.appendChild(el("h4", null, "Documents (" + a.docs + ")"));
+      [["MSPE", a.mspe], ["Medical School Transcript", a.transcript],
+       ["Personal Statement", a.personalStatement], ["Photo", a.photo],
+       ["USMLE Transcript", a.usmleTranscript], ["COMLEX-USA Transcript", a.comlexTranscript],
+       ["Dept. Chair Letter of Recommendation", a.chairLor]].forEach(function (p) {
+        field(d, p[0], p[1] ? "Received" : "Not received", 1);
+      });
+      field(d, "Letters of Recommendation", a.lors + " received", 1);
+    }
+    box.appendChild(d);
+    panel.appendChild(box);
+    var key = { "Exams/Licences": "step2", "Documents": "docs", "Limiting Factors": "visa",
+                "Education": "school", "Experience": "usce" }[state.tab];
+    if (key) annoInto(panel, key);
+    if (state.tab === "Exams/Licences") {
+      annoInto(panel, "step1");
+      annoInto(panel, "attempts");
+      annoInto(panel, "ecfmg");
+    }
+  }
+
+  /* ============================================================
+     VIEW — manage filters
+     ============================================================ */
+  function filterSection(body, title, list, editable) {
+    var card = el("div", "pd-card");
+    var hd = el("div", "pd-card-hd");
+    hd.appendChild(el("h3", null, title + " (" + list.length + ")"));
+    hd.appendChild(el("div", "sp"));
+    var c = el("button", "pd-chev", "⌃");
+    c.setAttribute("aria-label", "Collapse " + title);
+    hd.appendChild(c);
+    card.appendChild(hd);
+    var bd = el("div", "pd-card-bd");
+    var grid = el("div", "pd-filtergrid");
+    var sorted = list.slice().sort(function (x, y) {
+      return x.name.toLowerCase().localeCompare(y.name.toLowerCase());
+    });
+    sorted.forEach(function (f) {
+      var row = el("div", "pd-filterrow");
+      var star = fk(el("button", "star" + (state.favs[f.name] ? " on" : ""),
+        state.favs[f.name] ? "★" : "☆"), "star-" + f.name);
+      star.setAttribute("aria-label", (state.favs[f.name] ? "Unfavorite " : "Favorite ") + f.name);
+      on(star, "click", function () {
+        if (state.favs[f.name]) delete state.favs[f.name]; else state.favs[f.name] = 1;
+        render();
+      });
+      row.appendChild(star);
+      var nm = el("button", "nm pd-link", f.name);
+      on(nm, "click", function () { setFilter(f.name); });
+      row.appendChild(nm);
+      row.appendChild(el("span", "cnt", A.filter(f.fn).length.toLocaleString()));
+      if (editable) {
+        [["✎", "Edit"], ["🗑", "Delete"]].forEach(function (p) {
+          var b = el("button", "act", p[0]);
+          b.setAttribute("aria-label", p[1] + " " + f.name);
+          on(b, "click", function () { stub(p[1] + " filter"); });
+          row.appendChild(b);
+        });
+      }
+      grid.appendChild(row);
+    });
+    bd.appendChild(grid);
+    card.appendChild(bd);
+    body.appendChild(card);
+  }
+
+  function viewFilters(body) {
+    var bar = el("div", "pd-detailbar");
+    var h = el("h3", null, "Manage Filters");
+    h.style.cssText = "margin:0;font-size:19px;font-weight:600";
+    bar.appendChild(h);
+    bar.appendChild(el("div", "sp"));
+    var nb = el("button", "pd-btn solid", "New Criteria");
+    on(nb, "click", function () { state.view = "criteria"; render(); });
+    bar.appendChild(nb);
+    body.appendChild(bar);
+
+    var note = anno("filterbar");
+    if (note) body.appendChild(note);
+
+    filterSection(body, "User-Defined Filters", PD.userFilters, true);
+    filterSection(body, "System-Defined Filters", PD.systemFilters, false);
+
+    var foot = el("p");
+    foot.style.cssText = "font-size:12.5px;color:#767676;margin:2px 0 0";
+    foot.textContent = "The count beside each filter is how many of the "
+      + A.length.toLocaleString() + " invented applicants it returns. In the real product no "
+      + "count is shown until the filter is run.";
+    body.appendChild(foot);
+  }
+
+  /* ============================================================
+     VIEW — criteria builder
+     ============================================================ */
+  var OPS = {
+    list: ["Equals", "Not equal to"],
+    yesno: ["Equals"],
+    number: ["Equals", "Greater than", "Less than"],
+    date: ["Equals", "Before", "After"],
+    text: ["Contains", "Equals"]
+  };
+
+  /* field name → how to read it off an applicant. Fields absent here have no
+     backing value in the invented pool and say so when saved. */
+  var READ = {
+    "Applicant Type": function (a) { return a.type; },
+    "Previous Graduate": function (a) { return a.type === "Previous Graduate"; },
+    "Application Reviewed": function (a) { return a.reviewed; },
+    "Inactive": function (a) { return a.inactive; },
+    "Couples match": function (a) { return a.couples; },
+    /* date fields are deliberately absent: the pool stores a formatted string,
+       and Before/After over that would produce a confident wrong count */
+    "Designated Pronouns": function (a) { return a.pronouns || "Not provided"; },
+    "Division Preference": function (a) { return a.divisionPref === "Yes" ? a.division : "No Preference"; },
+    "Setting Preference": function (a) { return a.setting; },
+    "MSPE Received": function (a) { return a.mspe; },
+    "Medical School Transcript Received": function (a) { return a.transcript; },
+    "Personal Statement Received": function (a) { return a.personalStatement; },
+    "Photo Received": function (a) { return a.photo; },
+    "Number of LoRs Received": function (a) { return a.lors; },
+    "Dept. Chair LoR Received": function (a) { return a.chairLor; },
+    "USMLE Step 1 Result": function (a) { return a.step1; },
+    "USMLE Step 2 CK Score": function (a) { return a.step2; },
+    "COMLEX-USA Level 2 CE Score": function (a) { return a.comlex; },
+    "Number of Exam Attempts": function (a) { return a.attempts; },
+    "ECFMG Certified": function (a) { return a.ecfmg; },
+    "Advanced English Proficiency": function (a) { return a.english === "Yes"; },
+    "Most Recent Medical School": function (a) { return a.school; },
+    "Country of Medical School": function (a) { return a.country; },
+    "LCME Accredited": function (a) { return a.lcme; },
+    "Graduation Year": function (a) { return a.gradYear; },
+    "Program Signal Received": function (a) { return a.signal !== "None"; },
+    "Signal Tier": function (a) { return a.signal; },
+    "Peer-Reviewed Publications": function (a) { return a.pubs; },
+    "Peer-Reviewed Abstracts": function (a) { return a.abstracts; },
+    "Poster Presentations": function (a) { return a.presentations; },
+    "Research Experiences": function (a) { return a.research; },
+    "Visa Sponsorship Required": function (a) { return a.visaRequired; },
+    "U.S. or Canadian Citizen": function (a) { return a.country === "United States"; },
+    "Work Experiences": function (a) { return a.work; },
+    "Volunteer Experiences": function (a) { return a.volunteer; }
+  };
+
+  function currentField() {
+    var cat = PD.categories[state.crit.cat];
+    return cat.fields[Math.min(state.crit.field, cat.fields.length - 1)];
+  }
+  function opsFor(f) { return OPS[f.spec.type] || OPS.text; }
+  function defaultValue(f) {
+    if (f.spec.type === "yesno") return "Yes";
+    if (f.spec.type === "list") return f.spec.values[0];
+    return "";
+  }
+
+  function buildPredicate(f, op, value) {
+    var read = READ[f.name];
+    if (!read) return null;
+    var t = f.spec.type;
+    return function (a) {
+      var v = read(a);
+      if (t === "yesno") {
+        var want = value === "Yes";
+        return !!v === want;
+      }
+      if (t === "list") {
+        return op === "Not equal to" ? String(v) !== value : String(v) === value;
+      }
+      if (t === "number") {
+        var num = parseFloat(value);
+        if (isNaN(num) || v == null) return false;
+        if (op === "Greater than") return v > num;
+        if (op === "Less than") return v < num;
+        return v === num;
+      }
+      if (t === "text") {
+        if (!value) return true;
+        var s = String(v).toLowerCase(), q = value.toLowerCase();
+        return op === "Equals" ? s === q : s.indexOf(q) >= 0;
+      }
+      return String(v) === value;
+    };
+  }
+
+  var savedMsg = null;
+
+  function viewCriteria(body) {
+    var cat = PD.categories[state.crit.cat];
+    var f = currentField();
+    var ops = opsFor(f);
+    if (state.crit.op >= ops.length) state.crit.op = 0;
+    if (state.crit.value == null) state.crit.value = defaultValue(f);
+
+    var card = el("div", "pd-card");
+    var hd = el("div", "pd-crithd");
+    hd.appendChild(el("b", null, "New Criteria"));
+    hd.appendChild(el("div", "sp"));
+    var cancel = el("button", "pd-btn plain", "Cancel");
+    on(cancel, "click", function () { savedMsg = null; state.view = "filters"; render(); });
+    hd.appendChild(cancel);
+    var save = el("button", "pd-btn solid", "Save Criteria");
+    on(save, "click", function () {
+      var pred = buildPredicate(f, ops[state.crit.op], state.crit.value);
+      var label = f.name + " " + ops[state.crit.op].toLowerCase() + " "
+        + (f.spec.type === "text" && !state.crit.value ? "(anything)" : state.crit.value);
+      if (!pred) {
+        savedMsg = { ok: false, label: label };
+        render();
+        return;
+      }
+      var name = "Ad hoc: " + label;
+      byName[name] = { name: name, fn: pred };
+      savedMsg = null;
+      setFilter(name);
+    });
+    hd.appendChild(save);
+    card.appendChild(hd);
+
+    var cols = el("div", "pd-critcols");
+
+    /* categories */
+    var c1 = el("div", "pd-critcol");
+    var cs = el("div", "pd-critsearch");
+    var csi = el("input");
+    csi.type = "search";
+    csi.placeholder = "Search categories";
+    csi.setAttribute("aria-label", "Search categories");
+    csi.value = catQuery;
+    fk(csi, "catsearch");
+    on(csi, "input", function () { catQuery = csi.value; render(); });
+    cs.appendChild(csi);
+    c1.appendChild(cs);
+    var cl = el("div", "pd-critlist");
+    cl.setAttribute("role", "listbox");
+    cl.setAttribute("aria-label", "Criteria categories");
+    PD.categories.forEach(function (c, i) {
+      if (catQuery && c.name.toLowerCase().indexOf(catQuery.toLowerCase()) < 0) return;
+      var b = fk(el("button", null, c.name), "cat-" + i);
+      b.setAttribute("role", "option");
+      b.setAttribute("aria-selected", i === state.crit.cat ? "true" : "false");
+      on(b, "click", function () {
+        state.crit.cat = i; state.crit.field = 0; state.crit.op = 0;
+        state.crit.value = null; savedMsg = null; render();
+      });
+      cl.appendChild(b);
+    });
+    c1.appendChild(cl);
+    cols.appendChild(c1);
+
+    /* fields */
+    var c2 = el("div", "pd-critcol");
+    var fs = el("div", "pd-critsearch");
+    var fsi = el("input");
+    fsi.type = "search";
+    fsi.placeholder = "Search fields";
+    fsi.setAttribute("aria-label", "Search fields");
+    fsi.value = fieldQuery;
+    fk(fsi, "fieldsearch");
+    on(fsi, "input", function () { fieldQuery = fsi.value; render(); });
+    fs.appendChild(fsi);
+    c2.appendChild(fs);
+    var fl = el("div", "pd-critlist");
+    fl.setAttribute("role", "listbox");
+    fl.setAttribute("aria-label", "Fields in " + cat.name);
+    cat.fields.forEach(function (fd, i) {
+      if (fieldQuery && fd.name.toLowerCase().indexOf(fieldQuery.toLowerCase()) < 0) return;
+      var b = fk(el("button", null, fd.name), "field-" + i);
+      b.setAttribute("role", "option");
+      b.setAttribute("aria-selected", fd === f ? "true" : "false");
+      on(b, "click", function () {
+        state.crit.field = i; state.crit.op = 0; state.crit.value = null;
+        savedMsg = null; render();
+      });
+      fl.appendChild(b);
+    });
+    c2.appendChild(fl);
+    cols.appendChild(c2);
+
+    /* operators */
+    var c3 = el("div", "pd-critcol");
+    var ol = el("div", "pd-critlist");
+    ol.setAttribute("role", "listbox");
+    ol.setAttribute("aria-label", "Operator");
+    ops.forEach(function (o, i) {
+      var b = fk(el("button", null, o), "op-" + i);
+      b.setAttribute("role", "option");
+      b.setAttribute("aria-selected", i === state.crit.op ? "true" : "false");
+      on(b, "click", function () { state.crit.op = i; render(); });
+      ol.appendChild(b);
+    });
+    c3.appendChild(ol);
+    cols.appendChild(c3);
+
+    /* value */
+    var c4 = el("div", "pd-critcol pd-critval");
+    c4.appendChild(el("div", "pd-critlab", "Value"));
+    if (f.spec.type === "yesno") {
+      var radio = el("div", "pd-radio");
+      ["Yes", "No"].forEach(function (v) {
+        var lab = el("label");
+        var inp = fk(el("input"), "critvalue-" + v);
+        inp.type = "radio"; inp.name = "pdval";
+        inp.checked = state.crit.value === v;
+        on(inp, "change", function () { state.crit.value = v; render(); });
+        lab.appendChild(inp);
+        lab.appendChild(document.createTextNode(v));
+        radio.appendChild(lab);
+      });
+      c4.appendChild(radio);
+    } else if (f.spec.type === "list") {
+      var sel = fk(el("select"), "critvalue");
+      sel.setAttribute("aria-label", "Value for " + f.name);
+      f.spec.values.forEach(function (v) { sel.appendChild(new Option(v, v)); });
+      sel.value = state.crit.value;
+      on(sel, "change", function () { state.crit.value = sel.value; render(); });
+      c4.appendChild(sel);
+    } else {
+      var inp2 = fk(el("input"), "critvalue");
+      inp2.type = f.spec.type === "number" ? "number" : "text";
+      inp2.placeholder = f.spec.type === "date" ? "MMM DD, YYYY"
+        : f.spec.type === "number" ? "Enter a number" : "Enter a value";
+      inp2.setAttribute("aria-label", "Value for " + f.name);
+      inp2.value = state.crit.value;
+      /* re-render on each keystroke so the count under the builder tracks what
+         you are typing; focus is restored by key in render() */
+      on(inp2, "input", function () { state.crit.value = inp2.value; render(); });
+      c4.appendChild(inp2);
+    }
+    var rt = el("div", "pd-runtime");
+    var sw = fk(el("button", "pd-switch"), "runtime");
+    sw.setAttribute("aria-pressed", state.crit.runtime ? "true" : "false");
+    sw.setAttribute("aria-label", "Ask for Value at Filter Run Time");
+    on(sw, "click", function () { state.crit.runtime = !state.crit.runtime; render(); });
+    rt.appendChild(sw);
+    rt.appendChild(el("span", null, "Ask for Value at Filter Run Time"));
+    rt.setAttribute("data-anno", "1");
+    c4.appendChild(rt);
+    annoInto(c4, "runtime");
+    cols.appendChild(c4);
+    card.appendChild(cols);
+
+    var foot = el("div", "pd-critfoot");
+    if (savedMsg) {
+      foot.appendChild(el("span", null, "Saved: " + savedMsg.label
+        + " — the invented pool carries no value for this field, so the list is unchanged."));
+    } else if (f.spec.type === "number" && isNaN(parseFloat(state.crit.value))) {
+      foot.appendChild(el("span", null, "Enter a number to see how many of the "
+        + A.length.toLocaleString() + " invented applicants come through."));
+    } else {
+      var pred = buildPredicate(f, ops[state.crit.op], state.crit.value);
+      if (pred) {
+        var hits = A.filter(pred).length;
+        var pct = (hits / A.length * 100).toFixed(1);
+        foot.appendChild(el("strong", null, hits.toLocaleString() + " of " + A.length.toLocaleString()));
+        foot.appendChild(el("span", null, " invented applicants match this criterion (" + pct + "%). "
+          + "Save it to open the list."));
+      } else {
+        foot.appendChild(el("span", null, "This field has no value in the invented pool, so it "
+          + "cannot be counted here. The category and field names are the point."));
+      }
+    }
+    card.appendChild(foot);
+    body.appendChild(card);
+
+    if (f.note) {
+      var na = anno(f.note);
+      if (na) body.appendChild(na);
+    }
+    if (!cat.seen) {
+      var p = el("p");
+      p.style.cssText = "font-size:12.5px;color:#767676;margin:8px 0 0";
+      p.textContent = "“" + cat.name + "” is a reconstructed category. The screenshots this "
+        + "page was built from show the category list only where it was scrolled to, so categories "
+        + "past the letter L are inferred from what ERAS collects.";
+      body.appendChild(p);
+    }
+  }
+  var catQuery = "", fieldQuery = "";
+
+  /* ============================================================
+     VIEW — not recreated
+     ============================================================ */
+  function viewStub(body) {
+    var c = el("div", "pd-card");
+    var b = el("div", "pd-card-bd");
+    b.style.padding = "40px 22px";
+    var h = el("h3", null, stubName);
+    h.style.cssText = "margin:0 0 10px;font-size:18px;font-weight:600";
+    b.appendChild(h);
+    var p = el("p");
+    p.style.cssText = "margin:0;font-size:14px;color:#4f4f4f;max-width:62ch;line-height:1.55";
+    p.textContent = "Not recreated. This page was built from screenshots of the applicant "
+      + "list, the applicant record, the filter manager and the criteria builder. Nothing was "
+      + "seen of this section, so inventing it would be a guess dressed as a fact.";
+    b.appendChild(p);
+    var back = el("button", "pd-btn");
+    back.textContent = "Back to applicants";
+    back.style.marginTop = "18px";
+    on(back, "click", function () { setFilter(state.filter.name); });
+    b.appendChild(back);
+    c.appendChild(b);
+    body.appendChild(c);
+  }
+
+  /* ============================================================
+     RENDER
+     ============================================================ */
+  var root = $("#pdwsRoot");
+  function stageTop() {
+    return root.getBoundingClientRect().top + window.scrollY - 60;
+  }
+  function render() {
+    closeMenu();
+    var ae = document.activeElement;
+    var fkey = ae && ae.dataset ? ae.dataset.fkey : null;
+    var caret = ae && typeof ae.selectionStart === "number" ? ae.selectionStart : null;
+
+    root.innerHTML = "";
+    var chrome = buildChrome();
+    root.appendChild(chrome.root);
+    var body = chrome.body;
+    if (state.view === "dashboard") viewDashboard(body);
+    else if (state.view === "list") viewList(body);
+    else if (state.view === "applicant") viewApplicant(body);
+    else if (state.view === "filters") viewFilters(body);
+    else if (state.view === "criteria") viewCriteria(body);
+    else viewStub(body);
+
+    if (fkey) {
+      var back = root.querySelector('[data-fkey="' + fkey + '"]');
+      if (back) {
+        back.focus();
+        if (caret != null && typeof back.selectionStart === "number") {
+          try { back.setSelectionRange(caret, caret); } catch (e) {}
+        }
+      }
+    }
+  }
+
+  /* ---------------- annotation toggle ---------------- */
+  var annoBtn = $("#annoBtn");
+  function paintAnno() {
+    var on_ = document.body.classList.contains("anno-on");
+    annoBtn.setAttribute("aria-pressed", on_ ? "true" : "false");
+    annoBtn.lastChild.textContent = on_ ? "Applicant notes on" : "Applicant notes off";
+  }
+  on(annoBtn, "click", function () {
+    document.body.classList.toggle("anno-on");
+    paintAnno();
+    try {
+      localStorage.setItem("img2026-anno",
+        document.body.classList.contains("anno-on") ? "1" : "0");
+    } catch (e) {}
+  });
+  try {
+    if (localStorage.getItem("img2026-anno") === "1") document.body.classList.add("anno-on");
+    var th = localStorage.getItem("img2026-theme");
+    if (th) document.documentElement.setAttribute("data-theme", th);
+  } catch (e) {}
+  paintAnno();
+
+  render();
+})();
+</script>
+</body>
+</html>
