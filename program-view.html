@@ -110,6 +110,17 @@ a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,
 .stage-hint{color:var(--ink-3);font-size:12.5px;margin:0 0 10px;display:flex;
   flex-wrap:wrap;gap:4px 14px;align-items:baseline}
 
+/* fullscreen controls */
+.stage-controls{display:flex;justify-content:flex-end;margin-bottom:8px}
+.fs-btn{background:var(--pd-card);border:1px solid var(--pd-line);color:var(--pd-ink);padding:6px 10px;border-radius:6px;cursor:pointer;font-size:13px}
+.fs-btn:hover{box-shadow:0 6px 16px rgba(0,0,0,0.12)}
+.fullscreen-toolbar{position:fixed;top:12px;right:12px;z-index:120;display:flex;gap:8px;background:rgba(255,255,255,0.95);padding:8px;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.25)}
+.fullscreen-toolbar .fs-btn{background:#fff;border:1px solid #d8d8d8}
+/* fallback when Fullscreen API unavailable */
+.stage.fullscreen-fallback{position:fixed;inset:0;background:var(--pd-page);z-index:110;padding:20px;overflow:auto}
+.vis-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+
 footer{border-top:1px solid var(--rule);padding:36px 0 60px;color:var(--ink-3);font-size:13.5px}
 footer .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
 footer p{margin:0 0 12px;max-width:76ch}
@@ -475,6 +486,9 @@ body.anno-on .pd-annocell .pd-anno{margin:0;border:0;border-left:3px solid var(-
     <span>Move through it the way a program would: pick a filter, sort a column, open a row.</span>
     <span>Applications ▾ → Manage Filters</span>
   </p>
+  <div class="stage-controls">
+    <button id="enterFsBtn" class="fs-btn" aria-pressed="false" title="Toggle full screen">Full screen</button>
+  </div>
   <div id="pdwsRoot"></div>
 </div>
 
@@ -2457,6 +2471,85 @@ var PD = (function () {
       }
     }
   }
+
+  /* Fullscreen controls */
+  (function(){
+    var enterBtn = document.getElementById('enterFsBtn');
+    var stageEl = document.querySelector('.stage');
+    var rootEl = document.getElementById('pdwsRoot');
+    var outsideTarget = document.getElementById('outsideFocus');
+
+    function updateBtn(){
+      var inFs = document.fullscreenElement || stageEl.classList.contains('fullscreen-fallback');
+      if(enterBtn) enterBtn.textContent = inFs ? 'Exit full screen' : 'Full screen';
+      if(enterBtn) enterBtn.setAttribute('aria-pressed', inFs? 'true' : 'false');
+    }
+
+    function fallbackEnter(){
+      stageEl.classList.add('fullscreen-fallback');
+      document.body.classList.add('fs-active');
+      showToolbar();
+      updateBtn();
+    }
+    function enterFullscreen(){
+      if(stageEl.requestFullscreen){
+        stageEl.requestFullscreen().catch(function(){ fallbackEnter(); });
+      } else { fallbackEnter(); }
+    }
+    function exitFullscreen(){
+      if(document.fullscreenElement){
+        document.exitFullscreen();
+      }
+      stageEl.classList.remove('fullscreen-fallback');
+      document.body.classList.remove('fs-active');
+      hideToolbar();
+      updateBtn();
+    }
+    function toggle(){
+      if(document.fullscreenElement || stageEl.classList.contains('fullscreen-fallback')) exitFullscreen();
+      else enterFullscreen();
+    }
+    function showToolbar(){
+      if(document.getElementById('fsToolbar')) return;
+      var tb = document.createElement('div');
+      tb.id = 'fsToolbar';
+      tb.className = 'fullscreen-toolbar';
+      var exit = document.createElement('button');
+      exit.textContent = 'Exit';
+      exit.className='fs-btn';
+      exit.addEventListener('click', exitFullscreen);
+      var tabOut = document.createElement('button');
+      tabOut.textContent = 'Tab out';
+      tabOut.className='fs-btn';
+      tabOut.addEventListener('click', function(){
+         exitFullscreen();
+         if(outsideTarget) outsideTarget.focus();
+      });
+      tb.appendChild(tabOut);
+      tb.appendChild(exit);
+      document.body.appendChild(tb);
+    }
+    function hideToolbar(){ var tb=document.getElementById('fsToolbar'); if(tb) tb.remove(); }
+
+    if(enterBtn){
+      enterBtn.addEventListener('click', function(e){ e.preventDefault(); toggle(); });
+    }
+    document.addEventListener('fullscreenchange', function(){ 
+      if(!document.fullscreenElement) hideToolbar();
+      else showToolbar();
+      updateBtn();
+    });
+
+    // ensure we have outside focus target
+    if(!document.getElementById('outsideFocus')){
+      var t = document.createElement('a');
+      t.id='outsideFocus';
+      t.className='vis-hidden';
+      t.href='#';
+      t.tabIndex = -1;
+      document.body.appendChild(t);
+    }
+  })();
 
   /* ---------------- annotation toggle ---------------- */
   var annoBtn = $("#annoBtn");
