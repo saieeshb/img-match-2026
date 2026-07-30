@@ -40,6 +40,11 @@ h1,h2,h3,h4{line-height:1.2;margin:0}
 .navlinks::-webkit-scrollbar{display:none}
 .navlinks a{color:var(--ink-2);text-decoration:none;font-size:13px;white-space:nowrap;padding:4px 0;border-bottom:2px solid transparent}
 .navlinks a:hover{color:var(--ink);border-bottom-color:var(--rule-2)}
+/* leaves the page rather than jumping within it, so it is weighted and ruled off
+   from the six in-page anchors instead of sitting flush among them */
+.navlinks a.tab{color:var(--ink);font-weight:600;margin-left:5px;padding-left:17px;position:relative}
+.navlinks a.tab::before{content:"";position:absolute;left:0;top:50%;transform:translateY(-50%);
+  width:1px;height:13px;background:var(--rule-2)}
 .themebtn{background:none;border:1px solid var(--rule);color:var(--ink-2);border-radius:6px;
   padding:5px 9px;cursor:pointer;font-size:13px;line-height:1;flex-shrink:0}
 .themebtn:hover{border-color:var(--rule-2);color:var(--ink)}

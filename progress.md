@@ -13,6 +13,7 @@ Newest entries at the top.
 |---|---|
 | Data extraction from the NRMP PDF | Done, cross-validated |
 | Interactive site (6 sections) | Done |
+| Program view (PDWS recreation) | Done |
 | CSV / JSON exports | Done |
 | De-slop pass on all copy | Done, all gates pass |
 | OG card | Done (small-multiples design) |
@@ -38,12 +39,19 @@ Newest entries at the top.
 The site is assembled from `src/`, not edited directly. `index.html` is a build
 artefact; editing it by hand will be overwritten.
 
+`build.py` writes two pages.
+
 ```
-src/template.html   markup, with the /*__CSS__*/ /*__HERO__*/ /*__DATA__*/ /*__APP__*/ slots
-src/style.css       all styling
-src/app.js          all interactivity (tables, charts, exports, theme)
-src/hero.js         the WebGL particle field
-src/data.js         the dataset, generated from the PDF — do not hand-edit
+index.html            ← src/template.html
+src/style.css         all styling
+src/app.js            all interactivity (tables, charts, exports, theme)
+src/hero.js           the WebGL particle field
+src/data.js           the dataset, generated from the PDF — do not hand-edit
+
+program-view.html     ← src/pdws.template.html
+src/pdws.css          frame plus specimen styling
+src/pdws-data.js      seeded synthetic applicant pool, filters, criteria catalog
+src/pdws.js           the five views, routing, annotations
 ```
 
 ```bash
@@ -86,6 +94,51 @@ non-affiliation disclaimer. Contact if ever needed: datarequest@nrmp.org.
 ---
 
 ## Log
+
+### 2026-07-30 — Program view (second page)
+- New page `program-view.html`, linked from the top bar as a distinct tab. It
+  recreates the AAMC Program Director's WorkStation from screenshots Saieesh
+  supplied: dashboard, applicant list, applicant record, Manage Filters and the
+  New Criteria builder, plus a "not recreated" state for the sections the
+  screenshots never showed.
+- **Two visual worlds, deliberately unblended.** The frame is this site's own
+  chrome (dark, serif); the specimen is light and dense and stays light in both
+  themes, because restyling an enterprise grid to match this site would
+  misrepresent what a program actually looks at.
+- **732 invented applicants from a seeded PRNG, and every filter is a real
+  predicate over them.** Total Items, the page count, the per-filter counts in
+  Manage Filters and the live count under the criteria builder are all computed.
+  Saving a criterion creates an ad-hoc filter and opens its result list.
+- Reproduced verbatim from the screenshots: the nine nav sections, the two-column
+  row-major filter lists (13 user-defined, 50 system-defined), the Geographic
+  Preferences and Application Status field lists, the six Setting Preference
+  values, Equals / Not equal to, the run-time toggle, and 732 → Page 1 of 8.
+  Categories past the letter L are reconstructed from what ERAS collects, and the
+  builder says so under any category it invented.
+- **Non-impersonation is structural, not a footnote.** No AAMC logo or branding,
+  a "PDWS recreation" wordmark, a disclosure block above the specimen, and a
+  program named "Demo Program". Applicant names, IDs, scores and document states
+  are generated; school names are real institutions because a filter on medical
+  school is meaningless without them.
+- **Applicant notes**, off by default so the default state is the recreation.
+  Turning them on annotates the fields that decide most for a non-U.S. IMG:
+  visa sponsorship (absent from the NRMP data, present as a filter here), ECFMG,
+  Step 2 CK as a threshold, exam attempts, screened demographics.
+- Defects found and fixed while building: every interaction rebuilt the view and
+  dropped keyboard focus, so toggling two columns or typing a threshold was
+  broken — now every control carries a `data-fkey` and `render()` restores focus
+  and caret. On mobile, `MANAGE FILTERS` and `ACTIONS` overflowed their card
+  headers and were clipped unreachable by `.pdws{overflow:hidden}`.
+- Date criteria are deliberately not evaluated: the pool stores a formatted
+  string, and Before/After over that would produce a confident wrong count. The
+  builder reports honestly instead.
+- Copy gates clean: banned 0, structure no flags (burstiness 0.586), silhouette
+  penalty 0.0, grade 11.2. The one readability flag is word repetition at 34.4%
+  on "filter", "program" and "medical", the same terminology trade recorded in
+  the clarify pass.
+- **Verification limit.** The browser pane delivers `Return` with `key:""`, so a
+  native `<button>` ignores it too; keyboard activation is confirmed by
+  dispatched events and by real `Tab` presses producing the focus ring.
 
 ### 2026-07-30 — Polish pass
 - **Keyboard path was broken, not just imperfect.** Nothing on the page showed a

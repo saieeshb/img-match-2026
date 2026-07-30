@@ -10,19 +10,27 @@ import pathlib, sys
 
 ROOT = pathlib.Path(__file__).parent
 SRC = ROOT / "src"
-PARTS = {
-    "/*__CSS__*/":  "style.css",
-    "/*__HERO__*/": "hero.js",
-    "/*__DATA__*/": "data.js",
-    "/*__APP__*/":  "app.js",
-}
 
-html = (SRC / "template.html").read_text()
-for token, name in PARTS.items():
-    if token not in html:
-        sys.exit(f"placeholder {token} missing from template.html")
-    html = html.replace(token, (SRC / name).read_text())
+PAGES = [
+    ("template.html", "index.html", {
+        "/*__CSS__*/":  "style.css",
+        "/*__HERO__*/": "hero.js",
+        "/*__DATA__*/": "data.js",
+        "/*__APP__*/":  "app.js",
+    }),
+    ("pdws.template.html", "program-view.html", {
+        "/*__PDCSS__*/":  "pdws.css",
+        "/*__PDDATA__*/": "pdws-data.js",
+        "/*__PDAPP__*/":  "pdws.js",
+    }),
+]
 
-out = ROOT / "index.html"
-out.write_text(html)
-print(f"wrote {out.relative_to(ROOT)}  ({len(html) / 1024:.1f} KB)")
+for template, target, parts in PAGES:
+    html = (SRC / template).read_text()
+    for token, name in parts.items():
+        if token not in html:
+            sys.exit(f"placeholder {token} missing from {template}")
+        html = html.replace(token, (SRC / name).read_text())
+    out = ROOT / target
+    out.write_text(html)
+    print(f"wrote {out.relative_to(ROOT)}  ({len(html) / 1024:.1f} KB)")

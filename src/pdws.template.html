@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The screen on the other side — how programs filter applicants</title>
+<meta name="description" content="A working recreation of the program director's applicant workstation, filled with invented applicants, so you can see the fields a residency program can filter on before anyone reads an application.">
+
+<meta property="og:title" content="The screen on the other side">
+<meta property="og:description" content="A working recreation of the software a residency program uses to filter applicants, with every filter live over an invented applicant pool.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://match.saieesh.dev/program-view.html">
+<meta property="og:image" content="https://match.saieesh.dev/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The screen on the other side">
+<meta name="twitter:description" content="A working recreation of the software a residency program uses to filter applicants, with every filter live over an invented applicant pool.">
+<meta name="twitter:image" content="https://match.saieesh.dev/og-image.png">
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23111214'/><rect x='6.5' y='18' width='4.4' height='8' rx='1.2' fill='%23ece9e3'/><rect x='13.8' y='12' width='4.4' height='14' rx='1.2' fill='%235c9dff'/><rect x='21.1' y='6.5' width='4.4' height='19.5' rx='1.2' fill='%23f0a92e'/></svg>">
+<style>/*__PDCSS__*/</style>
+</head>
+<body>
+
+<div class="frame-bar">
+  <div class="frame-in">
+    <a class="frame-back" href="index.html">← IMG Match Outcomes</a>
+    <div class="frame-title">Program view <span>· recreation</span></div>
+    <div class="frame-sp"></div>
+    <button class="annotoggle" id="annoBtn" aria-pressed="false"><span class="dot" aria-hidden="true"></span><span>Applicant notes off</span></button>
+  </div>
+</div>
+
+<div class="intro">
+  <h1>The screen on the other side</h1>
+  <p>
+    The rest of this site measures what happened after programs chose who to look at. This page is that
+    choosing. It recreates the Program Director's WorkStation, the AAMC software a residency program uses
+    to filter, sort and open the applications it receives.
+  </p>
+  <p>
+    It was rebuilt from screenshots of a demo program and filled with 732 invented applicants. The filters
+    run for real, so every count on it is computed. Open <strong>Manage Filters</strong> to read what a
+    program can select on before anyone opens a personal statement: country of medical school, LCME
+    accreditation, visa sponsorship, ECFMG certification, number of exam attempts. Build one yourself in
+    <strong>New Criteria</strong> and the line under the builder says how many of the 732 come through it.
+  </p>
+  <p>
+    Turn on <strong>applicant notes</strong> and the fields that decide most for a non-U.S. IMG pick up a
+    line of commentary. Leave them off and what is left is the interface.
+  </p>
+
+  <div class="disclose">
+    <h2>What is real here and what is not</h2>
+    <p>
+      <em>The interface is a recreation.</em> It carries no AAMC logo or branding, it is not connected to
+      any AAMC system, and it is not the product. Category and field names transcribed from the screenshots
+      are the ones the criteria builder marks as observed; the rest are reconstructed from what ERAS
+      collects, and the builder says so underneath whenever you are looking at one.
+    </p>
+    <p>
+      <em>Every applicant is invented.</em> Names, AAMC IDs, scores, dates and document states come from a
+      seeded random generator, and the mix of applicant types is chosen to resemble a large Internal
+      Medicine pool rather than measured from one. Medical school names are real institutions, because a
+      filter on medical school means nothing without them, and no record here belongs to anyone who
+      attended one.
+    </p>
+    <p>
+      <em>Sections that were not in the screenshots are not filled in.</em> Rankings, Reports, Archives and
+      the rest say so when you open them.
+    </p>
+  </div>
+</div>
+
+<div class="stage">
+  <p class="stage-hint">
+    <span>Move through it the way a program would: pick a filter, sort a column, open a row.</span>
+    <span>Applications ▾ → Manage Filters</span>
+  </p>
+  <div id="pdwsRoot"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <p><strong>On the source.</strong> The layout, navigation, field labels and filter names reproduced here
+    were transcribed from screenshots of a demonstration program in the AAMC Program Director's WorkStation.
+    No applicant data was taken from them. This page is an independent recreation for the purpose of
+    explaining the screening step to applicants, and it is not affiliated with, endorsed by, or reviewed by
+    the AAMC, ERAS, Thalamus or the NRMP.</p>
+    <p>The Step 2 CK medians cited in the applicant notes come from the National Resident Matching Program's
+    <em>Charting Outcomes™: Non-U.S. IMGs (Main Residency Match, 2026 Appointment Year)</em>, which is the
+    dataset behind <a href="index.html">the rest of this site</a>.</p>
+  </div>
+</footer>
+
+<script>/*__PDDATA__*/</script>
+<script>/*__PDAPP__*/</script>
+</body>
+</html>
