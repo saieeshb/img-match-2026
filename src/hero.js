@@ -13,8 +13,19 @@
   if (!canvas || typeof THREE === "undefined") return;
 
   var N_MATCHED = 4429, N_UNMATCHED = 4541, N = N_MATCHED + N_UNMATCHED;
-  var COL_MATCHED   = new THREE.Color(0x5c9dff);
-  var COL_UNMATCHED = new THREE.Color(0xf0a92e);
+
+  /* Cohort colours come from the theme rather than being baked in, so the field
+     flips with the page. Light needs more opacity: the same alpha that reads as
+     a dot on near-black washes out to nothing on cream. */
+  function isLight() {
+    return document.documentElement.getAttribute("data-theme") === "light";
+  }
+  function cohortColors() {
+    var cs = getComputedStyle(document.documentElement);
+    var m = (cs.getPropertyValue("--matched") || "").trim() || "#5c9dff";
+    var u = (cs.getPropertyValue("--unmatched") || "").trim() || "#f0a92e";
+    return [new THREE.Color(m), new THREE.Color(u)];
+  }
 
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -67,8 +78,6 @@
     if (isMatched) { fib(mi++, N_MATCHED,   R_TWO, posB, o); posB[o] -= SPLIT; }
     else           { fib(ui++, N_UNMATCHED, R_TWO, posB, o); posB[o] += SPLIT; }
 
-    var c = isMatched ? COL_MATCHED : COL_UNMATCHED;
-    colors[o] = c.r; colors[o + 1] = c.g; colors[o + 2] = c.b;
     sizes[i] = 0.7 + Math.random() * 1.25;
     phase[i] = Math.random() * Math.PI * 2;
   }
@@ -84,7 +93,8 @@
     uMix:   { value: 0 },
     uTime:  { value: 0 },
     uDpr:   { value: 1 },
-    uFade:  { value: 1 }
+    uFade:  { value: 1 },
+    uAlpha: { value: 1 }
   };
 
   var mat = new THREE.ShaderMaterial({
@@ -112,18 +122,34 @@
       "}"
     ].join("\n"),
     fragmentShader: [
-      "uniform float uFade;",
+      "uniform float uFade; uniform float uAlpha;",
       "varying vec3 vColor; varying float vDepth;",
       "void main(){",
       "  vec2 c = gl_PointCoord - vec2(0.5);",
       "  float d = length(c);",
       "  if (d > 0.5) discard;",
       "  float a = smoothstep(0.5, 0.30, d);",
-      "  a *= mix(0.58, 0.13, vDepth) * uFade;",
+      "  a *= mix(0.58, 0.13, vDepth) * uFade * uAlpha;",
       "  gl_FragColor = vec4(vColor, a);",
       "}"
     ].join("\n")
   });
+
+  /* Fills the colour buffer from the active theme. Exposed so the theme toggle
+     can recolour the field in place instead of rebuilding the geometry. */
+  function paintCohorts() {
+    var c = cohortColors();
+    for (var k = 0; k < N; k++) {
+      var col = flags[k] === 1 ? c[0] : c[1];
+      var q = k * 3;
+      colors[q] = col.r; colors[q + 1] = col.g; colors[q + 2] = col.b;
+    }
+    geo.attributes.aColor.needsUpdate = true;
+    /* saturated dots on cream already read strongly; denser would fight the text */
+    uniforms.uAlpha.value = isLight() ? 0.92 : 1;
+  }
+  paintCohorts();
+  window.__heroRepaint = paintCohorts;
 
   var points = new THREE.Points(geo, mat);
   scene.add(points);

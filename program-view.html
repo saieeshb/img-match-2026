@@ -110,23 +110,49 @@ a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,
 .stage-hint{color:var(--ink-3);font-size:12.5px;margin:0 0 10px;display:flex;
   flex-wrap:wrap;gap:4px 14px;align-items:baseline}
 
-/* fullscreen controls */
+/* ---------- full screen ----------
+   The specimen sitting in a box reads as an embed. Full screen hands the
+   recreation the whole viewport, which is how the real thing is used.
+
+   Two mechanisms, because one is not enough: the Fullscreen API where it
+   exists, and a fixed-position fallback class for iOS Safari, which has no
+   element fullscreen at all. Both target .stage, so the same rules serve both. */
 .stage-controls{display:flex;justify-content:flex-end;margin-bottom:8px}
-.fs-btn{background:var(--pd-card);border:1px solid var(--pd-line);color:var(--pd-ink);padding:6px 10px;border-radius:6px;cursor:pointer;font-size:13px}
-.fs-btn:hover{box-shadow:0 6px 16px rgba(0,0,0,0.12)}
-.fullscreen-toolbar{position:fixed;top:12px;right:12px;z-index:120;display:flex;gap:8px;background:rgba(255,255,255,0.95);padding:8px;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.25)}
-.fullscreen-toolbar .fs-btn{background:#fff;border:1px solid #d8d8d8}
-/* fallback when Fullscreen API unavailable */
-.stage:fullscreen, .stage:-webkit-full-screen, .stage.fullscreen-fallback{position:fixed;inset:0;background:var(--pd-page);z-index:110;padding:0;overflow:auto;max-width:none;width:100%}
+.fs-btn{background:var(--bg-elev);border:1px solid var(--rule-2);color:var(--ink);
+  padding:7px 12px;border-radius:7px;cursor:pointer;font-size:13px;font-family:inherit;
+  white-space:nowrap}
+.fs-btn:hover{border-color:var(--ink-3)}
 
-/* make the PDWS container fill the fullscreen host so the container, not the outer stage, occupies the viewport */
-.stage:fullscreen .pdws, .stage:-webkit-full-screen .pdws, .stage.fullscreen-fallback .pdws{
-  position:absolute;inset:0;width:100%;height:100%;max-width:none;border-radius:0;box-shadow:none;overflow:auto}
+.stage:fullscreen,.stage:-webkit-full-screen,.stage.fullscreen-fallback{
+  position:fixed;inset:0;height:100vh;height:100dvh;background:var(--pd-page);
+  z-index:110;padding:0;overflow:auto;max-width:none;width:100%;
+  -webkit-overflow-scrolling:touch}
+/* the container, not the outer stage, has to fill the host */
+.stage:fullscreen .pdws,.stage:-webkit-full-screen .pdws,.stage.fullscreen-fallback .pdws{
+  position:absolute;inset:0;width:100%;height:100%;max-width:none;
+  border:0;border-radius:0;box-shadow:none;overflow:auto}
+.stage:fullscreen .stage-hint,.stage:-webkit-full-screen .stage-hint,
+.stage.fullscreen-fallback .stage-hint,
+.stage:fullscreen .stage-controls,.stage:-webkit-full-screen .stage-controls,
+.stage.fullscreen-fallback .stage-controls{display:none}
+body.fs-active{overflow:hidden}
 
-/* ensure toolbar is above the container */
-.fullscreen-toolbar{z-index:130}
-.vis-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-
+/* The toolbar lives inside .stage, not on <body>: in native fullscreen only the
+   fullscreen element's subtree is painted, so a body-level toolbar is invisible
+   exactly when it is needed. Bottom-right because the top-right of the specimen
+   is the program/user block, which this would otherwise cover. Fixed, not
+   absolute, so it stays put while the specimen scrolls under it. */
+.fullscreen-toolbar{position:fixed;z-index:130;display:flex;gap:8px;align-items:center;
+  bottom:calc(14px + env(safe-area-inset-bottom));
+  right:calc(14px + env(safe-area-inset-right));
+  background:rgba(255,255,255,.96);padding:7px;border-radius:9px;
+  box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.fullscreen-toolbar .fs-btn{background:#fff;border:1px solid #d3d3d3;color:#1d1d1d;
+  border-radius:6px}
+.fullscreen-toolbar .fs-btn:hover{background:#f0f0f0;border-color:#b5b5b5}
+.fullscreen-toolbar kbd{font:inherit;font-size:11px;color:#767676;
+  border:1px solid #d3d3d3;border-radius:4px;padding:1px 5px;background:#fafafa}
+@media(pointer:coarse){.fullscreen-toolbar .fs-btn{min-height:44px;padding:10px 14px}}
 
 footer{border-top:1px solid var(--rule);padding:36px 0 60px;color:var(--ink-3);font-size:13.5px}
 footer .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
@@ -471,8 +497,9 @@ body.anno-on .pd-annocell .pd-anno{margin:0;border:0;border-left:3px solid var(-
     <h2>What is real here and what is not</h2>
     <p>
       <em>The interface is a recreation.</em> It carries no AAMC logo or branding, it is not connected to
-      any AAMC system, and it is not the product. Category and field names shown are the ones the criteria builder marks as observed; the rest are reconstructed from what ERAS
-      collects, and the builder says so underneath whenever you are looking at one.
+      any AAMC system, and it is not the product. Category and field names shown are the ones the criteria
+      builder marks as observed; the rest are reconstructed from what ERAS collects, and the builder says so
+      underneath whenever you are looking at one.
     </p>
     <p>
       <em>Every applicant is invented.</em> Names, AAMC IDs, scores, dates and document states come from a
@@ -494,15 +521,17 @@ body.anno-on .pd-annocell .pd-anno{margin:0;border:0;border-left:3px solid var(-
     <span>Applications ▾ → Manage Filters</span>
   </p>
   <div class="stage-controls">
-    <button id="enterFsBtn" class="fs-btn" aria-pressed="false" title="Toggle full screen">Full screen</button>
+    <button id="enterFsBtn" class="fs-btn" aria-pressed="false">⤢ Full screen</button>
   </div>
   <div id="pdwsRoot"></div>
 </div>
+<a id="outsideFocus" class="vis-hidden" href="#top" tabindex="-1">Left full screen. Back on the page.</a>
 
 <footer>
   <div class="wrap">
     <p><strong>On the source.</strong> The layout, navigation, field labels and filter names reproduced here
-    are based on a demonstration program in the AAMC Program Director's WorkStation. No applicant data was taken from any real sources. This page is an independent recreation for the purpose of
+    are based on a demonstration program in the AAMC Program Director's WorkStation. No applicant data was
+    taken from any real sources. This page is an independent recreation for the purpose of
     explaining the screening step to applicants, and it is not affiliated with, endorsed by, or reviewed by
     the AAMC, ERAS, Thalamus or the NRMP.</p>
     <p>The Step 2 CK medians cited in the applicant notes come from the National Resident Matching Program's
@@ -1266,6 +1295,31 @@ var PD = (function () {
   function closeMenu() {
     if (openMenu) { openMenu.remove(); openMenu = null; }
   }
+  /* In native fullscreen only the fullscreen element's subtree is painted, so a
+     menu appended to <body> vanishes. Append it to whichever element is acting
+     as the host and position it relative to that. */
+  function menuHost() {
+    return document.fullscreenElement ||
+           document.webkitFullscreenElement ||
+           document.querySelector(".stage.fullscreen-fallback") ||
+           document.body;
+  }
+  function placeMenu(m, anchor, rightAlignWidth) {
+    var r = anchor.getBoundingClientRect();
+    var host = menuHost();
+    m.style.position = "absolute";
+    if (host === document.body) {
+      var left = rightAlignWidth ? r.right - rightAlignWidth : r.left;
+      m.style.left = (left + window.scrollX) + "px";
+      m.style.top = (r.bottom + window.scrollY) + "px";
+    } else {
+      var hr = host.getBoundingClientRect();
+      var l = (rightAlignWidth ? r.right - rightAlignWidth : r.left) - hr.left + host.scrollLeft;
+      m.style.left = l + "px";
+      m.style.top = (r.bottom - hr.top + host.scrollTop) + "px";
+    }
+    host.appendChild(m);
+  }
   document.addEventListener("click", function (e) {
     if (openMenu && !openMenu.contains(e.target) && !e.target.closest(".pd-nav button")) closeMenu();
   });
@@ -1301,22 +1355,7 @@ var PD = (function () {
           on(mb, "click", function () { closeMenu(); mi.go(); });
           m.appendChild(mb);
         });
-        var r = b.getBoundingClientRect();
-        // choose host for menu so it is visible inside fullscreen or fallback modes
-        var host = document.fullscreenElement || document.querySelector('.stage.fullscreen-fallback') || document.body;
-        if (host === document.body) {
-          m.style.position = "absolute";
-          m.style.left = (r.left + window.scrollX) + "px";
-          m.style.top = (r.bottom + window.scrollY) + "px";
-          document.body.appendChild(m);
-        } else {
-          // position relative to host's client rect
-          var hr = host.getBoundingClientRect();
-          m.style.position = "absolute";
-          m.style.left = (r.left - hr.left) + "px";
-          m.style.top = (r.bottom - hr.top) + "px";
-          host.appendChild(m);
-        }
+        placeMenu(m, b);
         openMenu = m;
       });
       nav.appendChild(b);
@@ -1616,10 +1655,7 @@ var PD = (function () {
           }
           m.appendChild(mb);
         });
-      var r = acb.getBoundingClientRect();
-      m.style.left = (r.right - 220 + window.scrollX) + "px";
-      m.style.top = (r.bottom + window.scrollY) + "px";
-      document.body.appendChild(m);
+      placeMenu(m, acb, 220);
       openMenu = m;
     });
     tools.appendChild(acb);
@@ -2426,7 +2462,8 @@ var PD = (function () {
     if (!cat.seen) {
       var p = el("p");
       p.style.cssText = "font-size:12.5px;color:#767676;margin:8px 0 0";
-      p.textContent = "“" + cat.name + "” is a reconstructed category. The available demo shows the category list only where it was scrolled to, so categories "
+      p.textContent = "“" + cat.name + "” is a reconstructed category. The available demo shows the "
+        + "category list only where it was scrolled to, so categories "
         + "past the letter L are inferred from what ERAS collects.";
       body.appendChild(p);
     }
@@ -2445,7 +2482,8 @@ var PD = (function () {
     b.appendChild(h);
     var p = el("p");
     p.style.cssText = "margin:0;font-size:14px;color:#4f4f4f;max-width:62ch;line-height:1.55";
-    p.textContent = "Not reconstructed. This section was not observed in the demo and is therefore not filled in.";
+    p.textContent = "Not reconstructed. This section was not observed in the demo and is "
+      + "therefore not filled in.";
     b.appendChild(p);
     var back = el("button", "pd-btn");
     back.textContent = "Back to applicants";
@@ -2491,83 +2529,99 @@ var PD = (function () {
     }
   }
 
-  /* Fullscreen controls */
-  (function(){
-    var enterBtn = document.getElementById('enterFsBtn');
-    var stageEl = document.querySelector('.stage');
-    var rootEl = document.getElementById('pdwsRoot');
-    var outsideTarget = document.getElementById('outsideFocus');
+  /* ---------------- full screen ----------------
+     Native Fullscreen where it exists, a fixed-position fallback class where it
+     does not (iOS Safari has no element fullscreen). Escape leaves either one;
+     the browser handles it natively, and the keydown covers the fallback. */
+  (function () {
+    var enterBtn = $("#enterFsBtn");
+    var stageEl = $(".stage");
+    var outside = $("#outsideFocus");
+    if (!enterBtn || !stageEl) return;
 
-    function updateBtn(){
-      var inFs = document.fullscreenElement || stageEl.classList.contains('fullscreen-fallback');
-      if(enterBtn) enterBtn.textContent = inFs ? 'Exit full screen' : 'Full screen';
-      if(enterBtn) enterBtn.setAttribute('aria-pressed', inFs? 'true' : 'false');
+    function nativeEl() {
+      return document.fullscreenElement || document.webkitFullscreenElement || null;
     }
-
-    function fallbackEnter(){
-      stageEl.classList.add('fullscreen-fallback');
-      document.body.classList.add('fs-active');
-      showToolbar();
-      updateBtn();
+    function isFull() {
+      return !!nativeEl() || stageEl.classList.contains("fullscreen-fallback");
     }
-    function enterFullscreen(){
-      if(stageEl.requestFullscreen){
-        stageEl.requestFullscreen().catch(function(){ fallbackEnter(); });
-      } else { fallbackEnter(); }
+    function paint() {
+      var f = isFull();
+      enterBtn.textContent = f ? "⤡ Exit full screen" : "⤢ Full screen";
+      enterBtn.setAttribute("aria-pressed", f ? "true" : "false");
     }
-    function exitFullscreen(){
-      if(document.fullscreenElement){
-        document.exitFullscreen();
-      }
-      stageEl.classList.remove('fullscreen-fallback');
-      document.body.classList.remove('fs-active');
-      hideToolbar();
-      updateBtn();
-    }
-    function toggle(){
-      if(document.fullscreenElement || stageEl.classList.contains('fullscreen-fallback')) exitFullscreen();
-      else enterFullscreen();
-    }
-    function showToolbar(){
-      if(document.getElementById('fsToolbar')) return;
-      var tb = document.createElement('div');
-      tb.id = 'fsToolbar';
-      tb.className = 'fullscreen-toolbar';
-      var exit = document.createElement('button');
-      exit.textContent = 'Exit';
-      exit.className='fs-btn';
-      exit.addEventListener('click', exitFullscreen);
-      var tabOut = document.createElement('button');
-      tabOut.textContent = 'Tab out';
-      tabOut.className='fs-btn';
-      tabOut.addEventListener('click', function(){
-         exitFullscreen();
-         if(outsideTarget) outsideTarget.focus();
+    function showToolbar() {
+      if ($("#fsToolbar")) return;
+      var tb = el("div", "fullscreen-toolbar");
+      tb.id = "fsToolbar";
+      var tabOut = el("button", "fs-btn", "Tab out");
+      tabOut.title = "Leave full screen and put focus back on the page";
+      on(tabOut, "click", function () {
+        exitFull();
+        if (outside) outside.focus();
       });
+      var exit = el("button", "fs-btn", "Exit");
+      on(exit, "click", exitFull);
+      var hint = el("kbd", null, "Esc");
+      hint.setAttribute("aria-hidden", "true");
       tb.appendChild(tabOut);
       tb.appendChild(exit);
-      document.body.appendChild(tb);
+      tb.appendChild(hint);
+      /* inside .stage so it survives native fullscreen */
+      stageEl.appendChild(tb);
     }
-    function hideToolbar(){ var tb=document.getElementById('fsToolbar'); if(tb) tb.remove(); }
-
-    if(enterBtn){
-      enterBtn.addEventListener('click', function(e){ e.preventDefault(); toggle(); });
+    function hideToolbar() {
+      var tb = $("#fsToolbar");
+      if (tb) tb.remove();
     }
-    document.addEventListener('fullscreenchange', function(){ 
-      if(!document.fullscreenElement) hideToolbar();
-      else showToolbar();
-      updateBtn();
+    function fallbackEnter() {
+      stageEl.classList.add("fullscreen-fallback");
+      document.body.classList.add("fs-active");
+      showToolbar(); paint();
+    }
+    function enterFull() {
+      if (isFull()) return;
+      var req = stageEl.requestFullscreen || stageEl.webkitRequestFullscreen;
+      if (req) {
+        try {
+          var pr = req.call(stageEl);
+          if (pr && pr.catch) pr.catch(fallbackEnter);
+        } catch (e) { fallbackEnter(); }
+      } else {
+        fallbackEnter();
+      }
+    }
+    function exitFull() {
+      if (nativeEl()) {
+        var ex = document.exitFullscreen || document.webkitExitFullscreen;
+        if (ex) { try { var pr = ex.call(document); if (pr && pr.catch) pr.catch(function () {}); } catch (e) {} }
+      }
+      stageEl.classList.remove("fullscreen-fallback");
+      document.body.classList.remove("fs-active");
+      hideToolbar(); paint();
+    }
+    on(enterBtn, "click", function (e) {
+      e.preventDefault();
+      isFull() ? exitFull() : enterFull();
     });
-
-    // ensure we have outside focus target
-    if(!document.getElementById('outsideFocus')){
-      var t = document.createElement('a');
-      t.id='outsideFocus';
-      t.className='vis-hidden';
-      t.href='#';
-      t.tabIndex = -1;
-      document.body.appendChild(t);
-    }
+    ["fullscreenchange", "webkitfullscreenchange"].forEach(function (ev) {
+      document.addEventListener(ev, function () {
+        if (nativeEl()) { showToolbar(); document.body.classList.add("fs-active"); }
+        else if (!stageEl.classList.contains("fullscreen-fallback")) {
+          hideToolbar(); document.body.classList.remove("fs-active");
+        }
+        paint();
+      });
+    });
+    /* the fallback has no browser-provided way out */
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && stageEl.classList.contains("fullscreen-fallback")) {
+        e.preventDefault();
+        exitFull();
+        enterBtn.focus();
+      }
+    });
+    paint();
   })();
 
   /* ---------------- annotation toggle ---------------- */

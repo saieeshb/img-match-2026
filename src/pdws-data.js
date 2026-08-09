@@ -12,7 +12,7 @@
 
    The interface being recreated is the AAMC Program Director's
    WorkStation (PDWS). Category and field names marked OBSERVED are
-   transcribed from screenshots of the live product. The rest are
+   taken from the observed demo interface. The rest are
    reconstructed and marked as such in the page's own disclosure.
    ============================================================ */
 var PD = (function () {
@@ -389,8 +389,8 @@ var PD = (function () {
   ];
 
   /* ---------------- criteria catalog ----------------
-     `seen: true` marks a category or field transcribed from a screenshot
-     of the real product. Everything else is reconstructed, and the page
+     `seen: true` marks a category or field observed in the demo product.
+     Everything else is reconstructed, and the page
      says so where a reader can see it. */
   var YESNO = { type: "yesno" };
   var DATE = { type: "date" };

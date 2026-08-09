@@ -6,7 +6,7 @@
 <title>Non-U.S. IMG Match Outcomes 2026 — Interactive Explorer</title>
 <meta name="description" content="An interactive, exportable explorer of NRMP Charting Outcomes data for non-U.S. citizen international medical graduates in the 2026 Main Residency Match.">
 
-<meta property="og:title" content="Two numbers out of nine">
+<meta property="og:title" content="Two numbers out of eleven">
 <meta property="og:description" content="Every non-U.S. IMG in the 2026 Match, by preferred specialty. Two measures separated those who matched from those who did not.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://match.saieesh.dev/">
@@ -15,7 +15,7 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Two dot plots showing the measures that separated matched from unmatched non-U.S. IMGs: programs ranked in-specialty, 5 versus 2, and USMLE Step 2 CK, 248 versus 242. Seven further measures, including research, publications and abstracts, are listed as identical in both groups.">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Two numbers out of nine">
+<meta name="twitter:title" content="Two numbers out of eleven">
 <meta name="twitter:description" content="Every non-U.S. IMG in the 2026 Match, by preferred specialty. Two measures separated those who matched from those who did not.">
 <meta name="twitter:image" content="https://match.saieesh.dev/og-image.png">
 
@@ -28,6 +28,19 @@
   --matched:#5c9dff; --matched-soft:#16304f;
   --unmatched:#f0a92e; --unmatched-soft:#3d2c0c;
   --accent:#ece9e3;
+  /* The hero is its own surface: a WebGL field behind text, so it needs a
+     background, a scrim and text colours that flip with the theme rather than
+     staying near-black over a cream page. --hero-scrim is raw RGB channels
+     because it feeds rgba() inside the gradients. */
+  --hero-bg:#0b0c0e; --hero-scrim:11,12,14; --hero-rule:#24262a;
+  /* veil stops are per-theme: on cream the dots read as ink, so the middle band
+     cannot be fully transparent the way it can be over near-black */
+  --veil-1:.93; --veil-2:.78; --veil-3:.28;
+  --veil-top:.75; --veil-mid:0; --veil-bot:.9;
+  --veil-m1:.96; --veil-m2:.9; --veil-m3:.5;
+  --veil-mtop:.82; --veil-mmid:.12; --veil-mbot:.95;
+  --hero-h1:#f4f2ee; --hero-sub:#c3c0b9; --hero-meta:#8b8982;
+  --hero-key:#96938c; --hero-hint:#85837c;
   --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
   --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
   --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
@@ -40,6 +53,13 @@
   --matched:#1f6feb; --matched-soft:#dbeafe;
   --unmatched:#b45309; --unmatched-soft:#fef3c7;
   --accent:#17181b;
+  --hero-bg:#f2f0ea; --hero-scrim:242,240,234; --hero-rule:#dedbd4;
+  --veil-1:.93; --veil-2:.76; --veil-3:.24;
+  --veil-top:.78; --veil-mid:.14; --veil-bot:.92;
+  --veil-m1:.96; --veil-m2:.9; --veil-m3:.48;
+  --veil-mtop:.84; --veil-mmid:.22; --veil-mbot:.95;
+  --hero-h1:#14151a; --hero-sub:#3b3d44; --hero-meta:#5b5d65;
+  --hero-key:#5b5d65; --hero-hint:#5b5d65;
 }
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--sans);
@@ -82,30 +102,32 @@ h1,h2,h3,h4{line-height:1.2;margin:0}
 }
 
 /* ---------- hero ---------- */
-header.hero{position:relative;isolation:isolate;background:#0b0c0e;overflow:hidden;
-  border-bottom:1px solid #24262a}
+header.hero{position:relative;isolation:isolate;background:var(--hero-bg);overflow:hidden;
+  border-bottom:1px solid var(--hero-rule)}
 #heroCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0;
   opacity:0;transition:opacity 1.5s ease}
 #heroCanvas.ready{opacity:1}
 /* keeps the headline legible wherever the field happens to be bright */
 header.hero::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
-  background:radial-gradient(ellipse 58% 46% at 50% 44%,rgba(11,12,14,.93) 0%,rgba(11,12,14,.78) 38%,rgba(11,12,14,.28) 66%,rgba(11,12,14,0) 88%),
-    linear-gradient(to bottom,rgba(11,12,14,.75) 0%,rgba(11,12,14,0) 22%,rgba(11,12,14,0) 74%,rgba(11,12,14,.9) 100%)}
+  background:radial-gradient(ellipse 58% 46% at 50% 44%,rgba(var(--hero-scrim),var(--veil-1)) 0%,rgba(var(--hero-scrim),var(--veil-2)) 38%,rgba(var(--hero-scrim),var(--veil-3)) 66%,rgba(var(--hero-scrim),0) 88%),
+    linear-gradient(to bottom,rgba(var(--hero-scrim),var(--veil-top)) 0%,rgba(var(--hero-scrim),var(--veil-mid)) 22%,rgba(var(--hero-scrim),var(--veil-mid)) 74%,rgba(var(--hero-scrim),var(--veil-bot)) 100%)}
 .hero-inner{position:relative;z-index:2;max-width:var(--maxw);margin:0 auto;padding:0 24px;
   min-height:min(90vh,780px);display:flex;flex-direction:column;align-items:center;
   justify-content:center;text-align:center;pointer-events:none}
 .hero-inner a,.hero-inner button{pointer-events:auto}
 h1{font-family:var(--serif);font-size:clamp(40px,7.4vw,84px);letter-spacing:-.028em;
-  font-weight:600;color:#f4f2ee;max-width:14ch;line-height:1.03}
-.hero-sub{font-size:clamp(17px,2.1vw,21px);color:#c3c0b9;max-width:52ch;margin:26px 0 0;line-height:1.5}
-.hero-meta{margin-top:38px;font-size:12.5px;color:#8b8982;display:flex;flex-wrap:wrap;
+  font-weight:600;color:var(--hero-h1);max-width:14ch;line-height:1.03}
+.hero-sub{font-size:clamp(17px,2.1vw,21px);color:var(--hero-sub);max-width:52ch;margin:26px 0 0;line-height:1.5}
+.hero-meta{margin-top:38px;font-size:12.5px;color:var(--hero-meta);display:flex;flex-wrap:wrap;
   gap:6px 16px;justify-content:center;max-width:70ch}
 .hero-key{margin-top:26px;display:flex;gap:20px;justify-content:center;flex-wrap:wrap;
-  font-size:12.5px;color:#96938c}
+  font-size:12.5px;color:var(--hero-key)}
 .hero-key i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:0}
-/* both sit over the particle field, so they clear 4.5:1 against the hero's own
-   near-black rather than only against a mid-grey */
-.hero-hint{margin-top:14px;font-size:11.5px;color:#85837c;letter-spacing:.02em}
+.hero-key i.k-m{background:var(--matched)}
+.hero-key i.k-n{background:var(--unmatched)}
+/* both sit over the particle field, so they are measured against the hero's own
+   surface in whichever theme is active, not against a mid-grey */
+.hero-hint{margin-top:14px;font-size:11.5px;color:var(--hero-hint);letter-spacing:.02em}
 /* a touch device has no pointer to move, so it gets the gesture it can perform */
 .hint-coarse{display:none}
 @media(pointer:coarse){.hint-fine{display:none}.hint-coarse{display:inline}}
@@ -114,8 +136,8 @@ h1{font-family:var(--serif);font-size:clamp(40px,7.4vw,84px);letter-spacing:-.02
   /* the field fills far more of a narrow frame, so the scrim has to reach
      further out and hold more of its density under the text */
   header.hero::after{background:
-    radial-gradient(ellipse 82% 54% at 50% 45%,rgba(11,12,14,.96) 0%,rgba(11,12,14,.9) 44%,rgba(11,12,14,.5) 74%,rgba(11,12,14,0) 94%),
-    linear-gradient(to bottom,rgba(11,12,14,.82) 0%,rgba(11,12,14,.12) 18%,rgba(11,12,14,.12) 70%,rgba(11,12,14,.95) 100%)}
+    radial-gradient(ellipse 82% 54% at 50% 45%,rgba(var(--hero-scrim),var(--veil-m1)) 0%,rgba(var(--hero-scrim),var(--veil-m2)) 44%,rgba(var(--hero-scrim),var(--veil-m3)) 74%,rgba(var(--hero-scrim),0) 94%),
+    linear-gradient(to bottom,rgba(var(--hero-scrim),var(--veil-mtop)) 0%,rgba(var(--hero-scrim),var(--veil-mmid)) 18%,rgba(var(--hero-scrim),var(--veil-mmid)) 70%,rgba(var(--hero-scrim),var(--veil-mbot)) 100%)}
 }
 @media(prefers-reduced-motion:reduce){#heroCanvas{transition:none}}
 
@@ -295,15 +317,16 @@ footer a{color:var(--ink-2)}
 <header class="hero">
   <canvas id="heroCanvas" aria-hidden="true"></canvas>
   <div class="hero-inner">
-    <h1>Two numbers out of nine</h1>
+    <h1>Two numbers out of eleven</h1>
     <p class="hero-sub">
-      The 2026 Match recorded nine measures for every non-U.S. IMG: an applicant who went to medical
-      school outside the United States and is not a U.S. citizen. Two of those measures told the
-      applicants who matched apart from those who did not. The other seven came out identical.
+      The 2026 Match recorded eleven measures for every non-U.S. IMG: an applicant who went to medical
+      school outside the United States and is not a U.S. citizen. Two of them told the applicants who
+      matched apart from those who did not. Seven came out identical. One of the last two runs
+      backwards.
     </p>
     <div class="hero-key">
-      <span><i style="background:#5c9dff"></i>4,429 matched</span>
-      <span><i style="background:#f0a92e"></i>4,541 did not match</span>
+      <span><i class="k-m"></i>4,429 matched</span>
+      <span><i class="k-n"></i>4,541 did not match</span>
       <span>one dot per applicant</span>
     </div>
     <div class="hero-hint" aria-hidden="true"><span class="hint-fine">Move your pointer to look around ·
@@ -372,8 +395,8 @@ footer a{color:var(--ink-2)}
     <div class="shead">
       <h2>All 24 specialties, ranked</h2>
       <p>
-        Click any row to open the full distribution for that specialty: all nine measures, matched against
-        unmatched, with quartiles and ranges. Sort by any column.
+        Click any row to open the full distribution for that specialty: all eleven measures, matched
+        against unmatched, with quartiles and ranges wherever NRMP reports them. Sort by any column.
       </p>
     </div>
 
@@ -600,8 +623,19 @@ footer a{color:var(--ink-2)}
   if (!canvas || typeof THREE === "undefined") return;
 
   var N_MATCHED = 4429, N_UNMATCHED = 4541, N = N_MATCHED + N_UNMATCHED;
-  var COL_MATCHED   = new THREE.Color(0x5c9dff);
-  var COL_UNMATCHED = new THREE.Color(0xf0a92e);
+
+  /* Cohort colours come from the theme rather than being baked in, so the field
+     flips with the page. Light needs more opacity: the same alpha that reads as
+     a dot on near-black washes out to nothing on cream. */
+  function isLight() {
+    return document.documentElement.getAttribute("data-theme") === "light";
+  }
+  function cohortColors() {
+    var cs = getComputedStyle(document.documentElement);
+    var m = (cs.getPropertyValue("--matched") || "").trim() || "#5c9dff";
+    var u = (cs.getPropertyValue("--unmatched") || "").trim() || "#f0a92e";
+    return [new THREE.Color(m), new THREE.Color(u)];
+  }
 
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -654,8 +688,6 @@ footer a{color:var(--ink-2)}
     if (isMatched) { fib(mi++, N_MATCHED,   R_TWO, posB, o); posB[o] -= SPLIT; }
     else           { fib(ui++, N_UNMATCHED, R_TWO, posB, o); posB[o] += SPLIT; }
 
-    var c = isMatched ? COL_MATCHED : COL_UNMATCHED;
-    colors[o] = c.r; colors[o + 1] = c.g; colors[o + 2] = c.b;
     sizes[i] = 0.7 + Math.random() * 1.25;
     phase[i] = Math.random() * Math.PI * 2;
   }
@@ -671,7 +703,8 @@ footer a{color:var(--ink-2)}
     uMix:   { value: 0 },
     uTime:  { value: 0 },
     uDpr:   { value: 1 },
-    uFade:  { value: 1 }
+    uFade:  { value: 1 },
+    uAlpha: { value: 1 }
   };
 
   var mat = new THREE.ShaderMaterial({
@@ -699,18 +732,34 @@ footer a{color:var(--ink-2)}
       "}"
     ].join("\n"),
     fragmentShader: [
-      "uniform float uFade;",
+      "uniform float uFade; uniform float uAlpha;",
       "varying vec3 vColor; varying float vDepth;",
       "void main(){",
       "  vec2 c = gl_PointCoord - vec2(0.5);",
       "  float d = length(c);",
       "  if (d > 0.5) discard;",
       "  float a = smoothstep(0.5, 0.30, d);",
-      "  a *= mix(0.58, 0.13, vDepth) * uFade;",
+      "  a *= mix(0.58, 0.13, vDepth) * uFade * uAlpha;",
       "  gl_FragColor = vec4(vColor, a);",
       "}"
     ].join("\n")
   });
+
+  /* Fills the colour buffer from the active theme. Exposed so the theme toggle
+     can recolour the field in place instead of rebuilding the geometry. */
+  function paintCohorts() {
+    var c = cohortColors();
+    for (var k = 0; k < N; k++) {
+      var col = flags[k] === 1 ? c[0] : c[1];
+      var q = k * 3;
+      colors[q] = col.r; colors[q + 1] = col.g; colors[q + 2] = col.b;
+    }
+    geo.attributes.aColor.needsUpdate = true;
+    /* saturated dots on cream already read strongly; denser would fight the text */
+    uniforms.uAlpha.value = isLight() ? 0.92 : 1;
+  }
+  paintCohorts();
+  window.__heroRepaint = paintCohorts;
 
   var points = new THREE.Points(geo, mat);
   scene.add(points);
@@ -6725,6 +6774,8 @@ footer a{color:var(--ink-2)}
     document.documentElement.setAttribute("data-theme", next);
     paintThemeBtn();
     try { localStorage.setItem("img2026-theme", next); } catch (e) {}
+    /* the hero is WebGL, so its colours do not follow a CSS variable change */
+    if (window.__heroRepaint) window.__heroRepaint();
     redrawCharts();
   });
   try {
@@ -6732,6 +6783,9 @@ footer a{color:var(--ink-2)}
     if (saved) document.documentElement.setAttribute("data-theme", saved);
   } catch (e) {}
   paintThemeBtn();
+  /* hero.js initialises before this runs, so on a light-mode load it has already
+     painted the field in the dark palette. Repaint once the theme is applied. */
+  if (window.__heroRepaint) window.__heroRepaint();
 
   /* ---------------- tooltip ---------------- */
   var tip = el("div", "tip");

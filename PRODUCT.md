@@ -78,11 +78,13 @@ zeroed: Dermatology, Orthopaedics, Otolaryngology, Plastics and Vascular Surgery
 (matched cohort under 5), plus Public Health and Thoracic Surgery (both
 cohorts).
 
-**Update cadence — open.** Saieesh intends to update it bi-annually. Whether
-that means twice per year or once every two years is not yet pinned, and NRMP
-publishes Charting Outcomes annually, so the two readings imply different things
-about whether a cycle gets skipped. Resolve before building anything that
-assumes a cadence (archived years, a year switcher, dated URLs).
+**Update cadence — the source side is settled.** The 2026 report's Introduction
+states: "Historically a biennial report, Charting Outcomes ... will now be
+released annually." So NRMP published every two years up to now and moves to
+annual from here. Saieesh's own "bi-annually" for updating the site is still
+his call, but there is now a fixed upstream cadence to hang it on: one new
+report per year. Safe to build archived years, a year switcher or dated URLs
+against an annual source.
 
 **No binding technical constraints have been declared.** Asked directly whether
 zero-external-requests, a cheap-phone performance floor, traceable derivation,

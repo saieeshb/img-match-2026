@@ -40,7 +40,7 @@
     to filter, sort and open the applications it receives.
   </p>
   <p>
-    It was rebuilt from screenshots of a demo program and filled with 732 invented applicants. The filters
+    It is a demonstration program filled with 732 invented applicants. The filters
     run for real, so every count on it is computed. Open <strong>Manage Filters</strong> to read what a
     program can select on before anyone opens a personal statement: country of medical school, LCME
     accreditation, visa sponsorship, ECFMG certification, number of exam attempts. Build one yourself in
@@ -55,9 +55,9 @@
     <h2>What is real here and what is not</h2>
     <p>
       <em>The interface is a recreation.</em> It carries no AAMC logo or branding, it is not connected to
-      any AAMC system, and it is not the product. Category and field names transcribed from the screenshots
-      are the ones the criteria builder marks as observed; the rest are reconstructed from what ERAS
-      collects, and the builder says so underneath whenever you are looking at one.
+      any AAMC system, and it is not the product. Category and field names shown are the ones the criteria
+      builder marks as observed; the rest are reconstructed from what ERAS collects, and the builder says so
+      underneath whenever you are looking at one.
     </p>
     <p>
       <em>Every applicant is invented.</em> Names, AAMC IDs, scores, dates and document states come from a
@@ -67,7 +67,7 @@
       attended one.
     </p>
     <p>
-      <em>Sections that were not in the screenshots are not filled in.</em> Rankings, Reports, Archives and
+      <em>Sections that are not part of the demonstration are not filled in.</em> Rankings, Reports, Archives and
       the rest say so when you open them.
     </p>
   </div>
@@ -78,14 +78,18 @@
     <span>Move through it the way a program would: pick a filter, sort a column, open a row.</span>
     <span>Applications ▾ → Manage Filters</span>
   </p>
+  <div class="stage-controls">
+    <button id="enterFsBtn" class="fs-btn" aria-pressed="false">⤢ Full screen</button>
+  </div>
   <div id="pdwsRoot"></div>
 </div>
+<a id="outsideFocus" class="vis-hidden" href="#top" tabindex="-1">Left full screen. Back on the page.</a>
 
 <footer>
   <div class="wrap">
     <p><strong>On the source.</strong> The layout, navigation, field labels and filter names reproduced here
-    were transcribed from screenshots of a demonstration program in the AAMC Program Director's WorkStation.
-    No applicant data was taken from them. This page is an independent recreation for the purpose of
+    are based on a demonstration program in the AAMC Program Director's WorkStation. No applicant data was
+    taken from any real sources. This page is an independent recreation for the purpose of
     explaining the screening step to applicants, and it is not affiliated with, endorsed by, or reviewed by
     the AAMC, ERAS, Thalamus or the NRMP.</p>
     <p>The Step 2 CK medians cited in the applicant notes come from the National Resident Matching Program's
