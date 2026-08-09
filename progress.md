@@ -36,8 +36,13 @@ Newest entries at the top.
 
 ## How to rebuild
 
-The site is assembled from `src/`, not edited directly. `index.html` is a build
-artefact; editing it by hand will be overwritten.
+The site is assembled from `src/`, not edited directly. `index.html` and
+`program-view.html` are build artefacts; editing them by hand will be
+overwritten. **This has already happened once.** The full-screen feature was
+written straight into `program-view.html`, survived three commits, and was wiped
+by the next `python3 build.py`. It was recovered from git and moved into `src/`.
+If you change a built file directly, the change lives exactly until someone
+rebuilds.
 
 `build.py` writes two pages.
 
@@ -94,6 +99,59 @@ non-affiliation disclaimer. Contact if ever needed: datarequest@nrmp.org.
 ---
 
 ## Log
+
+### 2026-08-09 — Fact-check against the source PDF, eleven measures, light hero, full screen
+
+- **Fact-checked every published claim against the original 255-page NRMP PDF**
+  (`~/Downloads/Non-US-IMG_Charting-Outcomes_FINAL.pdf`). Table 2 (printed p.7)
+  matches `data.js` exactly on all eleven rows. Internal Medicine Step 2 range
+  confirmed from Table 5 (p.17): matched 209-284 (n=2,649), unmatched 209-279
+  (n=2,730). Table 1 totals confirm 5,721 / 11,685 = 49.0%, and the unweighted
+  mean of the 24 specialty rates reproduces NRMP's headline at 41.48%.
+  Pediatrics 68.5% and Vascular Surgery 14.3% match NRMP's stated high and low.
+- **"Nine measures" was wrong and is now eleven.** Table 2's own header says
+  "the 11 measures presented in this report" and numbers its rows 1-11. The nine
+  framing counted only the median rows and silently dropped the two percentage
+  rows, while the page rendered all eleven directly underneath. Headline, hero,
+  OG title and the explorer intro all now say eleven. **`DATA.metrics` stays at
+  9** and so does "432 rows = 24 x 9 x 2": the per-specialty quartile tables
+  genuinely cover nine measures. Only Table 2 and the detail drawer carry eleven.
+- New hero line records the real shape: two separate, seven identical, and one
+  of the last two runs backwards (21.1% of matched hold another graduate degree
+  against 24.3% of unmatched).
+- **Absences verified by full-text scan, not assumption.** Zero occurrences
+  across 255 pages of: visa, sponsorship, citizenship, clinical experience,
+  USCE, observership, externship, year of graduation, ECFMG, Step 1, Step 3,
+  signal. MSPE and reference letters appear exactly once each, in the
+  Introduction, named as contributors and then never measured.
+- **The hero now follows the theme.** Background, scrim, all five text colours
+  and the two particle colours were hardcoded dark, so light mode left a
+  near-black slab above a cream page. All are tokens now, with per-theme veil
+  opacities because a mid-band that can be fully transparent over near-black
+  cannot be over cream. Light hero contrast: h1 16.0, sub 9.5, meta/key/hint
+  5.76. Dark unchanged.
+- **Two ordering bugs found while testing that.** `hero.js` initialises before
+  `app.js` restores the saved theme, so a light-mode load painted the field in
+  the dark palette and never repainted; `app.js` now calls `__heroRepaint()`
+  after restoring. Separately, several "the field is invisible" screenshots were
+  me capturing during the 1.5s fade-in at opacity 0.008, not a real defect.
+- **Full screen recovered and ported.** The feature existed only in the built
+  `program-view.html` and my rebuild destroyed it. Restored from git and moved
+  into `src/`, along with the copy revision that removed every "screenshots"
+  reference. Two real bugs fixed while porting: the toolbar was appended to
+  `<body>`, which is invisible in native fullscreen because only the fullscreen
+  element's subtree paints, and the fallback had no Escape handler. Toolbar also
+  moved to bottom-right, where it stops covering the program/user block.
+- Verified: fallback fills 390x844 exactly on mobile with 44px targets and no
+  overflow, nav dropdowns render inside the fullscreen host, Escape and "Tab
+  out" both exit with focus landing outside the specimen, no console errors.
+- Gates after the copy change: banned 0, structure clean at burstiness 0.556
+  (0.544 before I split the hero's trailing clause, which is under the floor and
+  blocking), silhouette clean, grade 9.9. Word repetition 45.6% is the same
+  terminology trade recorded in the clarify pass.
+- `PRODUCT.md` cadence question closed from source: NRMP was biennial and moves
+  to annual.
+
 
 ### 2026-07-30 — Program view (second page)
 - New page `program-view.html`, linked from the top bar as a distinct tab. It

@@ -52,6 +52,8 @@
     document.documentElement.setAttribute("data-theme", next);
     paintThemeBtn();
     try { localStorage.setItem("img2026-theme", next); } catch (e) {}
+    /* the hero is WebGL, so its colours do not follow a CSS variable change */
+    if (window.__heroRepaint) window.__heroRepaint();
     redrawCharts();
   });
   try {
@@ -59,6 +61,9 @@
     if (saved) document.documentElement.setAttribute("data-theme", saved);
   } catch (e) {}
   paintThemeBtn();
+  /* hero.js initialises before this runs, so on a light-mode load it has already
+     painted the field in the dark palette. Repaint once the theme is applied. */
+  if (window.__heroRepaint) window.__heroRepaint();
 
   /* ---------------- tooltip ---------------- */
   var tip = el("div", "tip");

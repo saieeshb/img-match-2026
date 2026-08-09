@@ -182,6 +182,31 @@
   function closeMenu() {
     if (openMenu) { openMenu.remove(); openMenu = null; }
   }
+  /* In native fullscreen only the fullscreen element's subtree is painted, so a
+     menu appended to <body> vanishes. Append it to whichever element is acting
+     as the host and position it relative to that. */
+  function menuHost() {
+    return document.fullscreenElement ||
+           document.webkitFullscreenElement ||
+           document.querySelector(".stage.fullscreen-fallback") ||
+           document.body;
+  }
+  function placeMenu(m, anchor, rightAlignWidth) {
+    var r = anchor.getBoundingClientRect();
+    var host = menuHost();
+    m.style.position = "absolute";
+    if (host === document.body) {
+      var left = rightAlignWidth ? r.right - rightAlignWidth : r.left;
+      m.style.left = (left + window.scrollX) + "px";
+      m.style.top = (r.bottom + window.scrollY) + "px";
+    } else {
+      var hr = host.getBoundingClientRect();
+      var l = (rightAlignWidth ? r.right - rightAlignWidth : r.left) - hr.left + host.scrollLeft;
+      m.style.left = l + "px";
+      m.style.top = (r.bottom - hr.top + host.scrollTop) + "px";
+    }
+    host.appendChild(m);
+  }
   document.addEventListener("click", function (e) {
     if (openMenu && !openMenu.contains(e.target) && !e.target.closest(".pd-nav button")) closeMenu();
   });
@@ -217,10 +242,7 @@
           on(mb, "click", function () { closeMenu(); mi.go(); });
           m.appendChild(mb);
         });
-        var r = b.getBoundingClientRect();
-        m.style.left = (r.left + window.scrollX) + "px";
-        m.style.top = (r.bottom + window.scrollY) + "px";
-        document.body.appendChild(m);
+        placeMenu(m, b);
         openMenu = m;
       });
       nav.appendChild(b);
@@ -520,10 +542,7 @@
           }
           m.appendChild(mb);
         });
-      var r = acb.getBoundingClientRect();
-      m.style.left = (r.right - 220 + window.scrollX) + "px";
-      m.style.top = (r.bottom + window.scrollY) + "px";
-      document.body.appendChild(m);
+      placeMenu(m, acb, 220);
       openMenu = m;
     });
     tools.appendChild(acb);
@@ -1330,8 +1349,8 @@
     if (!cat.seen) {
       var p = el("p");
       p.style.cssText = "font-size:12.5px;color:#767676;margin:8px 0 0";
-      p.textContent = "“" + cat.name + "” is a reconstructed category. The screenshots this "
-        + "page was built from show the category list only where it was scrolled to, so categories "
+      p.textContent = "“" + cat.name + "” is a reconstructed category. The available demo shows the "
+        + "category list only where it was scrolled to, so categories "
         + "past the letter L are inferred from what ERAS collects.";
       body.appendChild(p);
     }
@@ -1350,9 +1369,8 @@
     b.appendChild(h);
     var p = el("p");
     p.style.cssText = "margin:0;font-size:14px;color:#4f4f4f;max-width:62ch;line-height:1.55";
-    p.textContent = "Not recreated. This page was built from screenshots of the applicant "
-      + "list, the applicant record, the filter manager and the criteria builder. Nothing was "
-      + "seen of this section, so inventing it would be a guess dressed as a fact.";
+    p.textContent = "Not reconstructed. This section was not observed in the demo and is "
+      + "therefore not filled in.";
     b.appendChild(p);
     var back = el("button", "pd-btn");
     back.textContent = "Back to applicants";
@@ -1397,6 +1415,101 @@
       }
     }
   }
+
+  /* ---------------- full screen ----------------
+     Native Fullscreen where it exists, a fixed-position fallback class where it
+     does not (iOS Safari has no element fullscreen). Escape leaves either one;
+     the browser handles it natively, and the keydown covers the fallback. */
+  (function () {
+    var enterBtn = $("#enterFsBtn");
+    var stageEl = $(".stage");
+    var outside = $("#outsideFocus");
+    if (!enterBtn || !stageEl) return;
+
+    function nativeEl() {
+      return document.fullscreenElement || document.webkitFullscreenElement || null;
+    }
+    function isFull() {
+      return !!nativeEl() || stageEl.classList.contains("fullscreen-fallback");
+    }
+    function paint() {
+      var f = isFull();
+      enterBtn.textContent = f ? "⤡ Exit full screen" : "⤢ Full screen";
+      enterBtn.setAttribute("aria-pressed", f ? "true" : "false");
+    }
+    function showToolbar() {
+      if ($("#fsToolbar")) return;
+      var tb = el("div", "fullscreen-toolbar");
+      tb.id = "fsToolbar";
+      var tabOut = el("button", "fs-btn", "Tab out");
+      tabOut.title = "Leave full screen and put focus back on the page";
+      on(tabOut, "click", function () {
+        exitFull();
+        if (outside) outside.focus();
+      });
+      var exit = el("button", "fs-btn", "Exit");
+      on(exit, "click", exitFull);
+      var hint = el("kbd", null, "Esc");
+      hint.setAttribute("aria-hidden", "true");
+      tb.appendChild(tabOut);
+      tb.appendChild(exit);
+      tb.appendChild(hint);
+      /* inside .stage so it survives native fullscreen */
+      stageEl.appendChild(tb);
+    }
+    function hideToolbar() {
+      var tb = $("#fsToolbar");
+      if (tb) tb.remove();
+    }
+    function fallbackEnter() {
+      stageEl.classList.add("fullscreen-fallback");
+      document.body.classList.add("fs-active");
+      showToolbar(); paint();
+    }
+    function enterFull() {
+      if (isFull()) return;
+      var req = stageEl.requestFullscreen || stageEl.webkitRequestFullscreen;
+      if (req) {
+        try {
+          var pr = req.call(stageEl);
+          if (pr && pr.catch) pr.catch(fallbackEnter);
+        } catch (e) { fallbackEnter(); }
+      } else {
+        fallbackEnter();
+      }
+    }
+    function exitFull() {
+      if (nativeEl()) {
+        var ex = document.exitFullscreen || document.webkitExitFullscreen;
+        if (ex) { try { var pr = ex.call(document); if (pr && pr.catch) pr.catch(function () {}); } catch (e) {} }
+      }
+      stageEl.classList.remove("fullscreen-fallback");
+      document.body.classList.remove("fs-active");
+      hideToolbar(); paint();
+    }
+    on(enterBtn, "click", function (e) {
+      e.preventDefault();
+      isFull() ? exitFull() : enterFull();
+    });
+    ["fullscreenchange", "webkitfullscreenchange"].forEach(function (ev) {
+      document.addEventListener(ev, function () {
+        if (nativeEl()) { showToolbar(); document.body.classList.add("fs-active"); }
+        else if (!stageEl.classList.contains("fullscreen-fallback")) {
+          hideToolbar(); document.body.classList.remove("fs-active");
+        }
+        paint();
+      });
+    });
+    /* the fallback has no browser-provided way out */
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && stageEl.classList.contains("fullscreen-fallback")) {
+        e.preventDefault();
+        exitFull();
+        enterBtn.focus();
+      }
+    });
+    paint();
+  })();
 
   /* ---------------- annotation toggle ---------------- */
   var annoBtn = $("#annoBtn");

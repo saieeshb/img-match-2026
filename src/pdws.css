@@ -89,6 +89,50 @@ a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,
 .stage-hint{color:var(--ink-3);font-size:12.5px;margin:0 0 10px;display:flex;
   flex-wrap:wrap;gap:4px 14px;align-items:baseline}
 
+/* ---------- full screen ----------
+   The specimen sitting in a box reads as an embed. Full screen hands the
+   recreation the whole viewport, which is how the real thing is used.
+
+   Two mechanisms, because one is not enough: the Fullscreen API where it
+   exists, and a fixed-position fallback class for iOS Safari, which has no
+   element fullscreen at all. Both target .stage, so the same rules serve both. */
+.stage-controls{display:flex;justify-content:flex-end;margin-bottom:8px}
+.fs-btn{background:var(--bg-elev);border:1px solid var(--rule-2);color:var(--ink);
+  padding:7px 12px;border-radius:7px;cursor:pointer;font-size:13px;font-family:inherit;
+  white-space:nowrap}
+.fs-btn:hover{border-color:var(--ink-3)}
+
+.stage:fullscreen,.stage:-webkit-full-screen,.stage.fullscreen-fallback{
+  position:fixed;inset:0;height:100vh;height:100dvh;background:var(--pd-page);
+  z-index:110;padding:0;overflow:auto;max-width:none;width:100%;
+  -webkit-overflow-scrolling:touch}
+/* the container, not the outer stage, has to fill the host */
+.stage:fullscreen .pdws,.stage:-webkit-full-screen .pdws,.stage.fullscreen-fallback .pdws{
+  position:absolute;inset:0;width:100%;height:100%;max-width:none;
+  border:0;border-radius:0;box-shadow:none;overflow:auto}
+.stage:fullscreen .stage-hint,.stage:-webkit-full-screen .stage-hint,
+.stage.fullscreen-fallback .stage-hint,
+.stage:fullscreen .stage-controls,.stage:-webkit-full-screen .stage-controls,
+.stage.fullscreen-fallback .stage-controls{display:none}
+body.fs-active{overflow:hidden}
+
+/* The toolbar lives inside .stage, not on <body>: in native fullscreen only the
+   fullscreen element's subtree is painted, so a body-level toolbar is invisible
+   exactly when it is needed. Bottom-right because the top-right of the specimen
+   is the program/user block, which this would otherwise cover. Fixed, not
+   absolute, so it stays put while the specimen scrolls under it. */
+.fullscreen-toolbar{position:fixed;z-index:130;display:flex;gap:8px;align-items:center;
+  bottom:calc(14px + env(safe-area-inset-bottom));
+  right:calc(14px + env(safe-area-inset-right));
+  background:rgba(255,255,255,.96);padding:7px;border-radius:9px;
+  box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.fullscreen-toolbar .fs-btn{background:#fff;border:1px solid #d3d3d3;color:#1d1d1d;
+  border-radius:6px}
+.fullscreen-toolbar .fs-btn:hover{background:#f0f0f0;border-color:#b5b5b5}
+.fullscreen-toolbar kbd{font:inherit;font-size:11px;color:#767676;
+  border:1px solid #d3d3d3;border-radius:4px;padding:1px 5px;background:#fafafa}
+@media(pointer:coarse){.fullscreen-toolbar .fs-btn{min-height:44px;padding:10px 14px}}
+
 footer{border-top:1px solid var(--rule);padding:36px 0 60px;color:var(--ink-3);font-size:13.5px}
 footer .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
 footer p{margin:0 0 12px;max-width:76ch}
