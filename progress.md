@@ -100,6 +100,34 @@ non-affiliation disclaimer. Contact if ever needed: datarequest@nrmp.org.
 
 ## Log
 
+### 2026-08-09 — OG card rebuilt as the hero, in the site's real fonts
+
+- **The old card was set in two typefaces the site never renders.** It used
+  Georgia and Arial, but `--serif` resolves to Iowan Old Style and `--sans`
+  resolves to SF Pro through `-apple-system`. Georgia is fourth in the serif
+  stack and Arial is seventh in the sans stack, so neither reached a visitor.
+  Both are now loaded directly: `Iowan Old Style.ttc` index 1 for Bold, and
+  `SFNS.ttf` with `set_variation_by_name` for Regular and Semibold.
+- **The card is now the hero rather than a chart about it.** Same construction
+  as `src/hero.js`: 8,970 points, one per consented applicant, Fibonacci sphere
+  at the same golden angle and radii, interpolated to `MIX = 0.58` toward two
+  masses split by 6.4, through the same 52-degree camera at z = 17.5. Headline
+  updated to "Two numbers out of eleven".
+- Drawn at 3x and downsampled. `ImageDraw.Draw(img, "RGBA")` is what makes 8,970
+  overlapping dots alpha-blend instead of overwriting each other; the scrim is
+  computed at 240x126 and scaled up, because evaluating it per pixel at 3600x1890
+  in Python is not worth the seconds.
+- The teal accent the rest of the build dropped in July is gone from the card too.
+- `og:image:alt` rewrote: it still described the old dot plots.
+- **Cache note.** The filename did not change, so anywhere the URL has already
+  been shared will keep serving the old card until forced. LinkedIn Post
+  Inspector, Facebook Sharing Debugger and X Card Validator each need a manual
+  refetch.
+- `program-view.html` still points at this same card. Its own title is "The
+  screen on the other side", so the image and the headline do not agree. Left
+  alone for now; a second card would fix it.
+
+
 ### 2026-08-09 — Fact-check against the source PDF, eleven measures, light hero, full screen
 
 - **Fact-checked every published claim against the original 255-page NRMP PDF**
